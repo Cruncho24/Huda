@@ -38,7 +38,7 @@ const state = {
   audio: { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false },
   prayer: {
     times: null, location: null, qibla: null, city: '',
-    countdownInterval: null,
+    countdownInterval: null, ramadanInterval: null,
   },
   quran: {
     currentSurah: null,
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderHome();
   registerSW();
   setupInstallPrompt();
-  setInterval(rotatHadith, 12000);
+  setInterval(rotateHadith, 12000);
 });
 
 // ── Dark Mode ─────────────────────────────────────────────────
@@ -114,18 +114,18 @@ function playAyah(globalNum, surahNum, ayahNum) {
     const prev = document.getElementById(`aud-${state.audio.playingId}`);
     if (prev) { prev.textContent = '▶'; prev.classList.remove('playing'); }
     if (state.audio.playingId === globalNum) {
-      state.audio = { player: null, playingId: null };
+      state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
       return;
     }
   }
   const audio = new Audio(getAyahUrl(globalNum, surahNum, ayahNum));
-  state.audio = { player: audio, playingId: globalNum };
+  state.audio = { player: audio, playingId: globalNum, playingSurah: surahNum, playingAyah: ayahNum, paused: false };
   const btn = document.getElementById(btnId);
   if (btn) { btn.textContent = '⏸'; btn.classList.add('playing'); }
   audio.play().catch(() => { if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); } });
   audio.onended = () => {
     if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
-    state.audio = { player: null, playingId: null };
+    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
     // auto-play next ayah
     const nextBtn = document.getElementById(`aud-${globalNum + 1}`);
     if (nextBtn) nextBtn.click();
@@ -188,17 +188,16 @@ function renderHome() {
         <div class="ramadan-countdown-label">${label} in</div>
         <div class="ramadan-time" id="ramadan-countdown">${hh}h ${String(mm).padStart(2,'0')}m ${String(ss).padStart(2,'0')}s</div>
       </div>`;
-    // start live countdown
-    setTimeout(() => {
-      setInterval(() => {
-        const el = document.getElementById('ramadan-countdown');
-        if (!el) return;
-        const d = target - new Date();
-        if (d <= 0) { renderHome(); return; }
-        const h2 = Math.floor(d/3600000), m2 = Math.floor((d%3600000)/60000), s2 = Math.floor((d%60000)/1000);
-        el.textContent = `${h2}h ${String(m2).padStart(2,'0')}m ${String(s2).padStart(2,'0')}s`;
-      }, 1000);
-    }, 100);
+    // start live countdown (clear any existing one first)
+    if (state.prayer.ramadanInterval) clearInterval(state.prayer.ramadanInterval);
+    state.prayer.ramadanInterval = setInterval(() => {
+      const el = document.getElementById('ramadan-countdown');
+      if (!el) { clearInterval(state.prayer.ramadanInterval); state.prayer.ramadanInterval = null; return; }
+      const d = target - new Date();
+      if (d <= 0) { clearInterval(state.prayer.ramadanInterval); state.prayer.ramadanInterval = null; renderHome(); return; }
+      const h2 = Math.floor(d/3600000), m2 = Math.floor((d%3600000)/60000), s2 = Math.floor((d%60000)/1000);
+      el.textContent = `${h2}h ${String(m2).padStart(2,'0')}m ${String(s2).padStart(2,'0')}s`;
+    }, 1000);
   }
 
   document.getElementById('tab-home').innerHTML = `
@@ -276,7 +275,7 @@ function renderHome() {
   `;
 }
 
-function rotatHadith() {
+function rotateHadith() {
   state.hadithIndex = (state.hadithIndex + 1) % HADITHS.length;
   const card = document.getElementById('hadith-card');
   if (!card) return;
@@ -1377,7 +1376,6 @@ function showCQTab(tab) {
 function showLetterDetail(i) {
   const l = ARABIC_LETTERS[i];
   const tab = document.getElementById('tab-learn');
-  const prev = document.getElementById('cq-content') ? 'openChildrensQuran' : 'openChildrensQuran';
   tab.innerHTML = `
     <div class="page-header">
       <button class="back-btn" onclick="openChildrensQuran()">←</button>
@@ -1523,8 +1521,8 @@ function openZakatCalc() {
       <div class="zakat-section-title">Nisab Based On</div>
       <div class="zakat-field">
         <div class="nisab-type">
-          <button class="nisab-btn ${state.learn.zakat.nisab === 'gold' ? 'active' : ''}" onclick="setNisabType('gold')">Gold (87.48g)</button>
-          <button class="nisab-btn ${state.learn.zakat.nisab === 'silver' ? 'active' : ''}" onclick="setNisabType('silver')">Silver (612.36g)</button>
+          <button class="nisab-btn ${state.learn.zakat.nisab === 'gold' ? 'active' : ''}" onclick="setNisabType('gold', this)">Gold (87.48g)</button>
+          <button class="nisab-btn ${state.learn.zakat.nisab === 'silver' ? 'active' : ''}" onclick="setNisabType('silver', this)">Silver (612.36g)</button>
         </div>
       </div>
 
@@ -1588,10 +1586,10 @@ function setZakatCurrency(c) {
   document.querySelectorAll('label span').forEach(s => { s.textContent = `(${c})`; });
 }
 
-function setNisabType(t) {
+function setNisabType(t, btn) {
   state.learn.zakat.nisab = t;
   document.querySelectorAll('.nisab-btn').forEach(b => b.classList.remove('active'));
-  event.target.classList.add('active');
+  if (btn) btn.classList.add('active');
 }
 
 function calculateZakat() {
