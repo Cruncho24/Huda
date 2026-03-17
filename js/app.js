@@ -554,48 +554,23 @@ function playAyatulKursi() {
 }
 
 function playMushafAyah(globalNum, surahNum, ayahNum) {
-  // Stop existing
-  if (state.audio.player) {
-    state.audio.player.pause();
-    const prev = document.getElementById(`maud-${state.audio.playingId}`);
-    if (prev) prev.classList.remove('maud-playing');
-
-    if (state.audio.playingId === globalNum) {
-      state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
-      updateMushafPlayBtn(false);
-      updateMushafPlayerBar();
-      return;
-    }
+  // Toggle off if same ayah tapped
+  if (state.audio.playingId === globalNum && state.audio.player) {
+    mushafStop(); return;
   }
-  const url = `https://cdn.islamic.network/quran/audio/128/${state.reciter}/${globalNum}.mp3`;
-  const audio = (_preloaded.globalNum === globalNum && _preloaded.audio) ? _preloaded.audio : new Audio(url);
-  _preloaded = { audio: null, globalNum: null };
-  state.audio = { player: audio, playingId: globalNum, playingSurah: surahNum, playingAyah: ayahNum, paused: false };
-  const badge = document.getElementById(`maud-${globalNum}`);
-  if (badge) badge.classList.add('maud-playing');
+  // Stop previous
+  _waClear();
+  _wa.session++;
+  // Create AudioContext synchronously (must be in user gesture call stack for iOS)
+  const ctx = _waCtx();
+  if (ctx.state === 'suspended') ctx.resume();
+  const session = _wa.session;
+  // Sentinel player so existing checks work; .pause() = stop
+  state.audio = { player: { pause: _waClear }, playingId: globalNum, playingSurah: surahNum, playingAyah: ayahNum, paused: false };
   updateMushafPlayBtn(true);
   updateMushafPlayerBar();
-  // Preload next ayah in background
-  const nextUrl = `https://cdn.islamic.network/quran/audio/128/${state.reciter}/${globalNum + 1}.mp3`;
-  _preloaded = { audio: new Audio(nextUrl), globalNum: globalNum + 1 };
-  audio.play().catch(() => {
-    if (badge) badge.classList.remove('maud-playing');
-    updateMushafPlayBtn(false);
-    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
-    updateMushafPlayerBar();
-  });
-  audio.onended = () => {
-    if (badge) badge.classList.remove('maud-playing');
-    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
-    const next = document.getElementById(`maud-${globalNum + 1}`);
-    if (next) { updateMushafPlayBtn(true); next.click(); } else { updateMushafPlayBtn(false); updateMushafPlayerBar(); }
-  };
-  audio.onerror = () => {
-    if (badge) badge.classList.remove('maud-playing');
-    updateMushafPlayBtn(false);
-    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
-    updateMushafPlayerBar();
-  };
+  if (!_wa.rafId) _wa.rafId = requestAnimationFrame(_waRaf);
+  _waChain(globalNum, surahNum, ayahNum, ctx.currentTime + 0.05, session);
 }
 
 function mushafPlayAll(surahNum) {
@@ -608,18 +583,14 @@ function mushafPlayAll(surahNum) {
 
 function setReciter(id) {
   mushafStop();
-  _preloaded = { audio: null, globalNum: null };
   state.reciter = id;
   localStorage.setItem('huda_reciter', id);
 }
 
 function mushafStop() {
-  if (state.audio.player) {
-    state.audio.player.pause();
-    const prev = document.getElementById(`maud-${state.audio.playingId}`);
-    if (prev) prev.classList.remove('maud-playing');
-    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
-  }
+  _waClear();
+  _wa.session++;
+  state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
   updateMushafPlayBtn(false);
   updateMushafPlayerBar();
 }
@@ -630,15 +601,12 @@ function updateMushafPlayBtn(playing) {
 }
 
 function toggleMushafPlayback() {
-  if (!state.audio.player) return;
+  if (!_wa.ctx || !state.audio.player) return;
   if (state.audio.paused) {
-    state.audio.player.play().catch(() => {});
-    state.audio.paused = false;
+    _wa.ctx.resume().then(() => { state.audio.paused = false; updateMushafPlayerBar(); });
   } else {
-    state.audio.player.pause();
-    state.audio.paused = true;
+    _wa.ctx.suspend().then(() => { state.audio.paused = true; updateMushafPlayerBar(); });
   }
-  updateMushafPlayerBar();
 }
 
 function updateMushafPlayerBar() {
@@ -700,7 +668,77 @@ function renderSurahContent(n, arData, enData) {
 
 // ── Long-press mushaf ayah to play from that point ───────────
 let _lpTimer = null;
-let _preloaded = { audio: null, globalNum: null };
+
+// ── Web Audio gapless player ──────────────────────────────────
+const _wa = { ctx: null, session: 0, schedule: [], rafId: null, lastBadge: null };
+
+function _waCtx() {
+  if (!_wa.ctx) _wa.ctx = new (window.AudioContext || window.webkitAudioContext)();
+  return _wa.ctx;
+}
+
+async function _waFetch(url) {
+  const r = await fetch(url);
+  const ab = await r.arrayBuffer();
+  return new Promise((res, rej) => _wa.ctx.decodeAudioData(ab, res, rej));
+}
+
+function _waClear() {
+  _wa.schedule.forEach(e => { try { e.src.stop(0); } catch(_) {} });
+  _wa.schedule = [];
+  if (_wa.rafId) { cancelAnimationFrame(_wa.rafId); _wa.rafId = null; }
+  if (_wa.lastBadge !== null) {
+    const b = document.getElementById(`maud-${_wa.lastBadge}`);
+    if (b) b.classList.remove('maud-playing');
+    _wa.lastBadge = null;
+  }
+}
+
+function _waRaf() {
+  if (!_wa.ctx || !_wa.schedule.length) { _wa.rafId = null; return; }
+  const now = _wa.ctx.currentTime;
+  const cur = _wa.schedule.find(e => now >= e.startTime && now < e.endTime);
+  if (cur && _wa.lastBadge !== cur.globalNum) {
+    if (_wa.lastBadge !== null) {
+      const prev = document.getElementById(`maud-${_wa.lastBadge}`);
+      if (prev) prev.classList.remove('maud-playing');
+    }
+    const badge = document.getElementById(`maud-${cur.globalNum}`);
+    if (badge) badge.classList.add('maud-playing');
+    _wa.lastBadge = cur.globalNum;
+    state.audio.playingId = cur.globalNum;
+    state.audio.playingSurah = cur.surahNum;
+    state.audio.playingAyah = cur.ayahNum;
+    updateMushafPlayerBar();
+  }
+  const last = _wa.schedule[_wa.schedule.length - 1];
+  if (last && now >= last.endTime) { mushafStop(); return; }
+  _wa.rafId = requestAnimationFrame(_waRaf);
+}
+
+async function _waChain(globalNum, surahNum, ayahNum, scheduleAt, session) {
+  if (session !== _wa.session || !_wa.ctx) return;
+  const url = `https://cdn.islamic.network/quran/audio/128/${state.reciter}/${globalNum}.mp3`;
+  let buffer;
+  try {
+    buffer = await _waFetch(url);
+  } catch(_) { return; }
+  if (session !== _wa.session || !_wa.ctx) return;
+  const ctx = _wa.ctx;
+  const startAt = Math.max(scheduleAt, ctx.currentTime + 0.01);
+  const src = ctx.createBufferSource();
+  src.buffer = buffer;
+  src.connect(ctx.destination);
+  src.start(startAt);
+  _wa.schedule.push({ src, globalNum, surahNum, ayahNum, startTime: startAt, endTime: startAt + buffer.duration });
+  const nextEl = document.getElementById(`maud-${globalNum + 1}`);
+  if (nextEl) {
+    const wrap = nextEl.closest('.mushaf-ayah-wrap');
+    const ns = wrap ? +wrap.dataset.surah : surahNum;
+    const na = wrap ? +wrap.dataset.ayah : ayahNum + 1;
+    _waChain(globalNum + 1, ns, na, startAt + buffer.duration, session);
+  }
+}
 function setupAyahLongPress(container) {
   container.addEventListener('touchstart', e => {
     const ayah = e.target.closest('.mushaf-ayah-wrap[data-global]');
