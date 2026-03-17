@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#059669">
+  <meta name="description" content="Huda — Your Islamic Companion. Quran, Prayer Times, Dhikr, Duas, and more.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Huda">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Huda — Islamic Companion</title>
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/manifest.json">
+
+  <!-- Apple touch icons -->
+  <link rel="apple-touch-icon" href="/icons/icon-192.png">
+  <link rel="icon" type="image/png" href="/icons/icon-192.png">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/css/styles.css?v=17">
+
+  <!-- adhan.js for prayer time calculation (local, no defer so it's ready immediately) -->
+  <script src="/js/adhan.min.js?v=17"></script>
+
+  <!-- Google Fonts: Amiri for Arabic text -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- TAB: HOME -->
+  <section id="tab-home" class="tab-content active">
+    <!-- rendered by JS -->
+  </section>
+
+  <!-- TAB: QURAN -->
+  <section id="tab-quran" class="tab-content">
+    <!-- rendered by JS on first switch -->
+  </section>
+
+  <!-- TAB: PRAYER TIMES -->
+  <section id="tab-prayer" class="tab-content">
+    <!-- rendered by JS on first switch -->
+  </section>
+
+  <!-- TAB: DHIKR -->
+  <section id="tab-dhikr" class="tab-content">
+    <!-- rendered by JS on first switch -->
+  </section>
+
+  <!-- TAB: DUAS -->
+  <section id="tab-duas" class="tab-content">
+    <!-- rendered by JS on first switch -->
+  </section>
+
+  <!-- TAB: LEARN -->
+  <section id="tab-learn" class="tab-content">
+    <!-- rendered by JS on first switch -->
+  </section>
+
+  <!-- Bottom Navigation -->
+  <nav id="bottom-nav">
+    <button class="nav-item active" data-tab="home">
+      <div class="nav-icon">🏠</div>
+      <span class="nav-label">Home</span>
+    </button>
+    <button class="nav-item" data-tab="quran">
+      <div class="nav-icon">📖</div>
+      <span class="nav-label">Quran</span>
+    </button>
+    <button class="nav-item" data-tab="prayer">
+      <div class="nav-icon">🕌</div>
+      <span class="nav-label">Prayer</span>
+    </button>
+    <button class="nav-item" data-tab="dhikr">
+      <div class="nav-icon">📿</div>
+      <span class="nav-label">Dhikr</span>
+    </button>
+    <button class="nav-item" data-tab="duas">
+      <div class="nav-icon">🤲</div>
+      <span class="nav-label">Duas</span>
+    </button>
+    <button class="nav-item" data-tab="learn">
+      <div class="nav-icon">📚</div>
+      <span class="nav-label">Learn</span>
+    </button>
+  </nav>
+
+  <!-- PWA Install Banner -->
+  <div id="install-banner">
+    <div class="install-text">
+      <strong>Install Huda</strong> on your home screen for offline access
+    </div>
+    <button class="install-btn" onclick="installApp()">Install</button>
+    <button class="install-dismiss" onclick="dismissInstall()">✕</button>
+  </div>
+
+</div>
+
+<!-- Data & App -->
+<script src="/js/data.js?v=17"></script>
+<script src="/js/app.js?v=17"></script>
+
+</body>
+</html>
