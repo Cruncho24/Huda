@@ -4,11 +4,27 @@
 
 // ── Reciters ──────────────────────────────────────────────────
 const RECITERS = [
-  { id: 'ar.alafasy',      name: 'Mishary Alafasy' },
-  { id: 'ar.mahermuaiqly', name: 'Maher Al-Muqaili' },
+  { id: 'ar.alafasy',        name: 'Mishary Alafasy',      qurancdnId: 7 },
+  { id: 'ar.mahermuaiqly',   name: 'Maher Al-Muqaili' },
   { id: 'ar.abdullahbasfar', name: 'Abdullah Basfar' },
-  { id: 'ar.husary',       name: 'Mahmoud Al-Hussary' },
+  {
+    id: 'ar.yasserdossari', name: 'Yasser Al-Dosari', qurancdnId: 97,
+    surahUrl: n => `https://download.quranicaudio.com/quran/yasser_ad-dussary//${String(n).padStart(3,'0')}.mp3`,
+  },
 ];
+
+// Returns the per-ayah audio URL for the active reciter
+function getAyahUrl(globalNum, surahNum, ayahNum) {
+  return `https://cdn.islamic.network/quran/audio/128/${state.reciter}/${globalNum}.mp3`;
+}
+
+// Returns the full-surah audio URL, or null to fall back to per-ayah chain
+function getSurahAudioUrl(surahNum) {
+  const r = RECITERS.find(r => r.id === state.reciter);
+  if (r?.surahUrl) return r.surahUrl(surahNum);
+  if (state.reciter === 'ar.mahermuaiqly') return null; // no gapless source available
+  return `https://cdn.islamic.network/quran/audio-surah/128/${state.reciter}/${surahNum}.mp3`;
+}
 
 // ── State ────────────────────────────────────────────────────
 const state = {
@@ -102,8 +118,7 @@ function playAyah(globalNum, surahNum, ayahNum) {
       return;
     }
   }
-  const url = `https://cdn.islamic.network/quran/audio/128/${state.reciter}/${globalNum}.mp3`;
-  const audio = new Audio(url);
+  const audio = new Audio(getAyahUrl(globalNum, surahNum, ayahNum));
   state.audio = { player: audio, playingId: globalNum };
   const btn = document.getElementById(btnId);
   if (btn) { btn.textContent = '⏸'; btn.classList.add('playing'); }
@@ -465,7 +480,7 @@ function renderMushafPage(n, arData, enData) {
       <span class="mushaf-meta">${s[2]}</span>
       <span class="mushaf-meta-center">${s[1]}</span>
       <div class="mushaf-audio-controls">
-        <button class="mushaf-audio-btn" id="mushaf-play-btn" onclick="mushafPlayAll(${n})" title="Play all">▶</button>
+        <button class="mushaf-audio-btn" id="mushaf-play-btn" onclick="mushafPlayToggle(${n})" title="Play / Pause">▶</button>
       </div>
     </div>
     <div class="mushaf-hint">Hold any ayah to play from there</div>
@@ -475,7 +490,58 @@ function renderMushafPage(n, arData, enData) {
   updateMushafPlayerBar();
 }
 
-// ── Mushaf word-timing helpers ────────────────────────────────
+// ── Surah-level audio (gapless) ───────────────────────────────
+const _surahTimingsCache = {};
+let _surahAudio   = null; // the full-surah Audio element when active
+let _surahBadge   = null; // currently highlighted ayah badge
+let _surahTiming  = null; // { [verse_key]: { from, to } }
+
+// Fetch ayah-level timestamps for badge tracking (reciters with qurancdnId only)
+async function fetchSurahTimings(surahNum) {
+  const r = RECITERS.find(r => r.id === state.reciter);
+  const rid = r?.qurancdnId;
+  if (!rid) return null;
+  const ck = `${rid}_${surahNum}`;
+  if (_surahTimingsCache[ck]) return _surahTimingsCache[ck];
+  try {
+    const res = await fetch(`https://api.qurancdn.com/api/qdc/audio/reciters/${rid}/audio_files?chapter_number=${surahNum}&segments=true`);
+    const data = await res.json();
+    const f = (data.audio_files || [])[0];
+    if (!f) return null;
+    const t = {};
+    for (const vt of (f.verse_timings || [])) {
+      t[vt.verse_key] = { from: vt.timestamp_from, to: vt.timestamp_to };
+    }
+    _surahTimingsCache[ck] = t;
+    return t;
+  } catch(_) { return null; }
+}
+
+// timeupdate handler: highlights the correct ayah badge
+function _surahTimeUpdate() {
+  if (!_surahAudio || !_surahTiming) return;
+  const ms   = _surahAudio.currentTime * 1000;
+  const sn   = state.audio.playingSurah;
+  const cache = state.quran.cache[sn];
+  if (!cache) return;
+  for (const [key, t] of Object.entries(_surahTiming)) {
+    if (ms >= t.from && ms < t.to) {
+      const an = +key.split(':')[1];
+      if (state.audio.playingAyah === an) return;
+      if (_surahBadge) _surahBadge.classList.remove('maud-playing');
+      const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === an);
+      if (ayahObj) {
+        _surahBadge = document.getElementById(`maud-${ayahObj.number}`);
+        if (_surahBadge) _surahBadge.classList.add('maud-playing');
+      }
+      state.audio.playingAyah = an;
+      updateMushafPlayerBar();
+      return;
+    }
+  }
+}
+
+// ── Mushaf word-timing helpers (kept for potential future use) ─
 async function fetchMushafTimings(surahNum) {
   if (state.quran.timings[surahNum]) return state.quran.timings[surahNum];
   try {
@@ -484,8 +550,6 @@ async function fetchMushafTimings(surahNum) {
     const map = {};
     for (const f of (data.audio_files || [])) {
       for (const vt of (f.verse_timings || [])) {
-        // Segments are absolute ms within the chapter audio — convert to relative-to-ayah ms.
-        // Word indices from the API are 1-based — convert to 0-based to match our span IDs.
         const base = vt.timestamp_from;
         map[vt.verse_key] = (vt.segments || []).map(([wi, s, e]) =>
           [wi - 1, Math.max(0, s - base), Math.max(0, e - base)]
@@ -545,7 +609,7 @@ function playAyatulKursi() {
     if (prev) prev.classList.remove('maud-playing');
     state.audio = { player: null, playingId: null };
   }
-  const audio = new Audio(`https://cdn.islamic.network/quran/audio/128/${state.reciter}/${GLOBAL}.mp3`);
+  const audio = new Audio(getAyahUrl(GLOBAL, 2, 255));
   state.audio = { player: audio, playingId: GLOBAL };
   if (btn) btn.innerHTML = '⏸ Stop';
   audio.play().catch(() => { if (btn) btn.innerHTML = '▶ Play'; state.audio = { player: null, playingId: null }; });
@@ -553,7 +617,60 @@ function playAyatulKursi() {
   audio.onerror = () => { if (btn) btn.innerHTML = '▶ Play'; state.audio = { player: null, playingId: null }; };
 }
 
+// Attach an onended handler that plays the next ayah with zero overhead.
+// play() is called as the very first instruction — before any DOM work —
+// so the audio pipeline has the shortest possible cold-start gap.
+function _mushafSetupOnEnded(audio, globalNum, surahNum, ayahNum) {
+  audio.onended = () => {
+    const nextEl = document.getElementById(`maud-${globalNum + 1}`);
+    if (!nextEl) { mushafStop(); return; }
+
+    // ── Switch pool slot ──────────────────────────────────────
+    _poolIdx = 1 - _poolIdx;
+    const nextAudio = _pool[_poolIdx];
+    if (_poolFor[_poolIdx] !== globalNum + 1) {
+      nextAudio.src = getAyahUrl(globalNum + 1);
+      _poolFor[_poolIdx] = globalNum + 1;
+    }
+
+    // ── PLAY FIRST — before any DOM/state work ────────────────
+    nextAudio.play().catch(() => { mushafStop(); });
+
+    // ── State + badge update ──────────────────────────────────
+    const wrap = nextEl.closest('.mushaf-ayah-wrap');
+    const ns = wrap ? +wrap.dataset.surah : surahNum;
+    const na = wrap ? +wrap.dataset.ayah : ayahNum + 1;
+    const prevBadge = document.getElementById(`maud-${globalNum}`);
+    if (prevBadge) prevBadge.classList.remove('maud-playing');
+    state.audio = { player: nextAudio, playingId: globalNum + 1, playingSurah: ns, playingAyah: na, paused: false };
+    const nextBadge = document.getElementById(`maud-${globalNum + 1}`);
+    if (nextBadge) nextBadge.classList.add('maud-playing');
+    updateMushafPlayerBar();
+
+    // ── Preload two ahead ─────────────────────────────────────
+    const afterEl = document.getElementById(`maud-${globalNum + 2}`);
+    if (afterEl) _poolPreload(globalNum + 2);
+
+    // ── Chain next onended ────────────────────────────────────
+    _mushafSetupOnEnded(nextAudio, globalNum + 1, ns, na);
+  };
+}
+
 function playMushafAyah(globalNum, surahNum, ayahNum) {
+  // If surah audio is active for this surah, seek to the tapped ayah
+  if (_surahAudio && state.audio.playingSurah === surahNum && _surahTiming) {
+    const t = _surahTiming[`${surahNum}:${ayahNum}`];
+    if (t) {
+      _surahAudio.currentTime = t.from / 1000;
+      if (state.audio.paused) {
+        _surahAudio.play().catch(() => {});
+        state.audio.paused = false;
+        updateMushafPlayerBar();
+      }
+      return;
+    }
+  }
+
   // Toggle off if same ayah tapped
   if (state.audio.playingId === globalNum && state.audio.player) {
     mushafStop(); return;
@@ -565,16 +682,16 @@ function playMushafAyah(globalNum, surahNum, ayahNum) {
     if (prev) prev.classList.remove('maud-playing');
   }
 
-  // Switch to the preloaded slot if it has this ayah ready
+  // Use preloaded slot if ready, otherwise load now
   if (_poolFor[1 - _poolIdx] === globalNum) _poolIdx = 1 - _poolIdx;
   const audio = _pool[_poolIdx];
   if (_poolFor[_poolIdx] !== globalNum) {
-    audio.src = `https://cdn.islamic.network/quran/audio/128/${state.reciter}/${globalNum}.mp3`;
+    audio.src = getAyahUrl(globalNum, surahNum, ayahNum);
     audio.load();
     _poolFor[_poolIdx] = globalNum;
   }
 
-  // Play immediately — before DOM updates — to minimise gap
+  // Play first, state/DOM after
   audio.play().catch(() => { mushafStop(); });
 
   state.audio = { player: audio, playingId: globalNum, playingSurah: surahNum, playingAyah: ayahNum, paused: false };
@@ -583,26 +700,52 @@ function playMushafAyah(globalNum, surahNum, ayahNum) {
   updateMushafPlayBtn(true);
   updateMushafPlayerBar();
 
-  // Preload the next ayah into the other slot
+  // Preload next
   const nextEl = document.getElementById(`maud-${globalNum + 1}`);
   if (nextEl) _poolPreload(globalNum + 1);
 
-  audio.onended = () => {
-    if (badge) badge.classList.remove('maud-playing');
-    if (!nextEl) { mushafStop(); return; }
-    const wrap = nextEl.closest('.mushaf-ayah-wrap');
-    const ns = wrap ? +wrap.dataset.surah : surahNum;
-    const na = wrap ? +wrap.dataset.ayah : ayahNum + 1;
-    playMushafAyah(globalNum + 1, ns, na);
-  };
+  // Set up fast-path onended chain
+  _mushafSetupOnEnded(audio, globalNum, surahNum, ayahNum);
 }
 
 function mushafPlayAll(surahNum) {
-  // Play from first ayah of this surah
+  mushafStop();
+  const url = getSurahAudioUrl(surahNum);
+  // No gapless audio for this reciter — fall back to per-ayah chain
+  if (!url) {
+    const cache = state.quran.cache[surahNum];
+    if (cache) playMushafAyah(cache.arData.ayahs[0].number, surahNum, 1);
+    return;
+  }
+  _surahAudio = new Audio(url);
+  _surahAudio.onerror = () => {
+    _surahAudio = null; _surahTiming = null;
+    const cache = state.quran.cache[surahNum];
+    if (cache) playMushafAyah(cache.arData.ayahs[0].number, surahNum, 1);
+  };
+
+  // Highlight first ayah badge if cache is ready
   const cache = state.quran.cache[surahNum];
-  if (!cache) return;
-  const firstGlobal = cache.arData.ayahs[0].number;
-  playMushafAyah(firstGlobal, surahNum, 1);
+  if (cache && cache.arData) {
+    const first = cache.arData.ayahs[0];
+    _surahBadge = document.getElementById(`maud-${first.number}`);
+    if (_surahBadge) _surahBadge.classList.add('maud-playing');
+    state.audio = { player: _surahAudio, playingId: first.number, playingSurah: surahNum, playingAyah: 1, paused: false };
+  } else {
+    state.audio = { player: _surahAudio, playingId: null, playingSurah: surahNum, playingAyah: 1, paused: false };
+  }
+
+  _surahAudio.play().catch(() => mushafStop());
+  _surahAudio.onended = () => mushafStop();
+  updateMushafPlayBtn(true);
+  updateMushafPlayerBar();
+
+  // Fetch per-ayah timestamps in background for badge tracking
+  fetchSurahTimings(surahNum).then(t => {
+    if (!t || _surahAudio !== state.audio.player) return;
+    _surahTiming = t;
+    _surahAudio.addEventListener('timeupdate', _surahTimeUpdate);
+  });
 }
 
 function setReciter(id) {
@@ -613,11 +756,21 @@ function setReciter(id) {
 }
 
 function mushafStop() {
-  if (state.audio.player) {
+  // Clean up surah-level audio
+  if (_surahAudio) {
+    _surahAudio.removeEventListener('timeupdate', _surahTimeUpdate);
+    _surahAudio.pause();
+  }
+  if (_surahBadge) { _surahBadge.classList.remove('maud-playing'); }
+  // Also stop per-ayah pool player if it's different from surahAudio
+  if (state.audio.player && state.audio.player !== _surahAudio) {
     state.audio.player.pause();
     const prev = document.getElementById(`maud-${state.audio.playingId}`);
     if (prev) prev.classList.remove('maud-playing');
   }
+  _surahAudio = null;
+  _surahBadge = null;
+  _surahTiming = null;
   state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
   updateMushafPlayBtn(false);
   updateMushafPlayerBar();
@@ -625,18 +778,27 @@ function mushafStop() {
 
 function updateMushafPlayBtn(playing) {
   const btn = document.getElementById('mushaf-play-btn');
-  if (btn) btn.textContent = playing ? '⏸' : '▶';
+  if (!btn) return;
+  btn.textContent = !playing ? '▶' : state.audio.paused ? '▶' : '⏸';
+}
+
+// Called by the ▶/⏸ button inside the mushaf sticky header
+function mushafPlayToggle(surahNum) {
+  if (_surahAudio || state.audio.player) toggleMushafPlayback();
+  else mushafPlayAll(surahNum);
 }
 
 function toggleMushafPlayback() {
-  if (!state.audio.player) return;
+  const player = _surahAudio || state.audio.player;
+  if (!player) return;
   if (state.audio.paused) {
-    state.audio.player.play().catch(() => {});
+    player.play().catch(() => {});
     state.audio.paused = false;
   } else {
-    state.audio.player.pause();
+    player.pause();
     state.audio.paused = true;
   }
+  updateMushafPlayBtn(!!(state.audio.player || _surahAudio));
   updateMushafPlayerBar();
 }
 
@@ -710,7 +872,7 @@ function _poolPreload(globalNum) {
   const slot = 1 - _poolIdx;
   if (_poolFor[slot] === globalNum) return; // already loaded
   const el = _pool[slot];
-  el.src = `https://cdn.islamic.network/quran/audio/128/${state.reciter}/${globalNum}.mp3`;
+  el.src = getAyahUrl(globalNum);
   el.preload = 'auto';
   el.load();
   _poolFor[slot] = globalNum;
