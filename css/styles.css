@@ -1095,6 +1095,17 @@ body {
   border-color: var(--emerald);
 }
 
+.reciter-select {
+  font-size: 12px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--gray-200);
+  background: var(--gray-100);
+  color: var(--gray-500);
+  cursor: pointer;
+  max-width: 140px;
+}
+
 /* ── Mushaf (Page View) ─────────────────────────────────────── */
 #mushaf-page {
   background: #faf6f0;
@@ -1287,6 +1298,7 @@ html.dark .tab-switch-btn.active { background: #334155; color: #d1fae5; }
 html.dark .result-row { border-color: #334155; }
 html.dark .disclaimer { background: #2d2200; border-color: #4a3800; color: #fcd34d; }
 html.dark .reader-toolbar { background: #1e293b; border-color: #334155; }
+html.dark .reciter-select { background: #334155; border-color: #475569; color: #e2e8f0; }
 html.dark .view-toggle-btn { background: #334155; border-color: #475569; color: #94a3b8; }
 html.dark .tab-switcher { background: #334155; }
 html.dark .currency-btn { background: #334155; border-color: #475569; color: #94a3b8; }

@@ -2,6 +2,14 @@
    HUDA PWA — App Logic
    ============================================================ */
 
+// ── Reciters ──────────────────────────────────────────────────
+const RECITERS = [
+  { id: 'ar.alafasy',      name: 'Mishary Alafasy' },
+  { id: 'ar.mahermuaiqly', name: 'Maher Al-Muqaili' },
+  { id: 'ar.abdullahbasfar', name: 'Abdullah Basfar' },
+  { id: 'ar.husary',       name: 'Mahmoud Al-Hussary' },
+];
+
 // ── State ────────────────────────────────────────────────────
 const state = {
   activeTab: 'home',
@@ -10,6 +18,7 @@ const state = {
   darkMode: localStorage.getItem('huda_dark') === '1',
   fontSize: parseInt(localStorage.getItem('huda_fontsize') || '24'),
   bookmarks: JSON.parse(localStorage.getItem('huda_bookmarks') || '[]'),
+  reciter: localStorage.getItem('huda_reciter') || 'ar.alafasy',
   audio: { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false },
   prayer: {
     times: null, location: null, qibla: null, city: '',
@@ -93,7 +102,7 @@ function playAyah(globalNum, surahNum, ayahNum) {
       return;
     }
   }
-  const url = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${globalNum}.mp3`;
+  const url = `https://cdn.islamic.network/quran/audio/128/${state.reciter}/${globalNum}.mp3`;
   const audio = new Audio(url);
   state.audio = { player: audio, playingId: globalNum };
   const btn = document.getElementById(btnId);
@@ -305,6 +314,9 @@ function renderQuranList() {
           <button class="font-btn" onclick="changeFontSize(-2)">A−</button>
           <button class="font-btn" onclick="changeFontSize(2)">A+</button>
         </div>
+        <select class="reciter-select" id="reciter-select" onchange="setReciter(this.value)">
+          ${RECITERS.map(r => `<option value="${r.id}" ${state.reciter === r.id ? 'selected' : ''}>${r.name}</option>`).join('')}
+        </select>
       </div>
       <div id="reader-content"></div>
       <div id="mushaf-page" style="display:none"></div>
@@ -533,7 +545,7 @@ function playAyatulKursi() {
     if (prev) prev.classList.remove('maud-playing');
     state.audio = { player: null, playingId: null };
   }
-  const audio = new Audio(`https://cdn.islamic.network/quran/audio/128/ar.alafasy/${GLOBAL}.mp3`);
+  const audio = new Audio(`https://cdn.islamic.network/quran/audio/128/${state.reciter}/${GLOBAL}.mp3`);
   state.audio = { player: audio, playingId: GLOBAL };
   if (btn) btn.innerHTML = '⏸ Stop';
   audio.play().catch(() => { if (btn) btn.innerHTML = '▶ Play'; state.audio = { player: null, playingId: null }; });
@@ -555,7 +567,7 @@ function playMushafAyah(globalNum, surahNum, ayahNum) {
       return;
     }
   }
-  const url = `https://cdn.islamic.network/quran/audio/128/ar.alafasy/${globalNum}.mp3`;
+  const url = `https://cdn.islamic.network/quran/audio/128/${state.reciter}/${globalNum}.mp3`;
   const audio = new Audio(url);
   state.audio = { player: audio, playingId: globalNum, playingSurah: surahNum, playingAyah: ayahNum, paused: false };
   const badge = document.getElementById(`maud-${globalNum}`);
@@ -588,6 +600,12 @@ function mushafPlayAll(surahNum) {
   if (!cache) return;
   const firstGlobal = cache.arData.ayahs[0].number;
   playMushafAyah(firstGlobal, surahNum, 1);
+}
+
+function setReciter(id) {
+  mushafStop();
+  state.reciter = id;
+  localStorage.setItem('huda_reciter', id);
 }
 
 function mushafStop() {
