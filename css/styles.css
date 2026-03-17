@@ -1131,48 +1131,7 @@ html.dark .mushaf-audio-btn:active { background: #6a4830; }
   background: #f0e8d8;
 }
 
-.mushaf-player-bar {
-  position: sticky;
-  top: 44px;
-  z-index: 4;
-  background: #e8dcc8;
-  border-bottom: 1px solid #c8a870;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 6px 16px;
-  gap: 8px;
-}
-.mpb-info {
-  flex: 1;
-  font-size: 13px;
-  color: #7a5030;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.mpb-controls { display: flex; gap: 6px; }
-.mpb-btn {
-  background: #c9a878;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  padding: 5px 11px;
-  font-size: 14px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: background 0.15s;
-}
-.mpb-btn:active { background: #a07840; }
-.mpb-stop { background: #b06050; }
-.mpb-stop:active { background: #803030; }
-
 html.dark .mushaf-hint { background: #1a120a; color: #6a5040; }
-html.dark .mushaf-player-bar { background: #231508; border-color: #4a3020; }
-html.dark .mpb-info { color: #c9a06a; }
-html.dark .mpb-btn { background: #4a3020; }
-html.dark .mpb-stop { background: #5a2020; }
 
 .mushaf-scroll-body { padding: 0 0 24px; }
 
