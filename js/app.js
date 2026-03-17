@@ -292,6 +292,11 @@ function renderQuranList() {
           <h2 id="reader-title">Surah</h2>
           <div style="font-size:11px;opacity:0.8" id="reader-meta"></div>
         </div>
+        <div id="mushaf-header-controls" style="display:none;align-items:center;gap:6px;flex-shrink:0">
+          <span id="mpb-info" style="font-size:11px;opacity:0.9;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+          <button id="mpb-pause-btn" class="mhdr-btn" onclick="toggleMushafPlayback()">⏸</button>
+          <button class="mhdr-btn" onclick="mushafStop()">■</button>
+        </div>
       </div>
       <div class="reader-toolbar">
         <button class="view-toggle-btn active" id="btn-verse" onclick="setQuranView('verse')">Study</button>
@@ -444,13 +449,11 @@ function renderMushafPage(n, arData, enData) {
   }).join('');
 
   el.innerHTML = `
-    <div class="mushaf-sticky-header" data-surah-name="${s[1]}">
+    <div class="mushaf-sticky-header">
       <span class="mushaf-meta">${s[2]}</span>
-      <span class="mushaf-meta-center" id="mpb-info">${s[1]}</span>
+      <span class="mushaf-meta-center">${s[1]}</span>
       <div class="mushaf-audio-controls">
         <button class="mushaf-audio-btn" id="mushaf-play-btn" onclick="mushafPlayAll(${n})" title="Play all">▶</button>
-        <button class="mushaf-audio-btn" id="mpb-pause-btn" onclick="toggleMushafPlayback()" style="display:none">⏸</button>
-        <button class="mushaf-audio-btn" id="mpb-stop-btn" onclick="mushafStop()" style="display:none">■</button>
       </div>
     </div>
     <div class="mushaf-hint">Hold any ayah to play from there</div>
@@ -616,25 +619,19 @@ function toggleMushafPlayback() {
 }
 
 function updateMushafPlayerBar() {
-  const playBtn   = document.getElementById('mushaf-play-btn');
-  const pauseBtn  = document.getElementById('mpb-pause-btn');
-  const stopBtn   = document.getElementById('mpb-stop-btn');
-  const info      = document.getElementById('mpb-info');
-  const playing   = state.audio.player && state.audio.playingSurah;
-  if (playBtn)  playBtn.style.display  = playing ? 'none' : '';
-  if (pauseBtn) pauseBtn.style.display = playing ? '' : 'none';
-  if (stopBtn)  stopBtn.style.display  = playing ? '' : 'none';
-  if (info) {
-    if (playing) {
+  const controls = document.getElementById('mushaf-header-controls');
+  if (!controls) return;
+  const playing = !!(state.audio.player && state.audio.playingSurah);
+  controls.style.display = playing ? 'flex' : 'none';
+  if (playing) {
+    const info = document.getElementById('mpb-info');
+    if (info) {
       const s = SURAHS[state.audio.playingSurah - 1];
       info.textContent = `${s ? s[1] : ''} · ${state.audio.playingAyah}`;
-    } else {
-      // restore surah name (grab from the meta-center default stored as data attr)
-      const header = document.querySelector('.mushaf-sticky-header');
-      info.textContent = header ? (header.dataset.surahName || '') : '';
     }
+    const btn = document.getElementById('mpb-pause-btn');
+    if (btn) btn.textContent = state.audio.paused ? '▶' : '⏸';
   }
-  if (pauseBtn) pauseBtn.textContent = state.audio.paused ? '▶' : '⏸';
 }
 
 
