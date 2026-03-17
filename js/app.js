@@ -568,12 +568,16 @@ function playMushafAyah(globalNum, surahNum, ayahNum) {
     }
   }
   const url = `https://cdn.islamic.network/quran/audio/128/${state.reciter}/${globalNum}.mp3`;
-  const audio = new Audio(url);
+  const audio = (_preloaded.globalNum === globalNum && _preloaded.audio) ? _preloaded.audio : new Audio(url);
+  _preloaded = { audio: null, globalNum: null };
   state.audio = { player: audio, playingId: globalNum, playingSurah: surahNum, playingAyah: ayahNum, paused: false };
   const badge = document.getElementById(`maud-${globalNum}`);
   if (badge) badge.classList.add('maud-playing');
   updateMushafPlayBtn(true);
   updateMushafPlayerBar();
+  // Preload next ayah in background
+  const nextUrl = `https://cdn.islamic.network/quran/audio/128/${state.reciter}/${globalNum + 1}.mp3`;
+  _preloaded = { audio: new Audio(nextUrl), globalNum: globalNum + 1 };
   audio.play().catch(() => {
     if (badge) badge.classList.remove('maud-playing');
     updateMushafPlayBtn(false);
@@ -604,6 +608,7 @@ function mushafPlayAll(surahNum) {
 
 function setReciter(id) {
   mushafStop();
+  _preloaded = { audio: null, globalNum: null };
   state.reciter = id;
   localStorage.setItem('huda_reciter', id);
 }
@@ -695,6 +700,7 @@ function renderSurahContent(n, arData, enData) {
 
 // ── Long-press mushaf ayah to play from that point ───────────
 let _lpTimer = null;
+let _preloaded = { audio: null, globalNum: null };
 function setupAyahLongPress(container) {
   container.addEventListener('touchstart', e => {
     const ayah = e.target.closest('.mushaf-ayah-wrap[data-global]');
