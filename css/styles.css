@@ -350,7 +350,7 @@ body {
   direction: rtl;
   color: var(--gray-900);
   margin-bottom: 10px;
-  font-family: 'Amiri', 'Noto Naskh Arabic', 'Traditional Arabic', serif;
+  font-family: 'Scheherazade New', 'Noto Naskh Arabic', serif;
 }
 .ayah-num-badge {
   display: inline-flex;
@@ -568,7 +568,7 @@ body {
   line-height: 1.9;
   color: var(--gray-900);
   margin-bottom: 14px;
-  font-family: 'Amiri', 'Noto Naskh Arabic', 'Traditional Arabic', serif;
+  font-family: 'Scheherazade New', 'Noto Naskh Arabic', serif;
 }
 .dua-transliteration {
   font-size: 13px;
@@ -1125,7 +1125,7 @@ body {
 }
 .mushaf-meta { font-size: 11px; color: #8a6540; font-weight: 600; }
 .mushaf-meta-center {
-  font-family: 'Amiri', serif;
+  font-family: 'Scheherazade New', serif;
   font-size: 18px;
   color: #3d2a0a;
   direction: rtl;
@@ -1169,8 +1169,8 @@ html.dark .mushaf-hint { background: #1a120a; color: #6a5040; }
 
 .mushaf-bismillah {
   text-align: center;
-  font-family: 'Amiri', 'Noto Naskh Arabic', serif;
-  font-size: 24px;
+  font-family: 'Scheherazade New', 'Noto Naskh Arabic', serif;
+  font-size: 26px;
   color: #3d2a0a;
   direction: rtl;
   padding: 12px 0 16px;
@@ -1178,17 +1178,17 @@ html.dark .mushaf-hint { background: #1a120a; color: #6a5040; }
 }
 
 .mushaf-arabic-page {
-  font-family: 'Amiri', 'Noto Naskh Arabic', 'Traditional Arabic', serif;
-  font-size: 24px;
-  line-height: 2.5;
+  font-family: 'Scheherazade New', 'Noto Naskh Arabic', serif;
+  font-size: 26px;
+  line-height: 2.8;
   direction: rtl;
   text-align: justify;
   color: #1a0f00;
-  word-spacing: 3px;
+  word-spacing: 4px;
 }
 
 .mushaf-anum {
-  font-family: 'Amiri', serif;
+  font-family: 'Scheherazade New', serif;
   font-size: 18px;
   color: #059669;
   margin: 0 2px;

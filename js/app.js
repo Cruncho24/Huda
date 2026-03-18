@@ -463,7 +463,7 @@ function renderMushafPage(n, arData, enData) {
   const pagesHtml = pages.map((page, pg) => {
     const arabicText = page.ar.map(a => {
       const rawText = (hasBismillah && a.numberInSurah === 1) ? stripBismillah(a.text) : a.text;
-      return `<span class="mushaf-ayah-wrap" data-global="${a.number}" data-surah="${n}" data-ayah="${a.numberInSurah}">${rawText} <span class="mushaf-anum" id="maud-${a.number}" onclick="playMushafAyah(${a.number},${n},${a.numberInSurah})" title="Play ayah ${a.numberInSurah}">&#xFD3F;${toArabicNumerals(a.numberInSurah)}&#xFD3E;</span></span>`;
+      return `<span class="mushaf-ayah-wrap" data-global="${a.number}" data-surah="${n}" data-ayah="${a.numberInSurah}">${rawText} <span class="mushaf-anum" id="maud-${a.number}" onclick="tapMushafAyah(${a.number},${n},${a.numberInSurah})" title="Play ayah ${a.numberInSurah}">&#xFD3F;${toArabicNumerals(a.numberInSurah)}&#xFD3E;</span></span>`;
     }).join(' ');
 
     return `
@@ -860,6 +860,19 @@ function renderSurahContent(n, arData, enData) {
 
 // ── Long-press mushaf ayah to play from that point ───────────
 let _lpTimer = null;
+let _lpStartX = 0, _lpStartY = 0;
+
+// Tracks whether the mushaf is actively scrolling — used to block
+// accidental click-to-play events that fire at the end of a scroll gesture.
+let _mushafScrolling = false;
+let _mushafScrollTimer = null;
+
+// Called by the inline onclick on each ayah number badge.
+// Guards against accidental plays triggered while the user is scrolling.
+function tapMushafAyah(globalNum, surahNum, ayahNum) {
+  if (_mushafScrolling) return;
+  playMushafAyah(globalNum, surahNum, ayahNum);
+}
 
 // ── Preloaded audio pool for minimal-gap playback ────────────
 // Two Audio elements alternate: while one plays, the other preloads the next.
@@ -877,18 +890,32 @@ function _poolPreload(globalNum) {
   _poolFor[slot] = globalNum;
 }
 function setupAyahLongPress(container) {
+  // Detect scrolling on the container so we can block accidental taps
+  container.addEventListener('scroll', () => {
+    _mushafScrolling = true;
+    clearTimeout(_mushafScrollTimer);
+    _mushafScrollTimer = setTimeout(() => { _mushafScrolling = false; }, 300);
+  }, { passive: true });
+
   container.addEventListener('touchstart', e => {
     const ayah = e.target.closest('.mushaf-ayah-wrap[data-global]');
     if (!ayah) return;
+    _lpStartX = e.touches[0].clientX;
+    _lpStartY = e.touches[0].clientY;
     _lpTimer = setTimeout(() => {
       _lpTimer = null;
       haptic(60);
       flashAyah(ayah);
       playMushafAyah(+ayah.dataset.global, +ayah.dataset.surah, +ayah.dataset.ayah);
-    }, 500);
+    }, 600);
   }, { passive: true });
   container.addEventListener('touchend',  () => clearTimeout(_lpTimer));
-  container.addEventListener('touchmove', () => clearTimeout(_lpTimer));
+  container.addEventListener('touchmove', e => {
+    // Cancel long-press if finger moved more than 8px (user is scrolling)
+    const dx = e.touches[0].clientX - _lpStartX;
+    const dy = e.touches[0].clientY - _lpStartY;
+    if (Math.abs(dx) > 8 || Math.abs(dy) > 8) clearTimeout(_lpTimer);
+  }, { passive: true });
   // Desktop: right-click
   container.addEventListener('contextmenu', e => {
     const ayah = e.target.closest('.mushaf-ayah-wrap[data-global]');
