@@ -463,7 +463,7 @@ function renderMushafPage(n, arData, enData) {
   const pagesHtml = pages.map((page, pg) => {
     const arabicText = page.ar.map(a => {
       const rawText = (hasBismillah && a.numberInSurah === 1) ? stripBismillah(a.text) : a.text;
-      return `<span class="mushaf-ayah-wrap" data-global="${a.number}" data-surah="${n}" data-ayah="${a.numberInSurah}">${rawText} <span class="mushaf-anum" id="maud-${a.number}" onclick="tapMushafAyah(${a.number},${n},${a.numberInSurah})" title="Play ayah ${a.numberInSurah}">&#xFD3F;${toArabicNumerals(a.numberInSurah)}&#xFD3E;</span></span>`;
+      return `<span class="mushaf-ayah-wrap" data-global="${a.number}" data-surah="${n}" data-ayah="${a.numberInSurah}">${rawText} <span class="mushaf-anum" id="maud-${a.number}" title="Hold to play from ayah ${a.numberInSurah}">&#xFD3F;${toArabicNumerals(a.numberInSurah)}&#xFD3E;</span></span>`;
     }).join(' ');
 
     return `
@@ -482,7 +482,7 @@ function renderMushafPage(n, arData, enData) {
         <button class="mushaf-audio-btn" id="mushaf-play-btn" onclick="mushafPlayToggle(${n})" title="Play / Pause">▶</button>
       </div>
     </div>
-    <div class="mushaf-hint">Hold any ayah to play from there</div>
+    <div class="mushaf-hint">Hold an ayah number to play from there</div>
     <div class="mushaf-scroll-body">${pagesHtml}</div>
   `;
   setupAyahLongPress(el);
@@ -861,18 +861,7 @@ function renderSurahContent(n, arData, enData) {
 // ── Long-press mushaf ayah to play from that point ───────────
 let _lpTimer = null;
 let _lpStartX = 0, _lpStartY = 0;
-
-// Tracks whether the mushaf is actively scrolling — used to block
-// accidental click-to-play events that fire at the end of a scroll gesture.
-let _mushafScrolling = false;
-let _mushafScrollTimer = null;
-
-// Called by the inline onclick on each ayah number badge.
-// Guards against accidental plays triggered while the user is scrolling.
-function tapMushafAyah(globalNum, surahNum, ayahNum) {
-  if (_mushafScrolling) return;
-  playMushafAyah(globalNum, surahNum, ayahNum);
-}
+let _pendingPlay = null;
 
 // ── Preloaded audio pool for minimal-gap playback ────────────
 // Two Audio elements alternate: while one plays, the other preloads the next.
@@ -890,40 +879,84 @@ function _poolPreload(globalNum) {
   _poolFor[slot] = globalNum;
 }
 function setupAyahLongPress(container) {
-  // Detect scrolling on the container so we can block accidental taps
-  container.addEventListener('scroll', () => {
-    _mushafScrolling = true;
-    clearTimeout(_mushafScrollTimer);
-    _mushafScrollTimer = setTimeout(() => { _mushafScrolling = false; }, 300);
-  }, { passive: true });
-
+  // Touch: hold the ayah number badge to show the play popup
   container.addEventListener('touchstart', e => {
-    const ayah = e.target.closest('.mushaf-ayah-wrap[data-global]');
-    if (!ayah) return;
+    const anum = e.target.closest('.mushaf-anum');
+    if (!anum) return;
     _lpStartX = e.touches[0].clientX;
     _lpStartY = e.touches[0].clientY;
     _lpTimer = setTimeout(() => {
       _lpTimer = null;
       haptic(60);
-      flashAyah(ayah);
-      playMushafAyah(+ayah.dataset.global, +ayah.dataset.surah, +ayah.dataset.ayah);
-    }, 600);
+      const wrap = anum.closest('.mushaf-ayah-wrap');
+      flashAyah(wrap);
+      const g = +anum.id.replace('maud-', '');
+      showAyahPopup(g, +wrap.dataset.surah, +wrap.dataset.ayah, anum);
+    }, 500);
   }, { passive: true });
-  container.addEventListener('touchend',  () => clearTimeout(_lpTimer));
+  container.addEventListener('touchend', () => clearTimeout(_lpTimer));
   container.addEventListener('touchmove', e => {
-    // Cancel long-press if finger moved more than 8px (user is scrolling)
     const dx = e.touches[0].clientX - _lpStartX;
     const dy = e.touches[0].clientY - _lpStartY;
     if (Math.abs(dx) > 8 || Math.abs(dy) > 8) clearTimeout(_lpTimer);
   }, { passive: true });
-  // Desktop: right-click
+  // Desktop: right-click on badge
   container.addEventListener('contextmenu', e => {
-    const ayah = e.target.closest('.mushaf-ayah-wrap[data-global]');
-    if (!ayah) return;
+    const anum = e.target.closest('.mushaf-anum');
+    if (!anum) return;
     e.preventDefault();
-    flashAyah(ayah);
-    playMushafAyah(+ayah.dataset.global, +ayah.dataset.surah, +ayah.dataset.ayah);
+    const wrap = anum.closest('.mushaf-ayah-wrap');
+    const g = +anum.id.replace('maud-', '');
+    flashAyah(wrap);
+    showAyahPopup(g, +wrap.dataset.surah, +wrap.dataset.ayah, anum);
   });
+}
+
+function showAyahPopup(globalNum, surahNum, ayahNum, anchorEl) {
+  _pendingPlay = { globalNum, surahNum, ayahNum };
+  let popup = document.getElementById('ayah-popup');
+  if (!popup) {
+    popup = document.createElement('div');
+    popup.id = 'ayah-popup';
+    document.body.appendChild(popup);
+  }
+  popup.innerHTML = `
+    <div class="ayah-popup-label">Ayah ${ayahNum}</div>
+    <button class="ayah-popup-play" onclick="confirmPlayMushafAyah()">▶&nbsp; Play from here</button>
+  `;
+  popup.style.display = 'block';
+  const rect = anchorEl.getBoundingClientRect();
+  const pw = 170, ph = 80;
+  let top = rect.top - ph - 10;
+  let left = rect.left + rect.width / 2 - pw / 2;
+  if (top < 8) top = rect.bottom + 10;
+  left = Math.max(8, Math.min(left, window.innerWidth - pw - 8));
+  popup.style.top = top + 'px';
+  popup.style.left = left + 'px';
+  setTimeout(() => {
+    document.addEventListener('touchstart', _dismissPopupOutside, { passive: true, once: true });
+    document.addEventListener('mousedown', _dismissPopupOutside, { once: true });
+  }, 0);
+}
+
+function _dismissPopupOutside(e) {
+  const popup = document.getElementById('ayah-popup');
+  if (popup && !popup.contains(e.target)) hideAyahPopup();
+}
+
+function hideAyahPopup() {
+  const popup = document.getElementById('ayah-popup');
+  if (popup) popup.style.display = 'none';
+  _pendingPlay = null;
+  document.removeEventListener('touchstart', _dismissPopupOutside);
+  document.removeEventListener('mousedown', _dismissPopupOutside);
+}
+
+function confirmPlayMushafAyah() {
+  if (!_pendingPlay) return;
+  const { globalNum, surahNum, ayahNum } = _pendingPlay;
+  hideAyahPopup();
+  playMushafAyah(globalNum, surahNum, ayahNum);
 }
 
 function flashAyah(el) {
