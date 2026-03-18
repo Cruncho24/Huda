@@ -133,15 +133,20 @@ function playAyah(globalNum, surahNum, ayahNum) {
   state.audio = { player: audio, playingId: globalNum, playingSurah: surahNum, playingAyah: ayahNum, paused: false };
   const btn = document.getElementById(btnId);
   if (btn) { btn.textContent = '⏸'; btn.classList.add('playing'); }
-  audio.play().catch(() => { if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); } });
+  audio.play().catch(() => {
+    if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
+    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+  });
   audio.onended = () => {
     if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
-    // auto-play next ayah
     const nextBtn = document.getElementById(`aud-${globalNum + 1}`);
     if (nextBtn) nextBtn.click();
   };
-  audio.onerror = () => { if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); } };
+  audio.onerror = () => {
+    if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
+    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+  };
 }
 
 // ── Navigation ────────────────────────────────────────────────
@@ -607,25 +612,23 @@ function startWordHighlight(audio, surahNum, ayahNum, globalNum, timings) {
 function playAyatulKursi() {
   const GLOBAL = 262;
   const btn = document.getElementById('ak-play');
+  const resetAK = () => {
+    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+    updateMushafPlayerBar();
+    if (btn) btn.innerHTML = '▶ Play';
+  };
   if (state.audio.player && state.audio.playingId === GLOBAL) {
     state.audio.player.pause();
-    state.audio = { player: null, playingId: null };
-    if (btn) btn.innerHTML = '▶ Play';
+    resetAK();
     return;
   }
-  if (state.audio.player) {
-    state.audio.player.pause();
-    
-    const prev = document.getElementById(`maud-${state.audio.playingId}`);
-    if (prev) prev.classList.remove('maud-playing');
-    state.audio = { player: null, playingId: null };
-  }
+  mushafStop();
   const audio = new Audio(getAyahUrl(GLOBAL, 2, 255));
-  state.audio = { player: audio, playingId: GLOBAL };
+  state.audio = { player: audio, playingId: GLOBAL, playingSurah: null, playingAyah: null, paused: false };
   if (btn) btn.innerHTML = '⏸ Stop';
-  audio.play().catch(() => { if (btn) btn.innerHTML = '▶ Play'; state.audio = { player: null, playingId: null }; });
-  audio.onended = () => { if (btn) btn.innerHTML = '▶ Play'; state.audio = { player: null, playingId: null }; };
-  audio.onerror = () => { if (btn) btn.innerHTML = '▶ Play'; state.audio = { player: null, playingId: null }; };
+  audio.play().catch(resetAK);
+  audio.onended = resetAK;
+  audio.onerror = resetAK;
 }
 
 // Attach an onended handler that plays the next ayah with zero overhead.
@@ -674,9 +677,11 @@ function playMushafAyah(globalNum, surahNum, ayahNum) {
     if (t) {
       _surahAudio.currentTime = t.from / 1000;
       if (state.audio.paused) {
-        _surahAudio.play().catch(() => {});
-        state.audio.paused = false;
-        updateMushafPlayerBar();
+        _surahAudio.play().then(() => {
+          state.audio.paused = false;
+          updateMushafPlayBtn(true);
+          updateMushafPlayerBar();
+        }).catch(() => {});
       }
       return;
     }
@@ -743,7 +748,7 @@ function mushafPlayAll(surahNum) {
     if (_surahBadge) _surahBadge.classList.add('maud-playing');
     state.audio = { player: _surahAudio, playingId: first.number, playingSurah: surahNum, playingAyah: 1, paused: false };
   } else {
-    state.audio = { player: _surahAudio, playingId: null, playingSurah: surahNum, playingAyah: 1, paused: false };
+    state.audio = { player: _surahAudio, playingId: -1, playingSurah: surahNum, playingAyah: 1, paused: false };
   }
 
   _surahAudio.play().catch(() => mushafStop());
@@ -803,14 +808,17 @@ function toggleMushafPlayback() {
   const player = _surahAudio || state.audio.player;
   if (!player) return;
   if (state.audio.paused) {
-    player.play().catch(() => {});
-    state.audio.paused = false;
+    player.play().then(() => {
+      state.audio.paused = false;
+      updateMushafPlayBtn(true);
+      updateMushafPlayerBar();
+    }).catch(() => {});
   } else {
     player.pause();
     state.audio.paused = true;
+    updateMushafPlayBtn(true);
+    updateMushafPlayerBar();
   }
-  updateMushafPlayBtn(!!(state.audio.player || _surahAudio));
-  updateMushafPlayerBar();
 }
 
 function updateMushafPlayerBar() {
@@ -827,6 +835,8 @@ function updateMushafPlayerBar() {
     const btn = document.getElementById('mpb-pause-btn');
     if (btn) btn.textContent = state.audio.paused ? '▶' : '⏸';
   }
+  // Keep standalone mushaf-play-btn in sync
+  updateMushafPlayBtn(!!(state.audio.player || _surahAudio));
 }
 
 
