@@ -378,6 +378,7 @@ function filterSurahs(query) {
 }
 
 async function openSurah(n) {
+  mushafStop();
   document.getElementById('quran-list-view').style.display = 'none';
   const reader = document.getElementById('quran-reader');
   reader.style.display = 'block';
@@ -409,8 +410,6 @@ async function openSurah(n) {
       try { localStorage.setItem('huda_quran', JSON.stringify(state.quran.cache)); } catch(e) {}
     }
     if (state.quran.viewMode === 'page') {
-    // stop any playing audio when switching modes
-    if (state.audio.player) { state.audio.player.pause(); state.audio = { player: null, playingId: null }; }
       document.getElementById('reader-content').style.display = 'none';
       document.getElementById('mushaf-page').style.display = 'block';
       renderMushafPage(n, arData, enData);
@@ -432,7 +431,7 @@ async function openSurah(n) {
 function setQuranView(mode) {
   state.quran.viewMode = mode;
   state.quran.currentPage = 0;
-  if (state.audio.player) { state.audio.player.pause(); state.audio = { player: null, playingId: null }; }
+  mushafStop();
   document.getElementById('btn-verse')?.classList.toggle('active', mode === 'verse');
   document.getElementById('btn-page')?.classList.toggle('active', mode === 'page');
   const fontCtrl = document.getElementById('font-ctrl');
@@ -978,6 +977,7 @@ function flashAyah(el) {
 }
 
 function closeQuranReader() {
+  mushafStop();
   document.getElementById('quran-reader').style.display = 'none';
   document.getElementById('quran-list-view').style.display = 'block';
   state.quran.currentSurah = null;
