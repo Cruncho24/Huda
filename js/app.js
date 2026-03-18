@@ -6,15 +6,23 @@
 const RECITERS = [
   { id: 'ar.alafasy',        name: 'Mishary Alafasy',      qurancdnId: 7 },
   { id: 'ar.mahermuaiqly',   name: 'Maher Al-Muqaili' },
-  { id: 'ar.abdullahbasfar', name: 'Abdullah Basfar' },
+  {
+    id: 'ar.abdullahbasfar', name: 'Abdullah Basfar',
+    // cdn.islamic.network returns 403 for this reciter's per-ayah files
+    perAyahUrl: (s, a) => `https://everyayah.com/data/Abdullah_Basfar_192kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
+  },
   {
     id: 'ar.yasserdossari', name: 'Yasser Al-Dosari', qurancdnId: 97,
     surahUrl: n => `https://download.quranicaudio.com/quran/yasser_ad-dussary//${String(n).padStart(3,'0')}.mp3`,
+    // cdn.islamic.network returns 403 for this reciter's per-ayah files
+    perAyahUrl: (s, a) => `https://everyayah.com/data/Yasser_Ad-Dussary_128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
   },
 ];
 
 // Returns the per-ayah audio URL for the active reciter
 function getAyahUrl(globalNum, surahNum, ayahNum) {
+  const r = RECITERS.find(r => r.id === state.reciter);
+  if (r?.perAyahUrl) return r.perAyahUrl(surahNum, ayahNum);
   return `https://cdn.islamic.network/quran/audio/128/${state.reciter}/${globalNum}.mp3`;
 }
 
