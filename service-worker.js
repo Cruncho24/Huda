@@ -2,7 +2,7 @@
 // HUDA PWA — Service Worker
 // ============================================================
 
-const CACHE_NAME = 'huda-v23';
+const CACHE_NAME = 'huda-v27';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -109,6 +109,45 @@ async function cacheFirst(request) {
     throw e;
   }
 }
+
+// ── Reminder notifications ────────────────────────────────────
+const SW_REMINDERS = [
+  { title: 'Istighfar', body: 'أَسْتَغْفِرُ اللّٰه\nPause and seek Allah\'s forgiveness' },
+  { title: 'Subhan Allah', body: 'سُبْحَانَ اللّٰه\nGlory be to Allah — say it 33 times' },
+  { title: 'Alhamdulillah', body: 'الحَمْدُ لِلّٰه\nCount your blessings and praise Allah' },
+  { title: 'Allahu Akbar', body: 'اللّٰهُ أَكْبَر\nAllah is Greater than everything you worry about' },
+  { title: 'La ilaha illallah', body: 'لَا إِلٰهَ إِلَّا اللّٰه\nRenew your faith with the Shahada' },
+  { title: 'Salawat', body: 'اللّٰهُمَّ صَلِّ عَلَى مُحَمَّد\nSend blessings upon the Prophet ﷺ' },
+  { title: 'Dhikr', body: 'In the remembrance of Allah do hearts find rest — Quran 13:28' },
+  { title: 'Subhanallahi wa bihamdih', body: 'سُبْحَانَ اللّٰهِ وَبِحَمْدِهِ\nLight on the tongue, heavy on the scale' },
+];
+
+self.addEventListener('periodicsync', event => {
+  if (event.tag === 'huda-reminder') {
+    const msg = SW_REMINDERS[Math.floor(Math.random() * SW_REMINDERS.length)];
+    event.waitUntil(
+      self.registration.showNotification('Huda — ' + msg.title, {
+        body: msg.body,
+        icon: '/icons/icon-192.png',
+        badge: '/icons/icon-192.png',
+        tag: 'huda-reminder',
+        renotify: true,
+      })
+    );
+  }
+});
+
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const client of list) {
+        if ('focus' in client) return client.focus();
+      }
+      if (clients.openWindow) return clients.openWindow('/');
+    })
+  );
+});
 
 function stripQuery(url) {
   const u = new URL(url);

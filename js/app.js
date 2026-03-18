@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderHome();
   registerSW();
   setupInstallPrompt();
+  setupReminders();
   setInterval(rotateHadith, 12000);
 });
 
@@ -260,6 +261,8 @@ function renderHome() {
         <button class="ak-play-btn" id="ak-play" onclick="playAyatulKursi()">▶ Play</button>
       </div>
     </div>
+
+    ${renderReminderCard()}
 
     <div style="padding:8px 16px 12px">
       <div class="section-title">🌙 Your Islamic Companion</div>
@@ -1709,6 +1712,112 @@ function calculateZakat() {
     </div>
   `;
   document.getElementById('zakat-result').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── Reminders / Notifications ─────────────────────────────────
+const REMINDER_MSGS = [
+  { title: 'Istighfar', body: 'أَسْتَغْفِرُ اللّٰه\nPause and seek Allah\'s forgiveness' },
+  { title: 'Subhan Allah', body: 'سُبْحَانَ اللّٰه\nGlory be to Allah — say it 33 times' },
+  { title: 'Alhamdulillah', body: 'الحَمْدُ لِلّٰه\nCount your blessings and praise Allah' },
+  { title: 'Allahu Akbar', body: 'اللّٰهُ أَكْبَر\nAllah is Greater than everything you worry about' },
+  { title: 'La ilaha illallah', body: 'لَا إِلٰهَ إِلَّا اللّٰه\nRenew your faith with the Shahada' },
+  { title: 'Salawat', body: 'اللّٰهُمَّ صَلِّ عَلَى مُحَمَّد\nSend blessings upon the Prophet ﷺ' },
+  { title: 'Dhikr', body: 'In the remembrance of Allah do hearts find rest — Quran 13:28' },
+  { title: 'Subhanallahi wa bihamdih', body: 'سُبْحَانَ اللّٰهِ وَبِحَمْدِهِ\nBeloved to Allah — light on the tongue, heavy on the scale' },
+];
+
+function renderReminderCard() {
+  const enabled = localStorage.getItem('huda_notifs') === '1' && Notification.permission === 'granted';
+  const interval = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
+  const supported = 'Notification' in window;
+  if (!supported) return '';
+  return `
+    <div class="reminder-card">
+      <div class="reminder-card-top">
+        <div>
+          <div class="reminder-card-title">🔔 Daily Reminders</div>
+          <div class="reminder-card-sub">${enabled ? `Every ${interval}h · Dhikr, Istighfar & Salawat` : 'Gentle reminders throughout your day'}</div>
+        </div>
+        ${enabled
+          ? `<button class="reminder-off-btn" onclick="disableReminders()">Turn off</button>`
+          : `<button class="reminder-on-btn" onclick="enableReminders()">Enable</button>`
+        }
+      </div>
+      ${enabled ? `
+        <div class="reminder-intervals">
+          ${[1,2,3,4].map(h => `
+            <button class="ri-btn ${interval === h ? 'active' : ''}" onclick="setReminderInterval(${h})">${h}h</button>
+          `).join('')}
+        </div>` : ''}
+    </div>`;
+}
+
+let _reminderInterval = null;
+
+function setupReminders() {
+  if (localStorage.getItem('huda_notifs') !== '1') return;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  scheduleReminderInterval();
+  registerPeriodicSync();
+}
+
+function scheduleReminderInterval() {
+  if (_reminderInterval) clearInterval(_reminderInterval);
+  const hours = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
+  _reminderInterval = setInterval(fireReminder, hours * 3600000);
+}
+
+function fireReminder() {
+  if (Notification.permission !== 'granted') return;
+  const msg = REMINDER_MSGS[Math.floor(Math.random() * REMINDER_MSGS.length)];
+  navigator.serviceWorker?.ready.then(reg => {
+    reg.showNotification('Huda — ' + msg.title, {
+      body: msg.body,
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-192.png',
+      tag: 'huda-reminder',
+      renotify: true,
+    });
+  }).catch(() => {
+    new Notification('Huda — ' + msg.title, { body: msg.body, icon: '/icons/icon-192.png' });
+  });
+}
+
+function registerPeriodicSync() {
+  const hours = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
+  navigator.serviceWorker?.ready.then(reg => {
+    if ('periodicSync' in reg) {
+      reg.periodicSync.register('huda-reminder', { minInterval: hours * 3600000 }).catch(() => {});
+    }
+  });
+}
+
+async function enableReminders() {
+  if (!('Notification' in window)) return;
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    localStorage.setItem('huda_notifs', '1');
+    setupReminders();
+  } else {
+    localStorage.setItem('huda_notifs', '0');
+  }
+  renderHome();
+}
+
+function disableReminders() {
+  localStorage.setItem('huda_notifs', '0');
+  if (_reminderInterval) { clearInterval(_reminderInterval); _reminderInterval = null; }
+  navigator.serviceWorker?.ready.then(reg => {
+    if ('periodicSync' in reg) reg.periodicSync.unregister('huda-reminder').catch(() => {});
+  });
+  renderHome();
+}
+
+function setReminderInterval(h) {
+  localStorage.setItem('huda_notifs_interval', h);
+  scheduleReminderInterval();
+  registerPeriodicSync();
+  renderHome();
 }
 
 // ── PWA ───────────────────────────────────────────────────────
