@@ -2,6 +2,18 @@
    HUDA PWA — App Logic
    ============================================================ */
 
+// ── Security: HTML escape ────────────────────────────────────
+// Escapes untrusted strings before inserting into innerHTML.
+// Use on any value sourced from external APIs or localStorage.
+function esc(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
+}
+
 // ── Reciters ──────────────────────────────────────────────────
 const RECITERS = [
   { id: 'ar.alafasy',        name: 'Mishary Alafasy',      qurancdnId: 7 },
@@ -44,21 +56,22 @@ function getSurahAudioUrl(surahNum) {
 // ── State ────────────────────────────────────────────────────
 const state = {
   activeTab: 'home',
-  dhikrCounts: JSON.parse(localStorage.getItem('huda_dhikr') || '{}'),
+  dhikrCounts: (() => { try { return JSON.parse(localStorage.getItem('huda_dhikr') || '{}'); } catch(e) { return {}; } })(),
   hadithIndex: 0,
   darkMode: localStorage.getItem('huda_dark') === '1',
-  fontSize: parseInt(localStorage.getItem('huda_fontsize') || '24'),
-  bookmarks: JSON.parse(localStorage.getItem('huda_bookmarks') || '[]'),
-  surahBookmarks: JSON.parse(localStorage.getItem('huda_surah_bm') || '[]'),
+  fontSize: parseInt(localStorage.getItem('huda_fontsize') || '24') || 24,
+  bookmarks: (() => { try { return JSON.parse(localStorage.getItem('huda_bookmarks') || '[]'); } catch(e) { return []; } })(),
+  surahBookmarks: (() => { try { return JSON.parse(localStorage.getItem('huda_surah_bm') || '[]'); } catch(e) { return []; } })(),
   reciter: localStorage.getItem('huda_reciter') || 'ar.alafasy',
   audio: { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false },
   prayer: {
     times: null, location: null, qibla: null, city: '',
     countdownInterval: null, ramadanInterval: null, homeInterval: null,
+    compassOpen: false,
   },
   quran: {
     currentSurah: null,
-    cache: JSON.parse(localStorage.getItem('huda_quran') || '{}'),
+    cache: (() => { try { return JSON.parse(localStorage.getItem('huda_quran') || '{}'); } catch(e) { return {}; } })(),
     filteredSurahs: [...SURAHS],
     viewMode: 'verse',
     currentPage: 0,
@@ -79,7 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
   checkDhikrReset();
   // Pre-load cached prayer times so home live cards appear immediately
   const _cp = localStorage.getItem('huda_prayer');
-  if (_cp) { try { const p = JSON.parse(_cp); state.prayer.times = p.times; state.prayer.city = p.city || ''; state.prayer.qibla = p.qibla; } catch(e) {} }
+  if (_cp) { try { const p = JSON.parse(_cp); state.prayer.times = p.times; state.prayer.city = p.city || ''; state.prayer.qibla = p.qibla; if (p.lat && p.lng) state.prayer.location = { lat: p.lat, lng: p.lng }; } catch(e) {} }
   setupNav();
   renderHome();
   fetchAndCacheHijri(new Date());
@@ -229,7 +242,7 @@ function getHijriSync(date) {
   const key = _hijriDateKey(date);
   if (_hijriCacheMem && _hijriCacheMem.key === key) return _hijriCacheMem.hijri;
   const stored = localStorage.getItem('huda_hijri_' + key);
-  if (stored) { const h = JSON.parse(stored); _hijriCacheMem = { key, hijri: h }; return h; }
+  if (stored) { try { const h = JSON.parse(stored); _hijriCacheMem = { key, hijri: h }; return h; } catch(e) {} }
   return toHijri(date);
 }
 
@@ -259,7 +272,7 @@ function renderHome() {
   const hijriStr = `${hijri.day} ${hijri.monthName} ${hijri.year} AH`;
   const isRamadan = hijri.month === 9;
   const h = HADITHS[state.hadithIndex % HADITHS.length];
-  const lastRead = JSON.parse(localStorage.getItem('huda_last_read') || 'null');
+  const lastRead = (() => { try { return JSON.parse(localStorage.getItem('huda_last_read') || 'null'); } catch(e) { return null; } })();
 
   // Ramadan countdown (to Iftar = Maghrib, or Suhoor = Fajr)
   let ramadanCard = '';
@@ -298,8 +311,8 @@ function renderHome() {
     state.prayer.homeInterval = setInterval(() => {
       const elN = document.getElementById('home-notif-cd');
       if (!elN) { clearInterval(state.prayer.homeInterval); state.prayer.homeInterval = null; return; }
-      const lastR = parseInt(localStorage.getItem('huda_last_reminder') || '0');
-      const hoursR = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
+      const lastR = parseInt(localStorage.getItem('huda_last_reminder') || '0') || 0;
+      const hoursR = parseInt(localStorage.getItem('huda_notifs_interval') || '2') || 2;
       elN.textContent = fmtMs((lastR + hoursR * 3600000) - Date.now());
     }, 1000);
   }
@@ -329,7 +342,7 @@ function renderHome() {
       <div class="continue-icon">📖</div>
       <div class="continue-info">
         <div class="continue-label">Continue Reading</div>
-        <div class="continue-name">${lastRead.arabic} — ${lastRead.name}</div>
+        <div class="continue-name">${esc(lastRead.arabic)} — ${esc(lastRead.name)}</div>
       </div>
       <div style="color:var(--gray-300);font-size:20px">›</div>
     </div>` : ''}
@@ -346,7 +359,7 @@ function renderHome() {
           <div class="bookmark-badge">${b.s}:${b.a}</div>
           <div class="bookmark-info">
             <div class="bookmark-surah">${s ? s[1] + ' — ' + s[2] : 'Surah ' + b.s}</div>
-            <div class="bookmark-preview">${b.ar}</div>
+            <div class="bookmark-preview">${esc(b.ar)}</div>
           </div>
           <button class="bookmark-del" onclick="event.stopPropagation();removeBookmark(${b.s},${b.a})" title="Remove">✕</button>
         </div>`;
@@ -1002,7 +1015,7 @@ function toggleMushafPlayback() {
   } else {
     player.pause();
     state.audio.paused = true;
-    updateMushafPlayBtn(true);
+    updateMushafPlayBtn(false);
     updateMushafPlayerBar();
   }
 }
@@ -1080,8 +1093,8 @@ function renderSurahContent(n, arData, enData) {
     const displayText = (hasBism && a.numberInSurah === 1) ? stripBismillah(a.text) : a.text;
     return `
     <div class="ayah" data-global="${a.number}" data-surah="${n}" data-ayah="${a.numberInSurah}">
-      <div class="ayah-arabic"><span class="ayah-num-badge">${a.numberInSurah}</span> ${displayText}</div>
-      <div class="ayah-english">${enData.ayahs[i].text}</div>
+      <div class="ayah-arabic"><span class="ayah-num-badge">${a.numberInSurah}</span> ${esc(displayText)}</div>
+      <div class="ayah-english">${esc(enData.ayahs[i]?.text ?? '')}</div>
       <div class="ayah-actions">
         <button class="ayah-btn" id="aud-${a.number}" onclick="playAyah(${a.number},${n},${a.numberInSurah})" title="Play">▶</button>
         <button class="ayah-btn ${isBookmarked(n, a.numberInSurah) ? 'bookmarked' : ''}" id="bm-${n}-${a.numberInSurah}"
@@ -1237,11 +1250,13 @@ function renderPrayer() {
     `;
     const cached = localStorage.getItem('huda_prayer');
     if (cached) {
-      const p = JSON.parse(cached);
-      state.prayer.times = p.times;
-      state.prayer.city = p.city;
-      state.prayer.qibla = p.qibla;
-      renderPrayerTimes();
+      try {
+        const p = JSON.parse(cached);
+        state.prayer.times = p.times;
+        state.prayer.city = p.city;
+        state.prayer.qibla = p.qibla;
+        renderPrayerTimes();
+      } catch(e) {}
     }
     return;
   }
@@ -1283,26 +1298,29 @@ async function requestLocation() {
 
 function calcPrayerTimes(lat, lng) {
   if (typeof adhan === 'undefined') { renderPrayerFallback(); return; }
+  state.prayer.location = { lat, lng };
   const coords = new adhan.Coordinates(lat, lng);
   const params = adhan.CalculationMethod.MuslimWorldLeague();
   params.madhab = adhan.Madhab.Shafi;
-  const date = new Date();
-  const pt = new adhan.PrayerTimes(coords, date, params);
+  const now = new Date();
+  let pt = new adhan.PrayerTimes(coords, now, params);
+  // If all of today's prayer times have passed (e.g. after Isha), use tomorrow's
+  const allTodayPast = [pt.fajr, pt.sunrise, pt.dhuhr, pt.asr, pt.maghrib, pt.isha].every(t => t < now);
+  if (allTodayPast) {
+    const tomorrow = new Date(now.getTime() + 86400000);
+    pt = new adhan.PrayerTimes(coords, tomorrow, params);
+  }
   state.prayer.times = {
-    fajr: pt.fajr,
-    sunrise: pt.sunrise,
-    dhuhr: pt.dhuhr,
-    asr: pt.asr,
-    maghrib: pt.maghrib,
-    isha: pt.isha,
+    fajr: pt.fajr, sunrise: pt.sunrise, dhuhr: pt.dhuhr,
+    asr: pt.asr, maghrib: pt.maghrib, isha: pt.isha,
   };
   localStorage.setItem('huda_prayer', JSON.stringify({
     times: state.prayer.times,
     city: state.prayer.city,
-    qibla: state.prayer.qibla
+    qibla: state.prayer.qibla,
+    lat, lng,
   }));
   renderPrayerTimes();
-  // Update home live cards now that times are fresh
   if (state.activeTab === 'home') renderHome();
 }
 
@@ -1320,13 +1338,89 @@ function renderPrayerTimes() {
   const times = state.prayer.times;
   const fmt = t => new Date(t).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12: true });
 
-  // If all times are in the past, cached times are stale — recalculate
+  // When all cached times are in the past the data is stale. Show a "Updating"
+  // state, kick off a background recalculation, and return early.
+  // Never start the countdown with a past time — that creates an infinite
+  // re-render loop (diff<=0 → setTimeout(renderPrayerTimes) → repeat) which
+  // also destroys the Qibla compass DOM every second.
   const allPast = PRAYER_NAMES.every(p => new Date(times[p.key]) < now);
-  if (allPast && navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(pos => {
-      calcPrayerTimes(pos.coords.latitude, pos.coords.longitude);
-    }, () => {});
-    return;
+  if (allPast) {
+    // If we have cached coords, recalculate immediately (adhan is local — no network needed).
+    // calcPrayerTimes will use tomorrow's date if all today's times are past, then
+    // call renderPrayerTimes again with fresh data, so we return right after.
+    if (state.prayer.location) {
+      calcPrayerTimes(state.prayer.location.lat, state.prayer.location.lng);
+      return;
+    }
+    // No cached coords — need a fresh geolocation fix
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        pos => calcPrayerTimes(pos.coords.latitude, pos.coords.longitude),
+        () => {}
+      );
+    }
+    const tab = document.getElementById('tab-prayer');
+    tab.innerHTML = `
+      <div class="prayer-hero" style="padding-top:calc(24px + env(safe-area-inset-top,0px))">
+        <div class="next-prayer-label">Updating prayer times…</div>
+        <div class="next-prayer-name" style="font-size:18px;opacity:0.85">Please wait</div>
+        <div class="countdown" style="font-size:24px">—</div>
+        <div class="location-label">📍 ${esc(state.prayer.city || 'Your Location')}</div>
+      </div>
+      <div class="prayer-list">
+        ${PRAYER_NAMES.map(p => {
+          const t = new Date(times[p.key]);
+          return `
+            <div class="prayer-item past-prayer">
+              <div class="prayer-icon">${p.icon}</div>
+              <div>
+                <div class="prayer-name">${p.en}</div>
+                <div class="prayer-arabic-name">${p.ar}</div>
+              </div>
+              <div style="margin-left:auto">
+                <div class="prayer-time-text">${fmt(t)}</div>
+              </div>
+            </div>`;
+        }).join('')}
+      </div>
+      ${state.prayer.qibla !== null ? `
+      <div class="qibla-card" id="qibla-section">
+        <div class="qibla-top">
+          <div class="qibla-icon-wrap">🕋</div>
+          <div class="qibla-info">
+            <h4>Qibla Direction</h4>
+            <p>${Math.round(state.prayer.qibla)}° from North</p>
+          </div>
+          <button class="qibla-btn" id="qibla-open-btn" onclick="openQiblaCompass()">Find Qibla</button>
+        </div>
+        <div class="qibla-compass-wrap" id="qibla-compass-wrap" style="display:none">
+          <div class="compass-outer">
+            <svg viewBox="0 0 240 240" width="240" height="240">
+              <circle cx="120" cy="120" r="116" fill="none" stroke="rgba(5,150,105,0.15)" stroke-width="1.5"/>
+              <polygon points="120,2 127,17 113,17" fill="#059669"/>
+              <g id="compass-disc" style="transform-origin:120px 120px">
+                <circle cx="120" cy="120" r="110" fill="rgba(5,150,105,0.04)" stroke="rgba(5,150,105,0.2)" stroke-width="1.5"/>
+                ${[0,45,90,135,180,225,270,315].map(a=>{const r1=98,r2=108,rad=(a-90)*Math.PI/180;return `<line x1="${120+r1*Math.cos(rad)}" y1="${120+r1*Math.sin(rad)}" x2="${120+r2*Math.cos(rad)}" y2="${120+r2*Math.sin(rad)}" stroke="rgba(5,150,105,0.4)" stroke-width="1.5"/>`;}).join('')}
+                ${[15,30,60,75,105,120,150,165,195,210,240,255,285,300,330,345].map(a=>{const r1=103,r2=108,rad=(a-90)*Math.PI/180;return `<line x1="${120+r1*Math.cos(rad)}" y1="${120+r1*Math.sin(rad)}" x2="${120+r2*Math.cos(rad)}" y2="${120+r2*Math.sin(rad)}" stroke="rgba(5,150,105,0.2)" stroke-width="1"/>`;}).join('')}
+                <text x="120" y="22" text-anchor="middle" font-size="15" font-weight="800" fill="#059669">N</text>
+                <text x="218" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="rgba(5,150,105,0.6)">E</text>
+                <text x="120" y="226" text-anchor="middle" font-size="13" font-weight="600" fill="rgba(5,150,105,0.6)">S</text>
+                <text x="22" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="rgba(5,150,105,0.6)">W</text>
+                <g transform="rotate(${Math.round(state.prayer.qibla)}, 120, 120)">
+                  <line x1="120" y1="28" x2="120" y2="55" stroke="#059669" stroke-width="3" stroke-linecap="round"/>
+                  <text x="120" y="27" text-anchor="middle" font-size="18" dominant-baseline="auto">🕋</text>
+                </g>
+              </g>
+              <circle cx="120" cy="120" r="7" fill="#059669"/>
+              <circle cx="120" cy="120" r="3.5" fill="white"/>
+            </svg>
+          </div>
+          <div class="qibla-status" id="qibla-status">Calibrating…</div>
+          <button class="qibla-stop-btn" onclick="stopQiblaCompass()">Close Compass</button>
+        </div>
+      </div>` : ''}
+    `;
+    return; // no countdown — fresh render comes when geolocation resolves
   }
 
   let nextPrayer = null, nextTime = null;
@@ -1346,7 +1440,7 @@ function renderPrayerTimes() {
       <div class="next-prayer-time">${fmt(nextTime)}</div>
       <div class="countdown-label">Time Remaining</div>
       <div class="countdown" id="prayer-countdown">00:00:00</div>
-      <div class="location-label">📍 ${state.prayer.city}</div>
+      <div class="location-label">📍 ${esc(state.prayer.city)}</div>
     </div>
     <div class="prayer-list">
       ${PRAYER_NAMES.map(p => {
@@ -1423,6 +1517,13 @@ function renderPrayerTimes() {
   if (state.prayer.countdownInterval) clearInterval(state.prayer.countdownInterval);
   state.prayer.countdownInterval = setInterval(() => updateCountdown(nextTime), 1000);
   updateCountdown(nextTime);
+
+  // If the compass was open before this re-render, restore it without re-requesting permission
+  if (state.prayer.compassOpen) {
+    const wrap = document.getElementById('qibla-compass-wrap');
+    const btn = document.getElementById('qibla-open-btn');
+    if (wrap) { wrap.style.display = 'block'; if (btn) btn.style.display = 'none'; _startQiblaListener(); }
+  }
 }
 
 function updateCountdown(target) {
@@ -1432,8 +1533,8 @@ function updateCountdown(target) {
   if (diff <= 0) {
     el.textContent = '00:00:00';
     clearInterval(state.prayer.countdownInterval);
-    // Re-render after a short delay to avoid recursion (picks up new prayer)
-    setTimeout(renderPrayerTimes, 1000);
+    // Re-render immediately to pick up the next prayer (avoids 1s 00:00:00 flash)
+    setTimeout(renderPrayerTimes, 0);
     return;
   }
   const h = Math.floor(diff / 3600000);
@@ -1456,6 +1557,9 @@ function calcQibla(lat, lng) {
 // ── Qibla Compass ─────────────────────────────────────────────
 let _qiblaListener = null;
 let _qiblaGotAbsolute = false; // true once we receive an absolute-referenced event
+let _qiblaRafId = null;
+let _qiblaActive = false;
+let _noSensorTimeout = null;
 
 function openQiblaCompass() {
   const wrap = document.getElementById('qibla-compass-wrap');
@@ -1463,6 +1567,7 @@ function openQiblaCompass() {
   if (!wrap) return;
 
   const start = () => {
+    state.prayer.compassOpen = true;
     wrap.style.display = 'block';
     if (btn) btn.style.display = 'none';
     _startQiblaListener();
@@ -1484,79 +1589,126 @@ function openQiblaCompass() {
   }
 }
 
+// Tilt-compensated compass heading from DeviceOrientationEvent angles.
+// Works correctly whether the phone is lying flat or held vertically.
+// Based on W3C DeviceOrientation working group notes.
+function _tiltCompensatedHeading(alpha, beta, gamma) {
+  const r = Math.PI / 180;
+  const cX = Math.cos(beta * r), sX = Math.sin(beta * r);
+  const cY = Math.cos(gamma * r), sY = Math.sin(gamma * r);
+  const cZ = Math.cos(alpha * r), sZ = Math.sin(alpha * r);
+  const Vx = -cZ * sY - sZ * sX * cY;
+  const Vy = -sZ * sY + cZ * sX * cY;
+  const h = Math.atan2(Vx, Vy) * (180 / Math.PI);
+  return (h + 360) % 360;
+}
+
 function _startQiblaListener() {
-  // Clean up old listener only — don't touch DOM (caller manages visibility)
+  // Clean up any previous listener and RAF loop
   if (_qiblaListener) {
     window.removeEventListener('deviceorientationabsolute', _qiblaListener, true);
     window.removeEventListener('deviceorientation', _qiblaListener, true);
     _qiblaListener = null;
   }
+  if (_qiblaRafId) { cancelAnimationFrame(_qiblaRafId); _qiblaRafId = null; }
+
   _qiblaGotAbsolute = false;
+  _qiblaActive = true;
   const qibla = state.prayer.qibla;
 
-  // Smoothing + shortest-path state
   let smoothedHeading = null;
   let currentDiscDeg = null;
 
+  const disc = document.getElementById('compass-disc');
+  const status = document.getElementById('qibla-status');
+  if (!disc) return;
+
+  // Timeout: if no sensor events after 3s, show "not available" (desktop/Mac)
+  if (_noSensorTimeout) { clearTimeout(_noSensorTimeout); _noSensorTimeout = null; }
+  _noSensorTimeout = setTimeout(() => {
+    if (smoothedHeading === null && status && status.isConnected) {
+      status.textContent = 'No compass sensor detected on this device';
+      status.className = 'qibla-status qibla-off';
+    }
+  }, 3000);
+
+  // RAF render loop — decouples sensor reads from DOM writes
+  function render() {
+    if (!_qiblaActive || !disc.isConnected) return;
+    if (smoothedHeading !== null) {
+      disc.style.transform = `rotate(${currentDiscDeg}deg)`;
+      const diff = Math.abs(((((qibla - smoothedHeading) % 360) + 540) % 360) - 180);
+      if (status) {
+        if (diff <= 5) {
+          status.textContent = '✅ Facing the Qibla';
+          status.className = 'qibla-status qibla-on';
+        } else {
+          const turn = ((qibla - smoothedHeading) % 360 + 360) % 360;
+          status.textContent = `${Math.round(diff)}° off — turn ${turn < 180 ? 'right' : 'left'}`;
+          status.className = 'qibla-status qibla-off';
+        }
+      }
+    }
+    _qiblaRafId = requestAnimationFrame(render);
+  }
+  _qiblaRafId = requestAnimationFrame(render);
+
+  // Sensor handler — only updates state, never touches the DOM
   _qiblaListener = (e) => {
     let rawHeading;
+
     if (e.webkitCompassHeading != null) {
+      // iOS: already tilt-compensated magnetic north bearing (clockwise from N)
       rawHeading = e.webkitCompassHeading;
-    } else if (e.alpha != null) {
-      if (e.absolute) _qiblaGotAbsolute = true;
-      if (!e.absolute && _qiblaGotAbsolute) return;
-      rawHeading = (360 - e.alpha) % 360;
+
+    } else if (e.alpha != null && e.beta != null && e.gamma != null) {
+      // Android / others: require absolute reference (relative headings are useless)
+      // Trust deviceorientationabsolute event type even if e.absolute is false
+      // (some Chromium versions fire it as false during calibration)
+      const isAbsolute = e.absolute || e.type === 'deviceorientationabsolute';
+      if (isAbsolute) {
+        _qiblaGotAbsolute = true;
+      } else if (_qiblaGotAbsolute) {
+        return; // already have absolute source — ignore non-absolute events
+      } else {
+        return; // no absolute data yet — don't use relative orientation
+      }
+      // Apply tilt compensation so the compass works when phone is held vertically
+      rawHeading = _tiltCompensatedHeading(e.alpha, e.beta, e.gamma);
+
     } else return;
 
-    // Exponential moving average with shortest-path delta (α=0.3 — responsive but smooth)
+    if (_noSensorTimeout) { clearTimeout(_noSensorTimeout); _noSensorTimeout = null; }
+
+    // EMA smoothing (α=0.7) with shortest-path delta
     if (smoothedHeading === null) {
       smoothedHeading = rawHeading;
+      currentDiscDeg = -rawHeading;
     } else {
       let delta = rawHeading - smoothedHeading;
       if (delta > 180) delta -= 360;
       if (delta < -180) delta += 360;
-      smoothedHeading = (smoothedHeading + 0.5 * delta + 360) % 360;
-    }
+      smoothedHeading = (smoothedHeading + 0.7 * delta + 360) % 360;
 
-    const disc = document.getElementById('compass-disc');
-    const status = document.getElementById('qibla-status');
-    if (!disc) { stopQiblaCompass(); return; }
-
-    // Disc rotates by -heading so N always points to true north on screen.
-    // The Kaaba marker painted at qibla° on the disc naturally aligns with
-    // the fixed forward indicator (top triangle) when heading == qibla.
-    const targetDiscDeg = -smoothedHeading;
-    if (currentDiscDeg === null) {
-      currentDiscDeg = targetDiscDeg;
-    } else {
-      let delta = targetDiscDeg - (currentDiscDeg % 360);
-      if (delta > 180) delta -= 360;
-      if (delta < -180) delta += 360;
-      currentDiscDeg += delta;
-    }
-    disc.style.transform = `rotate(${currentDiscDeg}deg)`;
-
-    // How far off Qibla the user is facing
-    const diff = Math.abs(((((qibla - smoothedHeading) % 360) + 540) % 360) - 180);
-    if (status) {
-      if (diff <= 5) {
-        status.textContent = '✅ Facing the Qibla';
-        status.className = 'qibla-status qibla-on';
-      } else {
-        const turn = ((qibla - smoothedHeading) % 360 + 360) % 360;
-        status.textContent = `${Math.round(diff)}° off — turn ${turn < 180 ? 'right' : 'left'}`;
-        status.className = 'qibla-status qibla-off';
-      }
+      const targetDiscDeg = -smoothedHeading;
+      let discDelta = targetDiscDeg - (currentDiscDeg % 360);
+      if (discDelta > 180) discDelta -= 360;
+      if (discDelta < -180) discDelta += 360;
+      currentDiscDeg += discDelta;
     }
   };
 
-  // Listen to both — deviceorientationabsolute (Chrome/Firefox Android) gives e.absolute=true,
-  // deviceorientation covers iOS (webkitCompassHeading) and fallback browsers (DuckDuckGo etc.)
+  // deviceorientationabsolute — Chrome/Firefox Android (always absolute=true)
+  // deviceorientation — iOS (webkitCompassHeading) + fallback
   window.addEventListener('deviceorientationabsolute', _qiblaListener, true);
   window.addEventListener('deviceorientation', _qiblaListener, true);
 }
 
 function stopQiblaCompass() {
+  state.prayer.compassOpen = false;
+  _qiblaActive = false;
+  if (_noSensorTimeout) { clearTimeout(_noSensorTimeout); _noSensorTimeout = null; }
+  if (_qiblaRafId) { cancelAnimationFrame(_qiblaRafId); _qiblaRafId = null; }
   if (_qiblaListener) {
     window.removeEventListener('deviceorientationabsolute', _qiblaListener, true);
     window.removeEventListener('deviceorientation', _qiblaListener, true);
