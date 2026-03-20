@@ -1732,6 +1732,7 @@ function stopQiblaCompass() {
 
 // ── DHIKR TAB ─────────────────────────────────────────────────
 function renderDhikr() {
+  checkDhikrReset(); // reset counts if day has rolled over since last render
   const total = Object.values(state.dhikrCounts).reduce((a, b) => a + b, 0);
   const tab = document.getElementById('tab-dhikr');
   tab.innerHTML = `
@@ -2426,7 +2427,7 @@ function renderReminderCard() {
   }
 
   const enabled = localStorage.getItem('huda_notifs') === '1' && perm === 'granted';
-  const interval = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
+  const interval = parseInt(localStorage.getItem('huda_notifs_interval') || '2') || 2;
   const last = parseInt(localStorage.getItem('huda_last_reminder') || '0');
   const nextMs = last ? Math.max(0, (last + interval * 3600000) - Date.now()) : 0;
   const nextStr = enabled && last ? (nextMs < 60000 ? 'any moment' : `in ${Math.ceil(nextMs/60000)}m`) : '';
@@ -2529,30 +2530,32 @@ async function _syncSwTimestamp() {
   } catch(e) {}
 }
 
-// Check if a reminder is overdue and fire it
-function checkMissedReminder() {
+// Check if a reminder is overdue and fire it.
+// Async so we sync the SW's last-fired timestamp first — prevents double-notification
+// when both the SW timer and the foreground 60s poller expire at the same wall-clock time.
+async function checkMissedReminder() {
   if (localStorage.getItem('huda_notifs') !== '1') return;
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  await _syncSwTimestamp(); // pick up SW's last-fired before checking
   const last = parseInt(localStorage.getItem('huda_last_reminder') || '0');
   if (!last) {
     localStorage.setItem('huda_last_reminder', Date.now().toString());
     _swScheduleReminder();
     return;
   }
-  const hours = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
+  const hours = parseInt(localStorage.getItem('huda_notifs_interval') || '2') || 2;
   if (Date.now() - last >= hours * 3600000) {
     fireReminder();
   }
 }
 
-// Debounced version for event listeners — prevents stacking on app open
+// Debounced version for event listeners — prevents stacking on rapid app open/focus
 function _debouncedCheck() {
   if (_checkPending) return;
   _checkPending = true;
-  setTimeout(async () => {
+  setTimeout(() => {
     _checkPending = false;
-    await _syncSwTimestamp();
-    checkMissedReminder();
+    checkMissedReminder(); // checkMissedReminder handles _syncSwTimestamp itself
   }, 800);
 }
 
