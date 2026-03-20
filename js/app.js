@@ -2194,15 +2194,33 @@ const REMINDER_MSGS = [
 ];
 
 function renderReminderCard() {
+  const ua = navigator.userAgent || '';
+  const isDDG = /DuckDuckGo/i.test(ua);
   const perm = 'Notification' in window ? Notification.permission : 'unsupported';
+
+  // DuckDuckGo and browsers with no Notification API — show explanation, not a blank card
+  if (isDDG || perm === 'unsupported') {
+    return `
+    <div class="reminder-card">
+      <div class="reminder-card-top">
+        <div>
+          <div class="reminder-card-title">🔔 Daily Reminders</div>
+          <div class="reminder-card-sub" style="color:var(--gray-400)">
+            ${isDDG
+              ? 'DuckDuckGo blocks notifications — open in Chrome for reminders'
+              : 'Notifications not supported in this browser'}
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
   const enabled = localStorage.getItem('huda_notifs') === '1' && perm === 'granted';
   const interval = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
-  if (perm === 'unsupported') return '';
   const last = parseInt(localStorage.getItem('huda_last_reminder') || '0');
   const nextMs = last ? Math.max(0, (last + interval * 3600000) - Date.now()) : 0;
   const nextStr = enabled && last ? (nextMs < 60000 ? 'any moment' : `in ${Math.ceil(nextMs/60000)}m`) : '';
   const permDenied = perm === 'denied';
-  const ua = navigator.userAgent || '';
   const isMac = /Mac/.test(navigator.platform || ua) && !/iPhone|iPad/.test(ua);
   const isAndroid = /Android/.test(ua);
   const blockedHint = isMac
@@ -2379,7 +2397,14 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) _deb
 window.addEventListener('pageshow', e => { if (e.persisted) _debouncedCheck(); });
 
 async function enableReminders() {
-  if (!('Notification' in window)) return;
+  if (!('Notification' in window)) {
+    alert('Your browser doesn\'t support web notifications. Try opening Huda in Chrome.');
+    return;
+  }
+  if (/DuckDuckGo/i.test(navigator.userAgent || '')) {
+    alert('DuckDuckGo blocks web notifications.\n\nTo get reminders, open Huda in Chrome instead.');
+    return;
+  }
   const perm = await Notification.requestPermission();
   if (perm === 'granted') {
     localStorage.setItem('huda_notifs', '1');
