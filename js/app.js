@@ -1379,19 +1379,39 @@ function renderPrayerTimes() {
       </div>
       <div class="qibla-compass-wrap" id="qibla-compass-wrap" style="display:none">
         <div class="compass-outer">
-          <svg id="qibla-svg" viewBox="0 0 200 200" width="200" height="200">
-            <circle cx="100" cy="100" r="94" fill="rgba(5,150,105,0.06)" stroke="rgba(5,150,105,0.25)" stroke-width="1.5"/>
-            <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(5,150,105,0.1)" stroke-width="1"/>
-            <text x="100" y="13" text-anchor="middle" font-size="13" font-weight="800" fill="#059669">N</text>
-            <text x="190" y="105" text-anchor="middle" font-size="11" fill="rgba(0,0,0,0.35)">E</text>
-            <text x="100" y="197" text-anchor="middle" font-size="11" fill="rgba(0,0,0,0.35)">S</text>
-            <text x="10" y="105" text-anchor="middle" font-size="11" fill="rgba(0,0,0,0.35)">W</text>
-            <g id="qibla-needle" style="transform-origin:100px 100px">
-              <polygon points="100,16 108,96 100,112 92,96" fill="#059669" opacity="0.92"/>
-              <polygon points="100,112 108,106 100,178 92,106" fill="rgba(0,0,0,0.18)"/>
-              <circle cx="100" cy="100" r="8" fill="white" stroke="#059669" stroke-width="2.5"/>
-              <text x="100" y="11" text-anchor="middle" font-size="10">🕋</text>
+          <svg viewBox="0 0 240 240" width="240" height="240">
+            <!-- Fixed outer ring -->
+            <circle cx="120" cy="120" r="116" fill="none" stroke="rgba(5,150,105,0.15)" stroke-width="1.5"/>
+            <!-- Fixed forward indicator (green triangle at top = direction you're facing) -->
+            <polygon points="120,2 127,17 113,17" fill="#059669"/>
+            <!-- Rotating compass disc -->
+            <g id="compass-disc" style="transform-origin:120px 120px">
+              <!-- Disc face -->
+              <circle cx="120" cy="120" r="110" fill="rgba(5,150,105,0.04)" stroke="rgba(5,150,105,0.2)" stroke-width="1.5"/>
+              <!-- Major tick marks every 45° -->
+              ${[0,45,90,135,180,225,270,315].map(a => {
+                const r1=98, r2=108, rad=(a-90)*Math.PI/180;
+                return `<line x1="${120+r1*Math.cos(rad)}" y1="${120+r1*Math.sin(rad)}" x2="${120+r2*Math.cos(rad)}" y2="${120+r2*Math.sin(rad)}" stroke="rgba(5,150,105,0.4)" stroke-width="1.5"/>`;
+              }).join('')}
+              <!-- Minor tick marks every 15° -->
+              ${[15,30,60,75,105,120,150,165,195,210,240,255,285,300,330,345].map(a => {
+                const r1=103, r2=108, rad=(a-90)*Math.PI/180;
+                return `<line x1="${120+r1*Math.cos(rad)}" y1="${120+r1*Math.sin(rad)}" x2="${120+r2*Math.cos(rad)}" y2="${120+r2*Math.sin(rad)}" stroke="rgba(5,150,105,0.2)" stroke-width="1"/>`;
+              }).join('')}
+              <!-- Cardinal labels -->
+              <text x="120" y="22" text-anchor="middle" font-size="15" font-weight="800" fill="#059669">N</text>
+              <text x="218" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="rgba(5,150,105,0.6)">E</text>
+              <text x="120" y="226" text-anchor="middle" font-size="13" font-weight="600" fill="rgba(5,150,105,0.6)">S</text>
+              <text x="22" y="125" text-anchor="middle" font-size="13" font-weight="600" fill="rgba(5,150,105,0.6)">W</text>
+              <!-- Qibla marker on the disc at the Qibla bearing -->
+              <g transform="rotate(${Math.round(state.prayer.qibla)}, 120, 120)">
+                <line x1="120" y1="28" x2="120" y2="55" stroke="#059669" stroke-width="3" stroke-linecap="round"/>
+                <text x="120" y="27" text-anchor="middle" font-size="18" dominant-baseline="auto">🕋</text>
+              </g>
             </g>
+            <!-- Centre dot -->
+            <circle cx="120" cy="120" r="7" fill="#059669"/>
+            <circle cx="120" cy="120" r="3.5" fill="white"/>
           </svg>
         </div>
         <div class="qibla-status" id="qibla-status">Calibrating…</div>
@@ -1474,9 +1494,9 @@ function _startQiblaListener() {
   _qiblaGotAbsolute = false;
   const qibla = state.prayer.qibla;
 
-  // Smoothing state
-  let smoothedHeading = null; // exponential moving average of heading
-  let currentDeg = null;      // cumulative rotation angle (avoids wrap-around spin)
+  // Smoothing + shortest-path state
+  let smoothedHeading = null;
+  let currentDiscDeg = null;
 
   _qiblaListener = (e) => {
     let rawHeading;
@@ -1488,45 +1508,44 @@ function _startQiblaListener() {
       rawHeading = (360 - e.alpha) % 360;
     } else return;
 
-    // Exponential moving average — reduces sensor jitter (α=0.15 = heavy smoothing)
+    // Exponential moving average with shortest-path delta (α=0.3 — responsive but smooth)
     if (smoothedHeading === null) {
       smoothedHeading = rawHeading;
     } else {
-      // Shortest-path interpolation across 0°/360° boundary
       let delta = rawHeading - smoothedHeading;
       if (delta > 180) delta -= 360;
       if (delta < -180) delta += 360;
-      smoothedHeading = (smoothedHeading + 0.15 * delta + 360) % 360;
+      smoothedHeading = (smoothedHeading + 0.3 * delta + 360) % 360;
     }
 
-    const needle = document.getElementById('qibla-needle');
+    const disc = document.getElementById('compass-disc');
     const status = document.getElementById('qibla-status');
-    if (!needle) { stopQiblaCompass(); return; }
+    if (!disc) { stopQiblaCompass(); return; }
 
-    // Target angle: how much to rotate the needle
-    const targetAngle = (qibla - smoothedHeading + 360) % 360;
-
-    // Track cumulative rotation to always rotate the shortest path (prevents wrap-around spin)
-    if (currentDeg === null) {
-      currentDeg = targetAngle;
+    // Disc rotates by -heading so N always points to true north on screen.
+    // The Kaaba marker painted at qibla° on the disc naturally aligns with
+    // the fixed forward indicator (top triangle) when heading == qibla.
+    const targetDiscDeg = -smoothedHeading;
+    if (currentDiscDeg === null) {
+      currentDiscDeg = targetDiscDeg;
     } else {
-      let delta = targetAngle - (currentDeg % 360);
+      let delta = targetDiscDeg - (currentDiscDeg % 360);
       if (delta > 180) delta -= 360;
       if (delta < -180) delta += 360;
-      currentDeg += delta;
+      currentDiscDeg += delta;
     }
-    needle.style.transform = `rotate(${currentDeg}deg)`;
+    disc.style.transform = `rotate(${currentDiscDeg}deg)`;
 
-    const diff = Math.abs(((targetAngle + 180) % 360) - 180);
+    // How far off Qibla the user is facing
+    const diff = Math.abs(((((qibla - smoothedHeading) % 360) + 540) % 360) - 180);
     if (status) {
       if (diff <= 5) {
-        status.textContent = '✅ You are facing the Qibla!';
+        status.textContent = '✅ Facing the Qibla';
         status.className = 'qibla-status qibla-on';
-        needle.querySelector('polygon')?.setAttribute('fill', '#10b981');
       } else {
-        status.textContent = `${Math.round(diff)}° off — turn ${targetAngle < 180 ? 'right' : 'left'}`;
+        const turn = ((qibla - smoothedHeading) % 360 + 360) % 360;
+        status.textContent = `${Math.round(diff)}° off — turn ${turn < 180 ? 'right' : 'left'}`;
         status.className = 'qibla-status qibla-off';
-        needle.querySelector('polygon')?.setAttribute('fill', '#059669');
       }
     }
   };
