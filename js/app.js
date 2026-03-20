@@ -1515,7 +1515,7 @@ function _startQiblaListener() {
       let delta = rawHeading - smoothedHeading;
       if (delta > 180) delta -= 360;
       if (delta < -180) delta += 360;
-      smoothedHeading = (smoothedHeading + 0.3 * delta + 360) % 360;
+      smoothedHeading = (smoothedHeading + 0.5 * delta + 360) % 360;
     }
 
     const disc = document.getElementById('compass-disc');
