@@ -1465,7 +1465,12 @@ function openQiblaCompass() {
 }
 
 function _startQiblaListener() {
-  stopQiblaCompass(); // clean up any existing listener
+  // Clean up old listener only — don't touch DOM (caller manages visibility)
+  if (_qiblaListener) {
+    window.removeEventListener('deviceorientationabsolute', _qiblaListener, true);
+    window.removeEventListener('deviceorientation', _qiblaListener, true);
+    _qiblaListener = null;
+  }
   _qiblaGotAbsolute = false;
   const qibla = state.prayer.qibla;
 
