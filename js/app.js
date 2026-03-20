@@ -153,10 +153,17 @@ function toggleSurahBookmark(num) {
     state.surahBookmarks = [num, ...state.surahBookmarks];
   }
   localStorage.setItem('huda_surah_bm', JSON.stringify(state.surahBookmarks));
-  // refresh button in list if visible
+  const isNowBm = isSurahBookmarked(num);
+  // refresh button in surah list if visible
   const btn = document.getElementById(`sbm-${num}`);
-  if (btn) btn.textContent = isSurahBookmarked(num) ? '🔖' : '🏷️';
+  if (btn) btn.textContent = isNowBm ? '🔖' : '🏷️';
+  // refresh button in reader header if open on this surah
+  const rbm = document.getElementById('reader-bm-btn');
+  if (rbm && state.quran.currentSurah === num) rbm.textContent = isNowBm ? '🔖' : '🏷️';
   if (state.activeTab === 'home') renderHome();
+}
+function toggleReaderBookmark() {
+  if (state.quran.currentSurah) toggleSurahBookmark(state.quran.currentSurah);
 }
 function removeSurahBookmark(num) {
   state.surahBookmarks = state.surahBookmarks.filter(n => n !== num);
@@ -477,6 +484,7 @@ function renderQuranList() {
           <div style="font-size:11px;opacity:0.8" id="reader-meta"></div>
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <button class="mhdr-btn" id="reader-bm-btn" onclick="toggleReaderBookmark()" title="Bookmark this surah">🏷️</button>
           <button class="mhdr-btn" id="surah-prev-btn" onclick="navigateSurah(-1)" title="Previous surah">‹</button>
           <button class="mhdr-btn" id="surah-next-btn" onclick="navigateSurah(1)" title="Next surah">›</button>
         </div>
@@ -541,6 +549,8 @@ async function openSurah(n) {
   localStorage.setItem('huda_last_read', JSON.stringify({ surah: n, name: s[2], arabic: s[1] }));
   document.getElementById('reader-title').textContent = `${s[2]} — ${s[1]}`;
   document.getElementById('reader-meta').textContent = `${s[5]} · ${s[4]} verses · ${s[3]}`;
+  const rbm = document.getElementById('reader-bm-btn');
+  if (rbm) rbm.textContent = isSurahBookmarked(n) ? '🔖' : '🏷️';
   // Sync toggle button states
   document.getElementById('btn-verse')?.classList.toggle('active', state.quran.viewMode === 'verse');
   document.getElementById('btn-page')?.classList.toggle('active', state.quran.viewMode === 'page');
