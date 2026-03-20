@@ -2,7 +2,7 @@
 // HUDA PWA — Service Worker
 // ============================================================
 
-const CACHE_NAME = 'huda-v27';
+const CACHE_NAME = 'huda-v69';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -13,6 +13,8 @@ const STATIC_ASSETS = [
   '/js/adhan.min.js',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
+  '/fonts/UthmanicHafs1Ver13.woff2',
+  '/fonts/UthmanicHafs1Ver13.ttf',
 ];
 
 // ── Install: pre-cache everything needed for offline ──────────
@@ -122,18 +124,55 @@ const SW_REMINDERS = [
   { title: 'Subhanallahi wa bihamdih', body: 'سُبْحَانَ اللّٰهِ وَبِحَمْدِهِ\nLight on the tongue, heavy on the scale' },
 ];
 
+// SW-based reminder timer — runs independently of the page
+let _swTimer = null;
+let _swIntervalMs = 0;
+
+self.addEventListener('message', event => {
+  const d = event.data;
+  if (!d) return;
+  if (d.type === 'SCHEDULE_REMINDER') {
+    // intervalMs = recurring interval; firstMs = time until next fire (may be shorter if overdue)
+    _swIntervalMs = d.intervalMs || d.ms;
+    _swSetTimer(d.firstMs || d.ms);
+  } else if (d.type === 'CANCEL_REMINDER') {
+    if (_swTimer) { clearTimeout(_swTimer); _swTimer = null; }
+    _swIntervalMs = 0;
+  }
+});
+
+function _swSetTimer(ms) {
+  if (_swTimer) clearTimeout(_swTimer);
+  _swTimer = setTimeout(() => {
+    _swFireReminder();
+    if (_swIntervalMs) _swSetTimer(_swIntervalMs); // reschedule
+  }, ms);
+}
+
+function _swFireReminder() {
+  // Write timestamp to Cache API so the page can sync it via _syncSwTimestamp()
+  const now = Date.now();
+  caches.open(CACHE_NAME).then(c =>
+    c.put('/__huda_last_reminder__', new Response(String(now)))
+  );
+  const msg = SW_REMINDERS[Math.floor(Math.random() * SW_REMINDERS.length)];
+  self.registration.showNotification('Huda — ' + msg.title, {
+    body: msg.body,
+    icon: '/icons/icon-192.png',
+    badge: '/icons/icon-192.png',
+    tag: 'huda-reminder',
+    renotify: true,
+  });
+  // Tell all open clients so they can update their timestamp
+  self.clients.matchAll({ includeUncontrolled: true }).then(clients => {
+    clients.forEach(c => c.postMessage({ type: 'REMINDER_FIRED' }));
+  });
+}
+
+// periodicsync kept as bonus for Chrome Android where it IS supported
 self.addEventListener('periodicsync', event => {
   if (event.tag === 'huda-reminder') {
-    const msg = SW_REMINDERS[Math.floor(Math.random() * SW_REMINDERS.length)];
-    event.waitUntil(
-      self.registration.showNotification('Huda — ' + msg.title, {
-        body: msg.body,
-        icon: '/icons/icon-192.png',
-        badge: '/icons/icon-192.png',
-        tag: 'huda-reminder',
-        renotify: true,
-      })
-    );
+    event.waitUntil(Promise.resolve(_swFireReminder()));
   }
 });
 

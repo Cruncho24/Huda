@@ -1,0 +1,44 @@
+{
+  "name": "Huda — Islamic Companion",
+  "short_name": "Huda",
+  "description": "Your complete Islamic companion — Quran, Prayer Times, Dhikr, Duas, and more.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#059669",
+  "background_color": "#F9FAFB",
+  "lang": "en",
+  "scope": "/",
+  "categories": ["lifestyle", "education", "utilities"],
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Prayer Times",
+      "short_name": "Prayer",
+      "description": "Check today's prayer times",
+      "url": "/?tab=prayer",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Daily Dhikr",
+      "short_name": "Dhikr",
+      "description": "Start your daily dhikr",
+      "url": "/?tab=dhikr",
+      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

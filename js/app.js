@@ -20,6 +20,11 @@ const RECITERS = [
     // cdn.islamic.network returns 403 for this reciter's per-ayah files
     perAyahUrl: (s, a) => `https://everyayah.com/data/Yasser_Ad-Dussary_128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
   },
+  {
+    id: 'ar.abdurrahmanalsudais', name: 'Abdurrahman Al-Sudais',
+    surahUrl: n => `https://server11.mp3quran.net/sds/${String(n).padStart(3,'0')}.mp3`,
+    perAyahUrl: (s, a) => `https://everyayah.com/data/Abdurrahmaan_As-Sudais_192kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
+  },
 ];
 
 // Returns the per-ayah audio URL for the active reciter
@@ -44,11 +49,12 @@ const state = {
   darkMode: localStorage.getItem('huda_dark') === '1',
   fontSize: parseInt(localStorage.getItem('huda_fontsize') || '24'),
   bookmarks: JSON.parse(localStorage.getItem('huda_bookmarks') || '[]'),
+  surahBookmarks: JSON.parse(localStorage.getItem('huda_surah_bm') || '[]'),
   reciter: localStorage.getItem('huda_reciter') || 'ar.alafasy',
   audio: { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false },
   prayer: {
     times: null, location: null, qibla: null, city: '',
-    countdownInterval: null, ramadanInterval: null,
+    countdownInterval: null, ramadanInterval: null, homeInterval: null,
   },
   quran: {
     currentSurah: null,
@@ -71,8 +77,12 @@ const state = {
 document.addEventListener('DOMContentLoaded', () => {
   applyDarkMode();
   checkDhikrReset();
+  // Pre-load cached prayer times so home live cards appear immediately
+  const _cp = localStorage.getItem('huda_prayer');
+  if (_cp) { try { const p = JSON.parse(_cp); state.prayer.times = p.times; state.prayer.city = p.city || ''; state.prayer.qibla = p.qibla; } catch(e) {} }
   setupNav();
   renderHome();
+  fetchAndCacheHijri(new Date());
   registerSW();
   setupInstallPrompt();
   setupReminders();
@@ -116,6 +126,32 @@ function toggleBookmark(surahNum, ayahNum, arText) {
   if (btn) btn.textContent = isBookmarked(surahNum, ayahNum) ? '🔖' : '🏷️';
 }
 function isBookmarked(s, a) { return state.bookmarks.some(b => b.s === s && b.a === a); }
+function removeBookmark(s, a) {
+  state.bookmarks = state.bookmarks.filter(b => !(b.s === s && b.a === a));
+  localStorage.setItem('huda_bookmarks', JSON.stringify(state.bookmarks));
+  renderHome();
+}
+
+function isSurahBookmarked(num) { return state.surahBookmarks.includes(num); }
+function toggleSurahBookmark(num) {
+  if (isSurahBookmarked(num)) {
+    state.surahBookmarks = state.surahBookmarks.filter(n => n !== num);
+  } else {
+    state.surahBookmarks = [num, ...state.surahBookmarks];
+  }
+  localStorage.setItem('huda_surah_bm', JSON.stringify(state.surahBookmarks));
+  // refresh button in list if visible
+  const btn = document.getElementById(`sbm-${num}`);
+  if (btn) btn.textContent = isSurahBookmarked(num) ? '🔖' : '🏷️';
+  if (state.activeTab === 'home') renderHome();
+}
+function removeSurahBookmark(num) {
+  state.surahBookmarks = state.surahBookmarks.filter(n => n !== num);
+  localStorage.setItem('huda_surah_bm', JSON.stringify(state.surahBookmarks));
+  const btn = document.getElementById(`sbm-${num}`);
+  if (btn) btn.textContent = '🏷️';
+  renderHome();
+}
 
 // ── Audio ─────────────────────────────────────────────────────
 function playAyah(globalNum, surahNum, ayahNum) {
@@ -142,10 +178,15 @@ function playAyah(globalNum, surahNum, ayahNum) {
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
     const nextBtn = document.getElementById(`aud-${globalNum + 1}`);
     if (nextBtn) nextBtn.click();
+    else advanceToNextSurah();
   };
   audio.onerror = () => {
     if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+    // Skip broken ayah and advance
+    const nextBtn = document.getElementById(`aud-${globalNum + 1}`);
+    if (nextBtn) nextBtn.click();
+    else advanceToNextSurah();
   };
 }
 
@@ -177,11 +218,44 @@ function switchTab(tab) {
   if (renderers[tab]) renderers[tab]();
 }
 
+// ── Hijri Date (API-accurate, localStorage cached) ────────────
+let _hijriCacheMem = null; // { key: 'YYYY-MM-DD', hijri: {...} }
+
+function _hijriDateKey(date) {
+  return date.toISOString().slice(0, 10);
+}
+
+function getHijriSync(date) {
+  const key = _hijriDateKey(date);
+  if (_hijriCacheMem && _hijriCacheMem.key === key) return _hijriCacheMem.hijri;
+  const stored = localStorage.getItem('huda_hijri_' + key);
+  if (stored) { const h = JSON.parse(stored); _hijriCacheMem = { key, hijri: h }; return h; }
+  return toHijri(date);
+}
+
+async function fetchAndCacheHijri(date) {
+  const key = _hijriDateKey(date);
+  if (localStorage.getItem('huda_hijri_' + key)) return; // already cached
+  try {
+    const dd = String(date.getDate()).padStart(2,'0');
+    const mm = String(date.getMonth()+1).padStart(2,'0');
+    const yyyy = date.getFullYear();
+    const res = await fetch(`https://api.aladhan.com/v1/gToH/${dd}-${mm}-${yyyy}`);
+    if (!res.ok) return;
+    const json = await res.json();
+    const h = json.data.hijri;
+    const hijri = { day: parseInt(h.day), month: h.month.number, year: parseInt(h.year), monthName: HIJRI_MONTHS[h.month.number - 1] };
+    localStorage.setItem('huda_hijri_' + key, JSON.stringify(hijri));
+    _hijriCacheMem = { key, hijri };
+    if (state.activeTab === 'home') renderHome(); // refresh with accurate date
+  } catch(e) {}
+}
+
 // ── HOME TAB ──────────────────────────────────────────────────
 function renderHome() {
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
-  const hijri = toHijri(now);
+  const hijri = getHijriSync(now);
   const hijriStr = `${hijri.day} ${hijri.monthName} ${hijri.year} AH`;
   const isRamadan = hijri.month === 9;
   const h = HADITHS[state.hadithIndex % HADITHS.length];
@@ -216,6 +290,20 @@ function renderHome() {
     }, 1000);
   }
 
+  // Build dhikr reminder live countdown (shown inside reminder card)
+  const fmtMs = ms => { const t = Math.max(0, ms); return `${String(Math.floor(t/3600000)).padStart(2,'0')}:${String(Math.floor((t%3600000)/60000)).padStart(2,'0')}:${String(Math.floor((t%60000)/1000)).padStart(2,'0')}`; };
+  const notifEnabled = localStorage.getItem('huda_notifs') === '1' && 'Notification' in window && Notification.permission === 'granted';
+  if (notifEnabled) {
+    if (state.prayer.homeInterval) clearInterval(state.prayer.homeInterval);
+    state.prayer.homeInterval = setInterval(() => {
+      const elN = document.getElementById('home-notif-cd');
+      if (!elN) { clearInterval(state.prayer.homeInterval); state.prayer.homeInterval = null; return; }
+      const lastR = parseInt(localStorage.getItem('huda_last_reminder') || '0');
+      const hoursR = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
+      elN.textContent = fmtMs((lastR + hoursR * 3600000) - Date.now());
+    }, 1000);
+  }
+
   document.getElementById('tab-home').innerHTML = `
     <div class="hero fade-in">
       <div class="hero-arabic">السَّلَامُ عَلَيْكُمْ</div>
@@ -246,6 +334,45 @@ function renderHome() {
       <div style="color:var(--gray-300);font-size:20px">›</div>
     </div>` : ''}
 
+    ${state.bookmarks.length ? `
+    <div style="padding:16px 16px 0">
+      <div class="section-title">🔖 Bookmarked Ayahs</div>
+    </div>
+    <div class="bookmarks-list">
+      ${state.bookmarks.slice(0, 5).map(b => {
+        const s = SURAHS[b.s - 1];
+        return `
+        <div class="bookmark-row" onclick="switchTab('quran');setTimeout(()=>openSurah(${b.s}),100)">
+          <div class="bookmark-badge">${b.s}:${b.a}</div>
+          <div class="bookmark-info">
+            <div class="bookmark-surah">${s ? s[1] + ' — ' + s[2] : 'Surah ' + b.s}</div>
+            <div class="bookmark-preview">${b.ar}</div>
+          </div>
+          <button class="bookmark-del" onclick="event.stopPropagation();removeBookmark(${b.s},${b.a})" title="Remove">✕</button>
+        </div>`;
+      }).join('')}
+    </div>` : ''}
+
+    ${state.surahBookmarks.length ? `
+    <div style="padding:16px 16px 0">
+      <div class="section-title">📌 Saved Surahs</div>
+    </div>
+    <div class="saved-surahs-list">
+      ${state.surahBookmarks.map(num => {
+        const s = SURAHS[num - 1];
+        return s ? `
+        <div class="saved-surah-row" onclick="switchTab('quran');setTimeout(()=>openSurah(${num}),100)">
+          <div class="saved-surah-num">${num}</div>
+          <div class="saved-surah-info">
+            <div class="saved-surah-name">${s[2]}</div>
+            <div class="saved-surah-arabic">${s[1]}</div>
+          </div>
+          <div class="saved-surah-meta">${s[4]} verses</div>
+          <button class="bookmark-del" onclick="event.stopPropagation();removeSurahBookmark(${num})" title="Remove">✕</button>
+        </div>` : '';
+      }).join('')}
+    </div>` : ''}
+
     <div style="padding:16px 16px 0">
       <div class="section-title">📖 Hadith of the Day</div>
     </div>
@@ -263,9 +390,12 @@ function renderHome() {
     <div class="ayatul-kursi-card">
       <div class="ak-arabic">${AYATUL_KURSI.arabic}</div>
       <div class="ak-translation">${AYATUL_KURSI.translation}</div>
-      <div style="margin-top:10px;display:flex;align-items:center;gap:10px">
+      <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span class="badge badge-emerald">${AYATUL_KURSI.ref}</span>
         <button class="ak-play-btn" id="ak-play" onclick="playAyatulKursi()">▶ Play</button>
+        <select class="ak-reciter-select" onchange="setReciter(this.value)" title="Reciter">
+          ${RECITERS.map(r => `<option value="${r.id}" ${state.reciter === r.id ? 'selected' : ''}>${r.name}</option>`).join('')}
+        </select>
       </div>
     </div>
 
@@ -333,9 +463,14 @@ function renderQuranList() {
           <h2 id="reader-title">Surah</h2>
           <div style="font-size:11px;opacity:0.8" id="reader-meta"></div>
         </div>
+        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <button class="mhdr-btn" id="surah-prev-btn" onclick="navigateSurah(-1)" title="Previous surah">‹</button>
+          <button class="mhdr-btn" id="surah-next-btn" onclick="navigateSurah(1)" title="Next surah">›</button>
+        </div>
         <div id="mushaf-header-controls" style="display:none;align-items:center;gap:6px;flex-shrink:0">
           <span id="mpb-info" style="font-size:11px;opacity:0.9;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
           <button id="mpb-pause-btn" class="mhdr-btn" onclick="toggleMushafPlayback()">⏸</button>
+          <button class="mhdr-btn" title="Next surah" onclick="advanceToNextSurah()">⏭</button>
           <button class="mhdr-btn" onclick="mushafStop()">■</button>
         </div>
       </div>
@@ -366,7 +501,7 @@ function renderSurahList(list) {
         <div class="surah-meta">${s[5]} · ${s[4]} verses</div>
       </div>
       <div class="surah-arabic-name">${s[1]}</div>
-      <div class="surah-arrow">›</div>
+      <button class="surah-bm-btn" id="sbm-${s[0]}" onclick="event.stopPropagation();toggleSurahBookmark(${s[0]})" title="Bookmark surah">${isSurahBookmarked(s[0]) ? '🔖' : '🏷️'}</button>
     </div>
   `).join('');
 }
@@ -418,11 +553,14 @@ async function openSurah(n) {
       document.getElementById('reader-content').style.display = 'none';
       document.getElementById('mushaf-page').style.display = 'block';
       renderMushafPage(n, arData, enData);
+      document.getElementById('mushaf-page').scrollTop = 0;
     } else {
       document.getElementById('mushaf-page').style.display = 'none';
       document.getElementById('reader-content').style.display = 'block';
       renderSurahContent(n, arData, enData);
     }
+    document.getElementById('quran-reader').scrollTop = 0;
+    updateSurahNavBtns();
   } catch(e) {
     content.innerHTML = `
       <div class="error-state">
@@ -448,28 +586,29 @@ function setQuranView(mode) {
     document.getElementById('reader-content').style.display = 'none';
     document.getElementById('mushaf-page').style.display = 'block';
     renderMushafPage(n, arData, enData);
+    document.getElementById('mushaf-page').scrollTop = 0;
   } else {
     document.getElementById('mushaf-page').style.display = 'none';
     document.getElementById('reader-content').style.display = 'block';
     renderSurahContent(n, arData, enData);
+    document.getElementById('reader-content').scrollTop = 0;
   }
+  document.getElementById('quran-reader').scrollTop = 0;
 }
 
 // Build pages by splitting ayahs into chunks that fit a screen
 function buildMushafPages(arData, enData, hasBismillah) {
   const ayahs = arData.ayahs;
-  const pages = [];
-  // Estimate chars per page — longer surahs get fewer ayahs per page
-  const avgChars = ayahs.reduce((s, a) => s + a.text.length, 0) / ayahs.length;
-  const perPage = avgChars > 120 ? 5 : avgChars > 60 ? 8 : 12;
-  for (let i = 0; i < ayahs.length; i += perPage) {
-    pages.push({
-      ar: ayahs.slice(i, i + perPage),
-      en: enData.ayahs.slice(i, i + perPage),
-      first: i === 0,
-    });
-  }
-  return pages;
+  const enAyahs = enData.ayahs;
+  // Group by the real Mushaf page number returned by the API
+  const pageMap = new Map();
+  ayahs.forEach((a, i) => {
+    const pg = a.page || 1;
+    if (!pageMap.has(pg)) pageMap.set(pg, { ar: [], en: [], first: i === 0, page: pg });
+    pageMap.get(pg).ar.push(a);
+    pageMap.get(pg).en.push(enAyahs[i]);
+  });
+  return Array.from(pageMap.values());
 }
 
 function renderMushafPage(n, arData, enData) {
@@ -487,7 +626,7 @@ function renderMushafPage(n, arData, enData) {
       <div class="mushaf-page-block">
         ${page.first && hasBismillah ? `<div class="mushaf-bismillah">بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ</div>` : ''}
         <div class="mushaf-arabic-page" style="font-size:${state.fontSize}px">${arabicText}</div>
-        <div class="mushaf-page-divider">— ${pg + 1} / ${pages.length} —</div>
+        <div class="mushaf-page-divider">— Page ${page.page} —</div>
       </div>`;
   }).join('');
 
@@ -637,18 +776,29 @@ function playAyatulKursi() {
 function _mushafSetupOnEnded(audio, globalNum, surahNum, ayahNum) {
   audio.onended = () => {
     const nextEl = document.getElementById(`maud-${globalNum + 1}`);
-    if (!nextEl) { mushafStop(); return; }
+    if (!nextEl) { advanceToNextSurah(); return; }
 
     // ── Switch pool slot ──────────────────────────────────────
     _poolIdx = 1 - _poolIdx;
     const nextAudio = _pool[_poolIdx];
     if (_poolFor[_poolIdx] !== globalNum + 1) {
-      nextAudio.src = getAyahUrl(globalNum + 1);
+      // Read surah/ayah from DOM so perAyahUrl reciters get correct URL
+      const wrap2 = nextEl.closest('.mushaf-ayah-wrap');
+      const ns2 = wrap2 ? +wrap2.dataset.surah : surahNum;
+      const na2 = wrap2 ? +wrap2.dataset.ayah : ayahNum + 1;
+      nextAudio.src = getAyahUrl(globalNum + 1, ns2, na2);
       _poolFor[_poolIdx] = globalNum + 1;
     }
 
     // ── PLAY FIRST — before any DOM/state work ────────────────
-    nextAudio.play().catch(() => { mushafStop(); });
+    nextAudio.play().catch(() => {
+      // On error skip this ayah and try the next one
+      const skipEl = document.getElementById(`maud-${globalNum + 2}`);
+      if (skipEl) {
+        const wrap3 = skipEl.closest('.mushaf-ayah-wrap');
+        playMushafAyah(globalNum + 2, wrap3 ? +wrap3.dataset.surah : surahNum, wrap3 ? +wrap3.dataset.ayah : ayahNum + 2);
+      } else { advanceToNextSurah(); }
+    });
 
     // ── State + badge update ──────────────────────────────────
     const wrap = nextEl.closest('.mushaf-ayah-wrap');
@@ -735,9 +885,14 @@ function mushafPlayAll(surahNum) {
   }
   _surahAudio = new Audio(url);
   _surahAudio.onerror = () => {
+    // Fall back to per-ayah from the ayah we were on (not always restart from 1)
+    const resumeAyah = state.audio.playingAyah || 1;
     _surahAudio = null; _surahTiming = null;
+    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
     const cache = state.quran.cache[surahNum];
-    if (cache) playMushafAyah(cache.arData.ayahs[0].number, surahNum, 1);
+    if (!cache) return;
+    const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === resumeAyah) || cache.arData.ayahs[0];
+    playMushafAyah(ayahObj.number, surahNum, ayahObj.numberInSurah);
   };
 
   // Highlight first ayah badge if cache is ready
@@ -752,7 +907,7 @@ function mushafPlayAll(surahNum) {
   }
 
   _surahAudio.play().catch(() => mushafStop());
-  _surahAudio.onended = () => mushafStop();
+  _surahAudio.onended = () => advanceToNextSurah();
   updateMushafPlayBtn(true);
   updateMushafPlayerBar();
 
@@ -769,6 +924,37 @@ function setReciter(id) {
   _poolFor[0] = _poolFor[1] = null; // invalidate preload cache
   state.reciter = id;
   localStorage.setItem('huda_reciter', id);
+}
+
+async function navigateSurah(dir) {
+  const next = (state.quran.currentSurah || 1) + dir;
+  if (next < 1 || next > 114) return;
+  mushafStop();
+  await openSurah(next);
+  updateSurahNavBtns();
+}
+
+function updateSurahNavBtns() {
+  const n = state.quran.currentSurah || 1;
+  const prev = document.getElementById('surah-prev-btn');
+  const next = document.getElementById('surah-next-btn');
+  if (prev) prev.disabled = n <= 1;
+  if (next) next.disabled = n >= 114;
+}
+
+async function advanceToNextSurah() {
+  const next = (state.quran.currentSurah || 0) + 1;
+  if (next > 114) { mushafStop(); return; }
+  await openSurah(next);
+  if (state.quran.viewMode === 'page') {
+    mushafPlayAll(next);
+  } else {
+    const cache = state.quran.cache[next];
+    if (cache) {
+      const firstBtn = document.getElementById(`aud-${cache.arData.ayahs[0].number}`);
+      if (firstBtn) firstBtn.click();
+    }
+  }
 }
 
 function mushafStop() {
@@ -827,13 +1013,41 @@ function updateMushafPlayerBar() {
   const playing = !!(state.audio.player && state.audio.playingSurah);
   controls.style.display = playing ? 'flex' : 'none';
   if (playing) {
+    const s = SURAHS[state.audio.playingSurah - 1];
+    const surahName = s ? s[1] : '';
+    const surahEn = s ? s[2] : '';
+    const ayah = state.audio.playingAyah;
+
     const info = document.getElementById('mpb-info');
-    if (info) {
-      const s = SURAHS[state.audio.playingSurah - 1];
-      info.textContent = `${s ? s[1] : ''} · ${state.audio.playingAyah}`;
-    }
+    if (info) info.textContent = `${surahName} · ${ayah}`;
+
     const btn = document.getElementById('mpb-pause-btn');
     if (btn) btn.textContent = state.audio.paused ? '▶' : '⏸';
+
+    // ── Media Session (lock screen / car display) ──────────────
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: `${surahName} — Ayah ${ayah}`,
+        artist: surahEn,
+        album: 'Quran — Huda',
+        artwork: [{ src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }],
+      });
+      navigator.mediaSession.setActionHandler('play',          () => { toggleMushafPlayback(); });
+      navigator.mediaSession.setActionHandler('pause',         () => { toggleMushafPlayback(); });
+      navigator.mediaSession.setActionHandler('nexttrack',     () => { advanceToNextSurah(); });
+      navigator.mediaSession.setActionHandler('previoustrack', () => {
+        const prev = (state.quran.currentSurah || 1) - 1;
+        if (prev >= 1) { openSurah(prev).then(() => mushafPlayAll(prev)); }
+      });
+    }
+  } else {
+    // Clear media session when stopped
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.metadata = null;
+      ['play','pause','nexttrack','previoustrack'].forEach(a => {
+        try { navigator.mediaSession.setActionHandler(a, null); } catch(_) {}
+      });
+    }
   }
   // Keep standalone mushaf-play-btn in sync
   updateMushafPlayBtn(!!(state.audio.player || _surahAudio));
@@ -866,7 +1080,7 @@ function renderSurahContent(n, arData, enData) {
     const displayText = (hasBism && a.numberInSurah === 1) ? stripBismillah(a.text) : a.text;
     return `
     <div class="ayah" data-global="${a.number}" data-surah="${n}" data-ayah="${a.numberInSurah}">
-      <div class="ayah-arabic">${displayText} <span class="ayah-num-badge">${a.numberInSurah}</span></div>
+      <div class="ayah-arabic"><span class="ayah-num-badge">${a.numberInSurah}</span> ${displayText}</div>
       <div class="ayah-english">${enData.ayahs[i].text}</div>
       <div class="ayah-actions">
         <button class="ayah-btn" id="aud-${a.number}" onclick="playAyah(${a.number},${n},${a.numberInSurah})" title="Play">▶</button>
@@ -894,10 +1108,15 @@ let _poolFor  = [null, null]; // which globalNum each slot is loaded for
 function _poolPreload(globalNum) {
   const slot = 1 - _poolIdx;
   if (_poolFor[slot] === globalNum) return; // already loaded
-  const el = _pool[slot];
-  el.src = getAyahUrl(globalNum);
-  el.preload = 'auto';
-  el.load();
+  // Read surah/ayah from DOM so perAyahUrl reciters get the correct URL
+  const domEl = document.getElementById(`maud-${globalNum}`);
+  if (!domEl) return;
+  const wrap = domEl.closest('.mushaf-ayah-wrap');
+  const s = wrap ? +wrap.dataset.surah : state.audio.playingSurah;
+  const a = wrap ? +wrap.dataset.ayah : 0;
+  _pool[slot].src = getAyahUrl(globalNum, s, a);
+  _pool[slot].preload = 'auto';
+  _pool[slot].load();
   _poolFor[slot] = globalNum;
 }
 function setupAyahLongPress(container) {
@@ -1083,6 +1302,8 @@ function calcPrayerTimes(lat, lng) {
     qibla: state.prayer.qibla
   }));
   renderPrayerTimes();
+  // Update home live cards now that times are fresh
+  if (state.activeTab === 'home') renderHome();
 }
 
 function renderPrayerFallback() {
@@ -1099,6 +1320,15 @@ function renderPrayerTimes() {
   const times = state.prayer.times;
   const fmt = t => new Date(t).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12: true });
 
+  // If all times are in the past, cached times are stale — recalculate
+  const allPast = PRAYER_NAMES.every(p => new Date(times[p.key]) < now);
+  if (allPast && navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      calcPrayerTimes(pos.coords.latitude, pos.coords.longitude);
+    }, () => {});
+    return;
+  }
+
   let nextPrayer = null, nextTime = null;
   for (const p of PRAYER_NAMES) {
     if (p.key === 'sunrise') continue;
@@ -1114,7 +1344,8 @@ function renderPrayerTimes() {
       <div class="next-prayer-name">${nextPrayer.en}</div>
       <div class="next-prayer-arabic">${nextPrayer.ar}</div>
       <div class="next-prayer-time">${fmt(nextTime)}</div>
-      <div class="countdown" id="prayer-countdown"></div>
+      <div class="countdown-label">Time Remaining</div>
+      <div class="countdown" id="prayer-countdown">00:00:00</div>
       <div class="location-label">📍 ${state.prayer.city}</div>
     </div>
     <div class="prayer-list">
@@ -1137,11 +1368,34 @@ function renderPrayerTimes() {
       }).join('')}
     </div>
     ${state.prayer.qibla !== null ? `
-    <div class="qibla-card">
-      <div class="qibla-compass">🧭</div>
-      <div class="qibla-info">
-        <h4>Qibla Direction</h4>
-        <p>${Math.round(state.prayer.qibla)}° from North · Direction of the Ka'bah</p>
+    <div class="qibla-card" id="qibla-section">
+      <div class="qibla-top">
+        <div class="qibla-icon-wrap">🕋</div>
+        <div class="qibla-info">
+          <h4>Qibla Direction</h4>
+          <p>${Math.round(state.prayer.qibla)}° from North</p>
+        </div>
+        <button class="qibla-btn" id="qibla-open-btn" onclick="openQiblaCompass()">Find Qibla</button>
+      </div>
+      <div class="qibla-compass-wrap" id="qibla-compass-wrap" style="display:none">
+        <div class="compass-outer">
+          <svg id="qibla-svg" viewBox="0 0 200 200" width="200" height="200">
+            <circle cx="100" cy="100" r="94" fill="rgba(5,150,105,0.06)" stroke="rgba(5,150,105,0.25)" stroke-width="1.5"/>
+            <circle cx="100" cy="100" r="70" fill="none" stroke="rgba(5,150,105,0.1)" stroke-width="1"/>
+            <text x="100" y="13" text-anchor="middle" font-size="13" font-weight="800" fill="#059669">N</text>
+            <text x="190" y="105" text-anchor="middle" font-size="11" fill="rgba(0,0,0,0.35)">E</text>
+            <text x="100" y="197" text-anchor="middle" font-size="11" fill="rgba(0,0,0,0.35)">S</text>
+            <text x="10" y="105" text-anchor="middle" font-size="11" fill="rgba(0,0,0,0.35)">W</text>
+            <g id="qibla-needle" style="transform-origin:100px 100px">
+              <polygon points="100,16 108,96 100,112 92,96" fill="#059669" opacity="0.92"/>
+              <polygon points="100,112 108,106 100,178 92,106" fill="rgba(0,0,0,0.18)"/>
+              <circle cx="100" cy="100" r="8" fill="white" stroke="#059669" stroke-width="2.5"/>
+              <text x="100" y="11" text-anchor="middle" font-size="10">🕋</text>
+            </g>
+          </svg>
+        </div>
+        <div class="qibla-status" id="qibla-status">Calibrating…</div>
+        <button class="qibla-stop-btn" onclick="stopQiblaCompass()">Close Compass</button>
       </div>
     </div>` : ''}
   `;
@@ -1155,11 +1409,17 @@ function updateCountdown(target) {
   const el = document.getElementById('prayer-countdown');
   if (!el) { clearInterval(state.prayer.countdownInterval); return; }
   const diff = new Date(target) - new Date();
-  if (diff <= 0) { renderPrayerTimes(); return; }
+  if (diff <= 0) {
+    el.textContent = '00:00:00';
+    clearInterval(state.prayer.countdownInterval);
+    // Re-render after a short delay to avoid recursion (picks up new prayer)
+    setTimeout(renderPrayerTimes, 1000);
+    return;
+  }
   const h = Math.floor(diff / 3600000);
   const m = Math.floor((diff % 3600000) / 60000);
   const s = Math.floor((diff % 60000) / 1000);
-  el.textContent = `${h > 0 ? h + 'h ' : ''}${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+  el.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
 function calcQibla(lat, lng) {
@@ -1171,6 +1431,84 @@ function calcQibla(lat, lng) {
   const y = Math.sin(dLng) * Math.cos(kLat);
   const x = Math.cos(myLat) * Math.sin(kLat) - Math.sin(myLat) * Math.cos(kLat) * Math.cos(dLng);
   return ((Math.atan2(y, x) * 180 / Math.PI) + 360) % 360;
+}
+
+// ── Qibla Compass ─────────────────────────────────────────────
+let _qiblaListener = null;
+
+function openQiblaCompass() {
+  const wrap = document.getElementById('qibla-compass-wrap');
+  const btn = document.getElementById('qibla-open-btn');
+  if (!wrap) return;
+
+  const start = () => {
+    wrap.style.display = 'block';
+    if (btn) btn.style.display = 'none';
+    _startQiblaListener();
+  };
+
+  if (typeof DeviceOrientationEvent !== 'undefined' &&
+      typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission().then(r => {
+      if (r === 'granted') start();
+      else {
+        const st = document.getElementById('qibla-status');
+        if (st) { st.textContent = 'Permission denied — check iOS Settings → Safari → Motion & Orientation'; st.className = 'qibla-status qibla-off'; }
+        wrap.style.display = 'block';
+        if (btn) btn.style.display = 'none';
+      }
+    }).catch(() => start());
+  } else {
+    start();
+  }
+}
+
+function _startQiblaListener() {
+  if (_qiblaListener) window.removeEventListener('deviceorientation', _qiblaListener, true);
+  const qibla = state.prayer.qibla;
+
+  _qiblaListener = (e) => {
+    let heading;
+    if (e.webkitCompassHeading != null) {
+      heading = e.webkitCompassHeading; // iOS: degrees clockwise from magnetic north
+    } else if (e.alpha != null) {
+      heading = (360 - e.alpha) % 360;  // Android
+    } else return;
+
+    const needle = document.getElementById('qibla-needle');
+    const status = document.getElementById('qibla-status');
+    if (!needle) { stopQiblaCompass(); return; }
+
+    const angle = (qibla - heading + 360) % 360;
+    needle.style.transform = `rotate(${angle}deg)`;
+
+    const diff = Math.abs(((angle + 180) % 360) - 180);
+    if (status) {
+      if (diff <= 5) {
+        status.textContent = '✅ You are facing the Qibla!';
+        status.className = 'qibla-status qibla-on';
+        // pulse needle green
+        needle.querySelector('polygon')?.setAttribute('fill', '#10b981');
+      } else {
+        status.textContent = `${Math.round(diff)}° off — turn ${angle < 180 ? 'right' : 'left'}`;
+        status.className = 'qibla-status qibla-off';
+        needle.querySelector('polygon')?.setAttribute('fill', '#059669');
+      }
+    }
+  };
+
+  window.addEventListener('deviceorientation', _qiblaListener, true);
+}
+
+function stopQiblaCompass() {
+  if (_qiblaListener) {
+    window.removeEventListener('deviceorientation', _qiblaListener, true);
+    _qiblaListener = null;
+  }
+  const wrap = document.getElementById('qibla-compass-wrap');
+  const btn = document.getElementById('qibla-open-btn');
+  if (wrap) wrap.style.display = 'none';
+  if (btn) btn.style.display = '';
 }
 
 // ── DHIKR TAB ─────────────────────────────────────────────────
@@ -1201,6 +1539,7 @@ function renderDhikrCard(d, i) {
       <div class="dhikr-transliteration">${d.transliteration}</div>
       <div class="dhikr-meaning">${d.meaning}</div>
       <div class="dhikr-source">${d.source}</div>
+      ${d.reward ? `<div class="dhikr-reward">🌟 ${d.reward}</div>` : ''}
       <div class="progress-bar-wrap">
         <div class="progress-bar-fill" style="width:${pct}%"></div>
       </div>
@@ -1266,8 +1605,9 @@ const DUA_ICONS = {
   'Morning Adhkar':'🌅','Evening Adhkar':'🌆','Before Sleeping':'🌙',
   'Upon Waking':'☀️','Before Eating':'🍽️','After Eating':'🤲',
   'For Anxiety & Distress':'💚','After Prayer':'📿','Entering & Leaving Home':'🏠',
-  'Entering & Leaving Masjid':'🕌','Travelling':'✈️','For Parents':'❤️',
-  'Seeking Forgiveness':'🌿','For Guidance & Knowledge':'📚'
+  'Entering & Leaving Masjid':'🕌','Entering & Leaving Toilet':'🚻','Travelling':'✈️','For Parents':'❤️',
+  'Seeking Forgiveness':'🌿','For Guidance & Knowledge':'📚',
+  'Prophetic Duas ﷺ':'🌙'
 };
 
 function renderDuasHome() {
@@ -1291,7 +1631,113 @@ function renderDuasHome() {
 function openDuaCategory(cat) {
   state.learn.currentDuaCategory = cat;
   state.learn.currentDuaIndex = 0;
-  renderDuaReader();
+  if (cat === 'Prophetic Duas ﷺ') {
+    renderProphetList();
+  } else {
+    renderDuaReader();
+  }
+}
+
+// ── Prophet list (intermediate screen) ────────────────────────
+const PROPHET_ICONS = {
+  'Prophet Muhammad ﷺ': '🌙',
+  'Prophet Adam ﷺ':     '🌿',
+  'Prophet Nuh ﷺ':      '🌊',
+  'Prophet Ibrahim ﷺ':  '🔥',
+  'Prophet Musa ﷺ':     '⚡',
+  'Prophet Yunus ﷺ':    '🐋',
+  'Prophet Ayyub ﷺ':    '💚',
+  'Prophet Zakariyya ﷺ':'🌸',
+  'Prophet Sulayman ﷺ': '👑',
+};
+
+function renderProphetList() {
+  const all = DUAS['Prophetic Duas ﷺ'];
+  // Preserve insertion order
+  const seen = [];
+  const counts = {};
+  all.forEach(d => {
+    if (!counts[d.prophet]) { counts[d.prophet] = 0; seen.push(d.prophet); }
+    counts[d.prophet]++;
+  });
+  const tab = document.getElementById('tab-duas');
+  tab.innerHTML = `
+    <div class="page-header">
+      <button class="back-btn" onclick="renderDuasHome()">←</button>
+      <div>
+        <h2>Prophetic Duas ﷺ</h2>
+        <div style="font-size:11px;opacity:0.8">🌙 Duas of the Prophets</div>
+      </div>
+    </div>
+    <div style="padding:10px 16px 4px">
+      <p style="font-size:13px;color:var(--gray-500)">Select a Prophet to view their supplications</p>
+    </div>
+    <div class="prophet-list">
+      ${seen.map(name => `
+        <div class="prophet-row" onclick="openProphetDuas('${name.replace(/'/g,"\\'")}')">
+          <div class="prophet-row-icon">${PROPHET_ICONS[name] || '🤲'}</div>
+          <div class="prophet-row-info">
+            <div class="prophet-row-name">${name}</div>
+            <div class="prophet-row-count">${counts[name]} dua${counts[name] > 1 ? 's' : ''}</div>
+          </div>
+          <div class="prophet-row-arrow">›</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function openProphetDuas(prophet) {
+  state.learn.currentProphet = prophet;
+  state.learn.currentDuaIndex = 0;
+  renderProphetDuaReader();
+}
+
+function renderProphetDuaReader() {
+  const prophet = state.learn.currentProphet;
+  const duas = DUAS['Prophetic Duas ﷺ'].filter(d => d.prophet === prophet);
+  const i = state.learn.currentDuaIndex;
+  const dua = duas[i];
+  const tab = document.getElementById('tab-duas');
+  tab.innerHTML = `
+    <div class="page-header">
+      <button class="back-btn" onclick="renderProphetList()">←</button>
+      <div>
+        <h2>${prophet}</h2>
+        <div style="font-size:11px;opacity:0.8">${PROPHET_ICONS[prophet] || '🤲'} Prophetic Duas</div>
+      </div>
+    </div>
+    <div class="dua-card fade-in">
+      <div class="dua-counter">${i + 1} of ${duas.length}</div>
+      <div class="dua-arabic">${dua.arabic}</div>
+      <div class="dua-transliteration">${dua.transliteration}</div>
+      <div class="dua-meaning">${dua.meaning}</div>
+      <span class="dua-source-badge">📚 ${dua.source} · ${dua.grade}</span>
+      <button class="share-dua-btn" onclick="shareProphetDua(${i})">Share ↗</button>
+    </div>
+    ${duas.length > 1 ? `
+    <div class="dua-nav">
+      <button class="dua-nav-btn" onclick="changeProphetDua(-1)" ${i === 0 ? 'disabled' : ''}>← Previous</button>
+      <span style="font-size:12px;color:var(--gray-400)">${i + 1} / ${duas.length}</span>
+      <button class="dua-nav-btn" onclick="changeProphetDua(1)" ${i === duas.length - 1 ? 'disabled' : ''}>Next →</button>
+    </div>` : ''}
+  `;
+}
+
+function changeProphetDua(dir) {
+  const duas = DUAS['Prophetic Duas ﷺ'].filter(d => d.prophet === state.learn.currentProphet);
+  state.learn.currentDuaIndex = Math.max(0, Math.min(duas.length - 1, state.learn.currentDuaIndex + dir));
+  renderProphetDuaReader();
+}
+
+function shareProphetDua(index) {
+  const dua = DUAS['Prophetic Duas ﷺ'].filter(d => d.prophet === state.learn.currentProphet)[index];
+  const text = `${dua.arabic}\n\n${dua.transliteration}\n\n"${dua.meaning}"\n\n— ${dua.source} | ${dua.grade}\n\nShared from Huda Islamic Companion`;
+  if (navigator.share) {
+    navigator.share({ title: `Dua of ${dua.prophet}`, text }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(text).then(() => alert('Dua copied!')).catch(() => {});
+  }
 }
 
 function renderDuaReader() {
@@ -1739,23 +2185,37 @@ const REMINDER_MSGS = [
 ];
 
 function renderReminderCard() {
-  const enabled = localStorage.getItem('huda_notifs') === '1' && Notification.permission === 'granted';
+  const perm = 'Notification' in window ? Notification.permission : 'unsupported';
+  const enabled = localStorage.getItem('huda_notifs') === '1' && perm === 'granted';
   const interval = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
-  const supported = 'Notification' in window;
-  if (!supported) return '';
+  if (perm === 'unsupported') return '';
+  const last = parseInt(localStorage.getItem('huda_last_reminder') || '0');
+  const nextMs = last ? Math.max(0, (last + interval * 3600000) - Date.now()) : 0;
+  const nextStr = enabled && last ? (nextMs < 60000 ? 'any moment' : `in ${Math.ceil(nextMs/60000)}m`) : '';
+  const permDenied = perm === 'denied';
+  const isMac = /Mac/.test(navigator.platform || navigator.userAgent);
   return `
     <div class="reminder-card">
       <div class="reminder-card-top">
         <div>
           <div class="reminder-card-title">🔔 Daily Reminders</div>
-          <div class="reminder-card-sub">${enabled ? `Every ${interval}h · Dhikr, Istighfar & Salawat` : 'Gentle reminders throughout your day'}</div>
+          <div class="reminder-card-sub">${
+            permDenied ? `⚠️ Notifications blocked${isMac ? ' — System Settings → Notifications → Chrome' : ' — enable in device Settings'}` :
+            enabled ? `Every ${interval}h` :
+            'Gentle reminders throughout your day'
+          }</div>
+          ${enabled && isMac ? `<div style="font-size:11px;color:var(--gray-400);margin-top:3px">Mac: check System Settings → Notifications → Chrome if not arriving</div>` : ''}
         </div>
         ${enabled
-          ? `<button class="reminder-off-btn" onclick="disableReminders()">Turn off</button>`
-          : `<button class="reminder-on-btn" onclick="enableReminders()">Enable</button>`
+          ? `<div style="display:flex;gap:6px">
+               <button class="reminder-off-btn" onclick="testNotification()" title="Send a test notification now" style="background:#0891b2">Test</button>
+               <button class="reminder-off-btn" onclick="disableReminders()">Off</button>
+             </div>`
+          : permDenied ? '' : `<button class="reminder-on-btn" onclick="enableReminders()">Enable</button>`
         }
       </div>
       ${enabled ? `
+        <div class="reminder-next-cd">Next reminder in <span id="home-notif-cd" style="font-variant-numeric:tabular-nums;font-weight:700">--:--:--</span></div>
         <div class="reminder-intervals">
           ${[1,2,3,4].map(h => `
             <button class="ri-btn ${interval === h ? 'active' : ''}" onclick="setReminderInterval(${h})">${h}h</button>
@@ -1764,51 +2224,141 @@ function renderReminderCard() {
     </div>`;
 }
 
+function showToast(msg) {
+  let t = document.getElementById('huda-toast');
+  if (!t) { t = document.createElement('div'); t.id = 'huda-toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+function testNotification() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') {
+    const isMac = /Mac/.test(navigator.platform || navigator.userAgent);
+    alert(isMac
+      ? 'Notifications blocked.\n\n1. Open System Settings → Notifications → Chrome\n2. Turn on "Allow Notifications"\n3. Make sure Focus/Do Not Disturb is off\n4. Also check Chrome → Settings → Privacy → Notifications — make sure huda-six.vercel.app is allowed'
+      : 'Notifications are not granted. Please enable them in your device Settings.');
+    return;
+  }
+  const msg = REMINDER_MSGS[Math.floor(Math.random() * REMINDER_MSGS.length)];
+  // Fire via SW (works everywhere)
+  navigator.serviceWorker?.ready.then(reg => {
+    reg.showNotification('Huda — ' + msg.title, {
+      body: msg.body, icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',
+      tag: 'huda-test-' + Date.now(), renotify: true,
+    });
+  }).catch(() => {});
+  // Also fire direct Notification (desktop fallback)
+  try { new Notification('Huda — ' + msg.title, { body: msg.body, icon: '/icons/icon-192.png' }); } catch(e) {}
+  showToast('Notification sent — check your notification area');
+}
+
 let _reminderInterval = null;
+let _checkPending = false; // debounce guard
 
 function setupReminders() {
   if (localStorage.getItem('huda_notifs') !== '1') return;
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  scheduleReminderInterval();
-  registerPeriodicSync();
+  _syncSwTimestamp().then(() => {
+    checkMissedReminder();
+    _swScheduleReminder();
+  });
+  _startForegroundPoller();
 }
 
-function scheduleReminderInterval() {
+// Poll every 60s while app is open
+function _startForegroundPoller() {
   if (_reminderInterval) clearInterval(_reminderInterval);
+  _reminderInterval = setInterval(checkMissedReminder, 60000);
+}
+
+// Read the timestamp the SW wrote to cache when it fired
+async function _syncSwTimestamp() {
+  try {
+    const resp = await caches.match('/__huda_last_reminder__');
+    if (!resp) return;
+    const ts = parseInt(await resp.text());
+    if (!ts) return;
+    const stored = parseInt(localStorage.getItem('huda_last_reminder') || '0');
+    if (ts > stored) localStorage.setItem('huda_last_reminder', String(ts));
+  } catch(e) {}
+}
+
+// Check if a reminder is overdue and fire it
+function checkMissedReminder() {
+  if (localStorage.getItem('huda_notifs') !== '1') return;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const last = parseInt(localStorage.getItem('huda_last_reminder') || '0');
+  if (!last) {
+    localStorage.setItem('huda_last_reminder', Date.now().toString());
+    return;
+  }
   const hours = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
-  _reminderInterval = setInterval(fireReminder, hours * 3600000);
+  if (Date.now() - last >= hours * 3600000) {
+    fireReminder();
+  }
+}
+
+// Debounced version for event listeners — prevents stacking on app open
+function _debouncedCheck() {
+  if (_checkPending) return;
+  _checkPending = true;
+  setTimeout(async () => {
+    _checkPending = false;
+    await _syncSwTimestamp();
+    checkMissedReminder();
+  }, 800);
 }
 
 function fireReminder() {
-  if (Notification.permission !== 'granted') return;
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  // Update timestamp synchronously first — prevents any parallel call from double-firing
+  localStorage.setItem('huda_last_reminder', Date.now().toString());
   const msg = REMINDER_MSGS[Math.floor(Math.random() * REMINDER_MSGS.length)];
   navigator.serviceWorker?.ready.then(reg => {
     reg.showNotification('Huda — ' + msg.title, {
-      body: msg.body,
-      icon: '/icons/icon-192.png',
-      badge: '/icons/icon-192.png',
-      tag: 'huda-reminder',
-      renotify: true,
+      body: msg.body, icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',
+      tag: 'huda-reminder', renotify: true,
     });
-  }).catch(() => {
-    new Notification('Huda — ' + msg.title, { body: msg.body, icon: '/icons/icon-192.png' });
+  }).catch(() => {});
+  try { new Notification('Huda — ' + msg.title, { body: msg.body, icon: '/icons/icon-192.png' }); } catch(e) {}
+  // Reschedule SW from now so it doesn't also fire immediately
+  _swScheduleReminder();
+}
+
+// Tell the SW to run its own timer for background notifications
+function _swScheduleReminder() {
+  const hours = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
+  const last = parseInt(localStorage.getItem('huda_last_reminder') || '0');
+  const intervalMs = hours * 3600000;
+  const elapsed = last ? Date.now() - last : 0;
+  const remaining = intervalMs - elapsed;
+  // If overdue, page already handled it — give SW a full interval from now
+  // This prevents the SW from firing again immediately after the page just fired
+  const firstMs = remaining > 30000 ? remaining : intervalMs;
+  navigator.serviceWorker?.ready.then(reg => {
+    reg.active?.postMessage({ type: 'SCHEDULE_REMINDER', firstMs, intervalMs });
   });
 }
 
-function registerPeriodicSync() {
-  const hours = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
-  navigator.serviceWorker?.ready.then(reg => {
-    if ('periodicSync' in reg) {
-      reg.periodicSync.register('huda-reminder', { minInterval: hours * 3600000 }).catch(() => {});
+// Listen for SW firing — update our timestamp
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data?.type === 'REMINDER_FIRED') {
+      localStorage.setItem('huda_last_reminder', Date.now().toString());
     }
   });
 }
+
+// Single entry point for all app-open events — debounced to prevent stacking
+document.addEventListener('visibilitychange', () => { if (!document.hidden) _debouncedCheck(); });
+window.addEventListener('pageshow', e => { if (e.persisted) _debouncedCheck(); });
 
 async function enableReminders() {
   if (!('Notification' in window)) return;
   const perm = await Notification.requestPermission();
   if (perm === 'granted') {
     localStorage.setItem('huda_notifs', '1');
+    localStorage.setItem('huda_last_reminder', Date.now().toString());
     setupReminders();
   } else {
     localStorage.setItem('huda_notifs', '0');
@@ -1820,15 +2370,16 @@ function disableReminders() {
   localStorage.setItem('huda_notifs', '0');
   if (_reminderInterval) { clearInterval(_reminderInterval); _reminderInterval = null; }
   navigator.serviceWorker?.ready.then(reg => {
-    if ('periodicSync' in reg) reg.periodicSync.unregister('huda-reminder').catch(() => {});
+    reg.active?.postMessage({ type: 'CANCEL_REMINDER' });
   });
   renderHome();
 }
 
 function setReminderInterval(h) {
   localStorage.setItem('huda_notifs_interval', h);
-  scheduleReminderInterval();
-  registerPeriodicSync();
+  localStorage.setItem('huda_last_reminder', Date.now().toString()); // reset clock
+  _startForegroundPoller();
+  _swScheduleReminder();
   renderHome();
 }
 
