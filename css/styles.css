@@ -606,7 +606,7 @@ html.dark .saved-surah-name { color: var(--gray-100); }
 }
 #qibla-needle {
   transform-origin: 100px 100px;
-  transition: transform 0.25s ease-out;
+  transition: transform 0.4s ease-out;
 }
 .qibla-status {
   font-size: 14px;

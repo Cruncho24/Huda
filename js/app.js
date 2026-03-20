@@ -1474,33 +1474,57 @@ function _startQiblaListener() {
   _qiblaGotAbsolute = false;
   const qibla = state.prayer.qibla;
 
+  // Smoothing state
+  let smoothedHeading = null; // exponential moving average of heading
+  let currentDeg = null;      // cumulative rotation angle (avoids wrap-around spin)
+
   _qiblaListener = (e) => {
-    let heading;
+    let rawHeading;
     if (e.webkitCompassHeading != null) {
-      // iOS Safari — always compass-referenced
-      heading = e.webkitCompassHeading;
+      rawHeading = e.webkitCompassHeading;
     } else if (e.alpha != null) {
-      // Android: prefer absolute-referenced events; ignore non-absolute once we have absolute
       if (e.absolute) _qiblaGotAbsolute = true;
       if (!e.absolute && _qiblaGotAbsolute) return;
-      heading = (360 - e.alpha) % 360;
+      rawHeading = (360 - e.alpha) % 360;
     } else return;
+
+    // Exponential moving average — reduces sensor jitter (α=0.15 = heavy smoothing)
+    if (smoothedHeading === null) {
+      smoothedHeading = rawHeading;
+    } else {
+      // Shortest-path interpolation across 0°/360° boundary
+      let delta = rawHeading - smoothedHeading;
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+      smoothedHeading = (smoothedHeading + 0.15 * delta + 360) % 360;
+    }
 
     const needle = document.getElementById('qibla-needle');
     const status = document.getElementById('qibla-status');
     if (!needle) { stopQiblaCompass(); return; }
 
-    const angle = (qibla - heading + 360) % 360;
-    needle.style.transform = `rotate(${angle}deg)`;
+    // Target angle: how much to rotate the needle
+    const targetAngle = (qibla - smoothedHeading + 360) % 360;
 
-    const diff = Math.abs(((angle + 180) % 360) - 180);
+    // Track cumulative rotation to always rotate the shortest path (prevents wrap-around spin)
+    if (currentDeg === null) {
+      currentDeg = targetAngle;
+    } else {
+      let delta = targetAngle - (currentDeg % 360);
+      if (delta > 180) delta -= 360;
+      if (delta < -180) delta += 360;
+      currentDeg += delta;
+    }
+    needle.style.transform = `rotate(${currentDeg}deg)`;
+
+    const diff = Math.abs(((targetAngle + 180) % 360) - 180);
     if (status) {
       if (diff <= 5) {
         status.textContent = '✅ You are facing the Qibla!';
         status.className = 'qibla-status qibla-on';
         needle.querySelector('polygon')?.setAttribute('fill', '#10b981');
       } else {
-        status.textContent = `${Math.round(diff)}° off — turn ${angle < 180 ? 'right' : 'left'}`;
+        status.textContent = `${Math.round(diff)}° off — turn ${targetAngle < 180 ? 'right' : 'left'}`;
         status.className = 'qibla-status qibla-off';
         needle.querySelector('polygon')?.setAttribute('fill', '#059669');
       }
