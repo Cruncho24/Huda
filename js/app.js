@@ -1435,7 +1435,7 @@ function calcQibla(lat, lng) {
 
 // ── Qibla Compass ─────────────────────────────────────────────
 let _qiblaListener = null;
-let _qiblaEventName = 'deviceorientation';
+let _qiblaGotAbsolute = false; // true once we receive an absolute-referenced event
 
 function openQiblaCompass() {
   const wrap = document.getElementById('qibla-compass-wrap');
@@ -1465,22 +1465,20 @@ function openQiblaCompass() {
 }
 
 function _startQiblaListener() {
-  if (_qiblaListener) window.removeEventListener(_qiblaEventName, _qiblaListener, true);
+  stopQiblaCompass(); // clean up any existing listener
+  _qiblaGotAbsolute = false;
   const qibla = state.prayer.qibla;
-
-  // On Android, deviceorientation fires with e.absolute=false (relative to arbitrary init heading).
-  // deviceorientationabsolute always fires with true compass-referenced values on Chrome 66+.
-  const isAndroid = /Android/i.test(navigator.userAgent);
-  _qiblaEventName = (isAndroid && 'ondeviceorientationabsolute' in window)
-    ? 'deviceorientationabsolute'
-    : 'deviceorientation';
 
   _qiblaListener = (e) => {
     let heading;
     if (e.webkitCompassHeading != null) {
-      heading = e.webkitCompassHeading; // iOS: degrees clockwise from magnetic north
+      // iOS Safari — always compass-referenced
+      heading = e.webkitCompassHeading;
     } else if (e.alpha != null) {
-      heading = (360 - e.alpha) % 360;  // Android absolute event
+      // Android: prefer absolute-referenced events; ignore non-absolute once we have absolute
+      if (e.absolute) _qiblaGotAbsolute = true;
+      if (!e.absolute && _qiblaGotAbsolute) return;
+      heading = (360 - e.alpha) % 360;
     } else return;
 
     const needle = document.getElementById('qibla-needle');
@@ -1504,12 +1502,16 @@ function _startQiblaListener() {
     }
   };
 
-  window.addEventListener(_qiblaEventName, _qiblaListener, true);
+  // Listen to both — deviceorientationabsolute (Chrome/Firefox Android) gives e.absolute=true,
+  // deviceorientation covers iOS (webkitCompassHeading) and fallback browsers (DuckDuckGo etc.)
+  window.addEventListener('deviceorientationabsolute', _qiblaListener, true);
+  window.addEventListener('deviceorientation', _qiblaListener, true);
 }
 
 function stopQiblaCompass() {
   if (_qiblaListener) {
-    window.removeEventListener(_qiblaEventName, _qiblaListener, true);
+    window.removeEventListener('deviceorientationabsolute', _qiblaListener, true);
+    window.removeEventListener('deviceorientation', _qiblaListener, true);
     _qiblaListener = null;
   }
   const wrap = document.getElementById('qibla-compass-wrap');
