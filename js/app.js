@@ -1435,6 +1435,7 @@ function calcQibla(lat, lng) {
 
 // ── Qibla Compass ─────────────────────────────────────────────
 let _qiblaListener = null;
+let _qiblaEventName = 'deviceorientation';
 
 function openQiblaCompass() {
   const wrap = document.getElementById('qibla-compass-wrap');
@@ -1464,15 +1465,22 @@ function openQiblaCompass() {
 }
 
 function _startQiblaListener() {
-  if (_qiblaListener) window.removeEventListener('deviceorientation', _qiblaListener, true);
+  if (_qiblaListener) window.removeEventListener(_qiblaEventName, _qiblaListener, true);
   const qibla = state.prayer.qibla;
+
+  // On Android, deviceorientation fires with e.absolute=false (relative to arbitrary init heading).
+  // deviceorientationabsolute always fires with true compass-referenced values on Chrome 66+.
+  const isAndroid = /Android/i.test(navigator.userAgent);
+  _qiblaEventName = (isAndroid && 'ondeviceorientationabsolute' in window)
+    ? 'deviceorientationabsolute'
+    : 'deviceorientation';
 
   _qiblaListener = (e) => {
     let heading;
     if (e.webkitCompassHeading != null) {
       heading = e.webkitCompassHeading; // iOS: degrees clockwise from magnetic north
     } else if (e.alpha != null) {
-      heading = (360 - e.alpha) % 360;  // Android
+      heading = (360 - e.alpha) % 360;  // Android absolute event
     } else return;
 
     const needle = document.getElementById('qibla-needle');
@@ -1487,7 +1495,6 @@ function _startQiblaListener() {
       if (diff <= 5) {
         status.textContent = '✅ You are facing the Qibla!';
         status.className = 'qibla-status qibla-on';
-        // pulse needle green
         needle.querySelector('polygon')?.setAttribute('fill', '#10b981');
       } else {
         status.textContent = `${Math.round(diff)}° off — turn ${angle < 180 ? 'right' : 'left'}`;
@@ -1497,12 +1504,12 @@ function _startQiblaListener() {
     }
   };
 
-  window.addEventListener('deviceorientation', _qiblaListener, true);
+  window.addEventListener(_qiblaEventName, _qiblaListener, true);
 }
 
 function stopQiblaCompass() {
   if (_qiblaListener) {
-    window.removeEventListener('deviceorientation', _qiblaListener, true);
+    window.removeEventListener(_qiblaEventName, _qiblaListener, true);
     _qiblaListener = null;
   }
   const wrap = document.getElementById('qibla-compass-wrap');
