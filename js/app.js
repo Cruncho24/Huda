@@ -2278,17 +2278,13 @@ function testNotification() {
     return;
   }
   const msg = REMINDER_MSGS[Math.floor(Math.random() * REMINDER_MSGS.length)];
-  // Fire via SW (works everywhere, required on Android)
+  // Use SW notification only — direct new Notification() would cause a duplicate
   navigator.serviceWorker?.ready.then(reg => {
     reg.showNotification('Huda — ' + msg.title, {
       body: msg.body, icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',
       tag: 'huda-test-' + Date.now(), renotify: true,
     });
   }).catch(() => {});
-  // Direct Notification — desktop only (Android Chrome blocks this from page context)
-  if (!/Android/.test(navigator.userAgent || '')) {
-    try { new Notification('Huda — ' + msg.title, { body: msg.body, icon: '/icons/icon-192.png' }); } catch(e) {}
-  }
   showToast('Notification sent — check your notification area');
 }
 
@@ -2360,10 +2356,6 @@ function fireReminder() {
       tag: 'huda-reminder', renotify: true,
     });
   }).catch(() => {});
-  // Direct Notification — desktop only (Android Chrome blocks this from page context)
-  if (!/Android/.test(navigator.userAgent || '')) {
-    try { new Notification('Huda — ' + msg.title, { body: msg.body, icon: '/icons/icon-192.png' }); } catch(e) {}
-  }
   // Reschedule SW from now so it doesn't also fire immediately
   _swScheduleReminder();
 }
