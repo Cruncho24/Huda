@@ -2,7 +2,7 @@
 // HUDA PWA — Service Worker
 // ============================================================
 
-const CACHE_NAME = 'huda-v74';
+const CACHE_NAME = 'huda-v75';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -149,12 +149,16 @@ function _swSetTimer(ms) {
   }, ms);
 }
 
-function _swFireReminder() {
-  // Write timestamp to Cache API so the page can sync it via _syncSwTimestamp()
+async function _swFireReminder() {
   const now = Date.now();
-  caches.open(CACHE_NAME).then(c =>
-    c.put('/__huda_last_reminder__', new Response(String(now)))
-  );
+  // Update last-fired and advance next-fire timestamps in cache
+  const schedCache = await caches.open('huda-schedule');
+  const intResp = await schedCache.match('/__huda_interval__');
+  const intervalMs = intResp ? (parseInt(await intResp.text()) || 7200000) : 7200000;
+  await schedCache.put('/__huda_next_reminder__', new Response(String(now + intervalMs)));
+  // Write last-fired so page can sync via _syncSwTimestamp()
+  const appCache = await caches.open(CACHE_NAME);
+  await appCache.put('/__huda_last_reminder__', new Response(String(now)));
   const msg = SW_REMINDERS[Math.floor(Math.random() * SW_REMINDERS.length)];
   self.registration.showNotification('Huda — ' + msg.title, {
     body: msg.body,
@@ -163,17 +167,26 @@ function _swFireReminder() {
     tag: 'huda-reminder',
     renotify: true,
   });
-  // Tell all open clients so they can update their timestamp
+  // Tell open clients to sync their timestamp
   self.clients.matchAll({ includeUncontrolled: true }).then(clients => {
     clients.forEach(c => c.postMessage({ type: 'REMINDER_FIRED' }));
   });
 }
 
-// periodicsync kept as bonus for Chrome Android where it IS supported
+// periodicsync — only fires on Chrome Android for installed PWAs, but it's reliable
 self.addEventListener('periodicsync', event => {
-  if (event.tag === 'huda-reminder') {
-    event.waitUntil(Promise.resolve(_swFireReminder()));
-  }
+  if (event.tag !== 'huda-reminder') return;
+  event.waitUntil((async () => {
+    try {
+      const cache = await caches.open('huda-schedule');
+      const nextResp = await cache.match('/__huda_next_reminder__');
+      if (nextResp) {
+        const nextTime = parseInt(await nextResp.text());
+        if (!isNaN(nextTime) && Date.now() < nextTime) return; // not time yet
+      }
+    } catch(e) {}
+    await _swFireReminder();
+  })());
 });
 
 self.addEventListener('notificationclick', event => {

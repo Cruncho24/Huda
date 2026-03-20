@@ -2326,6 +2326,7 @@ function checkMissedReminder() {
   const last = parseInt(localStorage.getItem('huda_last_reminder') || '0');
   if (!last) {
     localStorage.setItem('huda_last_reminder', Date.now().toString());
+    _swScheduleReminder();
     return;
   }
   const hours = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
@@ -2347,8 +2348,13 @@ function _debouncedCheck() {
 
 function fireReminder() {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  // Update timestamp synchronously first — prevents any parallel call from double-firing
-  localStorage.setItem('huda_last_reminder', Date.now().toString());
+  const hours = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
+  const last = parseInt(localStorage.getItem('huda_last_reminder') || '0');
+  const intervalMs = hours * 3600000;
+  // Advance from the scheduled time (not from now) so the schedule doesn't drift/reset
+  const scheduledTime = last ? last + intervalMs : Date.now();
+  const newLast = Math.min(scheduledTime, Date.now());
+  localStorage.setItem('huda_last_reminder', String(newLast));
   const msg = REMINDER_MSGS[Math.floor(Math.random() * REMINDER_MSGS.length)];
   navigator.serviceWorker?.ready.then(reg => {
     reg.showNotification('Huda — ' + msg.title, {
@@ -2356,22 +2362,39 @@ function fireReminder() {
       tag: 'huda-reminder', renotify: true,
     });
   }).catch(() => {});
-  // Reschedule SW from now so it doesn't also fire immediately
   _swScheduleReminder();
 }
 
-// Tell the SW to run its own timer for background notifications
+// Write next-fire schedule to Cache API so the SW can check it when woken by periodicSync
+async function _writeScheduleToCache(nextFireTime, intervalMs) {
+  try {
+    const cache = await caches.open('huda-schedule');
+    await cache.put('/__huda_next_reminder__', new Response(String(nextFireTime)));
+    await cache.put('/__huda_interval__', new Response(String(intervalMs)));
+  } catch(e) {}
+}
+
+// Schedule background notification via SW timer + Periodic Background Sync
 function _swScheduleReminder() {
   const hours = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
   const last = parseInt(localStorage.getItem('huda_last_reminder') || '0');
   const intervalMs = hours * 3600000;
   const elapsed = last ? Date.now() - last : 0;
   const remaining = intervalMs - elapsed;
-  // If overdue, page already handled it — give SW a full interval from now
-  // This prevents the SW from firing again immediately after the page just fired
   const firstMs = remaining > 30000 ? remaining : intervalMs;
+  const nextFireTime = Date.now() + firstMs;
+
+  // Write to cache so SW periodicSync handler can check if it's time to fire
+  _writeScheduleToCache(nextFireTime, intervalMs);
+
   navigator.serviceWorker?.ready.then(reg => {
+    // SW setTimeout — works on desktop and short intervals before SW is terminated
     reg.active?.postMessage({ type: 'SCHEDULE_REMINDER', firstMs, intervalMs });
+    // Periodic Background Sync — the only reliable background mechanism on mobile
+    // Requires installed PWA on Chrome Android; silently ignored otherwise
+    if ('periodicSync' in reg) {
+      reg.periodicSync.register('huda-reminder', { minInterval: intervalMs }).catch(() => {});
+    }
   });
 }
 
@@ -2379,7 +2402,8 @@ function _swScheduleReminder() {
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.addEventListener('message', e => {
     if (e.data?.type === 'REMINDER_FIRED') {
-      localStorage.setItem('huda_last_reminder', Date.now().toString());
+      // SW already wrote to cache; sync it into localStorage
+      _syncSwTimestamp();
     }
   });
 }
