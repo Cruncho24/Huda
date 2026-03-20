@@ -2193,14 +2193,21 @@ function renderReminderCard() {
   const nextMs = last ? Math.max(0, (last + interval * 3600000) - Date.now()) : 0;
   const nextStr = enabled && last ? (nextMs < 60000 ? 'any moment' : `in ${Math.ceil(nextMs/60000)}m`) : '';
   const permDenied = perm === 'denied';
-  const isMac = /Mac/.test(navigator.platform || navigator.userAgent);
+  const ua = navigator.userAgent || '';
+  const isMac = /Mac/.test(navigator.platform || ua) && !/iPhone|iPad/.test(ua);
+  const isAndroid = /Android/.test(ua);
+  const blockedHint = isMac
+    ? ' — System Settings → Notifications → Chrome'
+    : isAndroid
+    ? ' — Chrome menu → Settings → Site Settings → Notifications'
+    : ' — enable in your browser settings';
   return `
     <div class="reminder-card">
       <div class="reminder-card-top">
         <div>
           <div class="reminder-card-title">🔔 Daily Reminders</div>
           <div class="reminder-card-sub">${
-            permDenied ? `⚠️ Notifications blocked${isMac ? ' — System Settings → Notifications → Chrome' : ' — enable in device Settings'}` :
+            permDenied ? `⚠️ Notifications blocked${blockedHint}` :
             enabled ? `Every ${interval}h` :
             'Gentle reminders throughout your day'
           }</div>
@@ -2233,22 +2240,28 @@ function showToast(msg) {
 
 function testNotification() {
   if (!('Notification' in window) || Notification.permission !== 'granted') {
-    const isMac = /Mac/.test(navigator.platform || navigator.userAgent);
+    const ua = navigator.userAgent || '';
+    const isMac = /Mac/.test(navigator.platform || ua) && !/iPhone|iPad/.test(ua);
+    const isAndroid = /Android/.test(ua);
     alert(isMac
       ? 'Notifications blocked.\n\n1. Open System Settings → Notifications → Chrome\n2. Turn on "Allow Notifications"\n3. Make sure Focus/Do Not Disturb is off\n4. Also check Chrome → Settings → Privacy → Notifications — make sure huda-six.vercel.app is allowed'
-      : 'Notifications are not granted. Please enable them in your device Settings.');
+      : isAndroid
+      ? 'Notifications blocked.\n\nTo enable:\n1. Tap Chrome\'s 3-dot menu → Settings\n2. Site Settings → Notifications\n3. Find this site → tap Allow'
+      : 'Notifications are not granted. Please enable them in your browser settings.');
     return;
   }
   const msg = REMINDER_MSGS[Math.floor(Math.random() * REMINDER_MSGS.length)];
-  // Fire via SW (works everywhere)
+  // Fire via SW (works everywhere, required on Android)
   navigator.serviceWorker?.ready.then(reg => {
     reg.showNotification('Huda — ' + msg.title, {
       body: msg.body, icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',
       tag: 'huda-test-' + Date.now(), renotify: true,
     });
   }).catch(() => {});
-  // Also fire direct Notification (desktop fallback)
-  try { new Notification('Huda — ' + msg.title, { body: msg.body, icon: '/icons/icon-192.png' }); } catch(e) {}
+  // Direct Notification — desktop only (Android Chrome blocks this from page context)
+  if (!/Android/.test(navigator.userAgent || '')) {
+    try { new Notification('Huda — ' + msg.title, { body: msg.body, icon: '/icons/icon-192.png' }); } catch(e) {}
+  }
   showToast('Notification sent — check your notification area');
 }
 
@@ -2320,7 +2333,10 @@ function fireReminder() {
       tag: 'huda-reminder', renotify: true,
     });
   }).catch(() => {});
-  try { new Notification('Huda — ' + msg.title, { body: msg.body, icon: '/icons/icon-192.png' }); } catch(e) {}
+  // Direct Notification — desktop only (Android Chrome blocks this from page context)
+  if (!/Android/.test(navigator.userAgent || '')) {
+    try { new Notification('Huda — ' + msg.title, { body: msg.body, icon: '/icons/icon-192.png' }); } catch(e) {}
+  }
   // Reschedule SW from now so it doesn't also fire immediately
   _swScheduleReminder();
 }
