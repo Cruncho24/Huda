@@ -106,7 +106,6 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchAndCacheHijri(new Date());
   registerSW();
   setupInstallPrompt();
-  setupReminders();
   setInterval(rotateHadith, 12000);
 });
 
@@ -318,20 +317,6 @@ function renderHome() {
     }, 1000);
   }
 
-  // Build dhikr reminder live countdown (shown inside reminder card)
-  const fmtMs = ms => { const t = Math.max(0, ms); return `${String(Math.floor(t/3600000)).padStart(2,'0')}:${String(Math.floor((t%3600000)/60000)).padStart(2,'0')}:${String(Math.floor((t%60000)/1000)).padStart(2,'0')}`; };
-  const notifEnabled = localStorage.getItem('huda_notifs') === '1' && 'Notification' in window && Notification.permission === 'granted';
-  if (notifEnabled) {
-    if (state.prayer.homeInterval) clearInterval(state.prayer.homeInterval);
-    state.prayer.homeInterval = setInterval(() => {
-      const elN = document.getElementById('home-notif-cd');
-      if (!elN) { clearInterval(state.prayer.homeInterval); state.prayer.homeInterval = null; return; }
-      const lastR = parseInt(localStorage.getItem('huda_last_reminder') || '0') || 0;
-      const hoursR = parseInt(localStorage.getItem('huda_notifs_interval') || '2') || 2;
-      elN.textContent = fmtMs((lastR + hoursR * 3600000) - Date.now());
-    }, 1000);
-  }
-
   document.getElementById('tab-home').innerHTML = `
     <div class="hero fade-in">
       <div class="hero-arabic">السَّلَامُ عَلَيْكُمْ</div>
@@ -426,8 +411,6 @@ function renderHome() {
         </select>
       </div>
     </div>
-
-    ${renderReminderCard()}
 
     <div style="padding:8px 16px 12px">
       <div class="section-title">🌙 Your Islamic Companion</div>
@@ -1840,11 +1823,6 @@ function saveTasbeeh() {
 }
 
 // ── Islamic Calendar ──────────────────────────────────────────
-const HIJRI_MONTHS = [
-  'Muharram','Safar','Rabi al-Awwal','Rabi al-Thani',
-  'Jumada al-Awwal','Jumada al-Thani','Rajab',"Sha'ban",
-  'Ramadan','Shawwal',"Dhu al-Qi'dah",'Dhu al-Hijjah'
-];
 const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 async function openCalendar() {
@@ -2721,82 +2699,7 @@ function calculateZakat() {
   document.getElementById('zakat-result').scrollIntoView({ behavior: 'smooth' });
 }
 
-// ── Reminders / Notifications ─────────────────────────────────
-const REMINDER_MSGS = [
-  { title: 'Istighfar', body: 'أَسْتَغْفِرُ اللّٰه\nPause and seek Allah\'s forgiveness' },
-  { title: 'Subhan Allah', body: 'سُبْحَانَ اللّٰه\nGlory be to Allah — say it 33 times' },
-  { title: 'Alhamdulillah', body: 'الحَمْدُ لِلّٰه\nCount your blessings and praise Allah' },
-  { title: 'Allahu Akbar', body: 'اللّٰهُ أَكْبَر\nAllah is Greater than everything you worry about' },
-  { title: 'La ilaha illallah', body: 'لَا إِلٰهَ إِلَّا اللّٰه\nRenew your faith with the Shahada' },
-  { title: 'Salawat', body: 'اللّٰهُمَّ صَلِّ عَلَى مُحَمَّد\nSend blessings upon the Prophet ﷺ' },
-  { title: 'Dhikr', body: 'In the remembrance of Allah do hearts find rest — Quran 13:28' },
-  { title: 'Subhanallahi wa bihamdih', body: 'سُبْحَانَ اللّٰهِ وَبِحَمْدِهِ\nBeloved to Allah — light on the tongue, heavy on the scale' },
-];
 
-function renderReminderCard() {
-  const ua = navigator.userAgent || '';
-  const isDDG = /DuckDuckGo/i.test(ua);
-  const perm = 'Notification' in window ? Notification.permission : 'unsupported';
-
-  // DuckDuckGo and browsers with no Notification API — show explanation, not a blank card
-  if (isDDG || perm === 'unsupported') {
-    return `
-    <div class="reminder-card">
-      <div class="reminder-card-top">
-        <div>
-          <div class="reminder-card-title">🔔 Daily Reminders</div>
-          <div class="reminder-card-sub" style="color:var(--gray-400)">
-            ${isDDG
-              ? 'DuckDuckGo blocks notifications — open in Chrome for reminders'
-              : 'Notifications not supported in this browser'}
-          </div>
-        </div>
-      </div>
-    </div>`;
-  }
-
-  const enabled = localStorage.getItem('huda_notifs') === '1' && perm === 'granted';
-  const interval = parseInt(localStorage.getItem('huda_notifs_interval') || '2') || 2;
-  const last = parseInt(localStorage.getItem('huda_last_reminder') || '0');
-  const nextMs = last ? Math.max(0, (last + interval * 3600000) - Date.now()) : 0;
-  const nextStr = enabled && last ? (nextMs < 60000 ? 'any moment' : `in ${Math.ceil(nextMs/60000)}m`) : '';
-  const permDenied = perm === 'denied';
-  const isMac = /Mac/.test(navigator.platform || ua) && !/iPhone|iPad/.test(ua);
-  const isAndroid = /Android/.test(ua);
-  const blockedHint = isMac
-    ? ' — System Settings → Notifications → Chrome'
-    : isAndroid
-    ? ' — Chrome menu → Settings → Site Settings → Notifications'
-    : ' — enable in your browser settings';
-  return `
-    <div class="reminder-card">
-      <div class="reminder-card-top">
-        <div>
-          <div class="reminder-card-title">🔔 Daily Reminders</div>
-          <div class="reminder-card-sub">${
-            permDenied ? `⚠️ Notifications blocked${blockedHint}` :
-            enabled ? `Every ${interval}h` :
-            'Gentle reminders throughout your day'
-          }</div>
-          ${enabled && isMac ? `<div style="font-size:11px;color:var(--gray-400);margin-top:3px">Mac: check System Settings → Notifications → Chrome if not arriving</div>` : ''}
-        </div>
-        ${enabled
-          ? `<div style="display:flex;gap:6px">
-               <button class="reminder-off-btn" onclick="testNotification()" title="Send a test notification now" style="background:#0891b2">Test</button>
-               <button class="reminder-off-btn" onclick="disableReminders()">Off</button>
-             </div>`
-          : permDenied ? '' : `<button class="reminder-on-btn" onclick="enableReminders()">Enable</button>`
-        }
-      </div>
-      ${enabled ? `
-        <div class="reminder-next-cd">Next reminder in <span id="home-notif-cd" style="font-variant-numeric:tabular-nums;font-weight:700">--:--:--</span></div>
-        <div class="reminder-intervals">
-          ${[1,2,3,4].map(h => `
-            <button class="ri-btn ${interval === h ? 'active' : ''}" onclick="setReminderInterval(${h})">${h}h</button>
-          `).join('')}
-        </div>` : ''}
-    </div>`;
-}
 
 function showToast(msg) {
   let t = document.getElementById('huda-toast');
@@ -2805,191 +2708,6 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-function testNotification() {
-  if (!('Notification' in window) || Notification.permission !== 'granted') {
-    const ua = navigator.userAgent || '';
-    const isMac = /Mac/.test(navigator.platform || ua) && !/iPhone|iPad/.test(ua);
-    const isAndroid = /Android/.test(ua);
-    alert(isMac
-      ? 'Notifications blocked.\n\n1. Open System Settings → Notifications → Chrome\n2. Turn on "Allow Notifications"\n3. Make sure Focus/Do Not Disturb is off\n4. Also check Chrome → Settings → Privacy → Notifications — make sure huda-six.vercel.app is allowed'
-      : isAndroid
-      ? 'Notifications blocked.\n\nTo enable:\n1. Tap Chrome\'s 3-dot menu → Settings\n2. Site Settings → Notifications\n3. Find this site → tap Allow'
-      : 'Notifications are not granted. Please enable them in your browser settings.');
-    return;
-  }
-  const msg = REMINDER_MSGS[Math.floor(Math.random() * REMINDER_MSGS.length)];
-  // Use SW notification only — direct new Notification() would cause a duplicate
-  navigator.serviceWorker?.ready.then(reg => {
-    reg.showNotification('Huda — ' + msg.title, {
-      body: msg.body, icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',
-      tag: 'huda-test-' + Date.now(), renotify: true,
-    });
-  }).catch(() => {});
-  showToast('Notification sent — check your notification area');
-}
-
-let _reminderInterval = null;
-let _checkPending = false; // debounce guard
-
-function setupReminders() {
-  if (localStorage.getItem('huda_notifs') !== '1') return;
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  _syncSwTimestamp().then(() => {
-    checkMissedReminder();
-    _swScheduleReminder();
-  });
-  _startForegroundPoller();
-}
-
-// Poll every 60s while app is open
-function _startForegroundPoller() {
-  if (_reminderInterval) clearInterval(_reminderInterval);
-  _reminderInterval = setInterval(checkMissedReminder, 60000);
-}
-
-// Read the timestamp the SW wrote to cache when it fired
-async function _syncSwTimestamp() {
-  try {
-    const resp = await caches.match('/__huda_last_reminder__');
-    if (!resp) return;
-    const ts = parseInt(await resp.text());
-    if (!ts) return;
-    const stored = parseInt(localStorage.getItem('huda_last_reminder') || '0');
-    if (ts > stored) localStorage.setItem('huda_last_reminder', String(ts));
-  } catch(e) {}
-}
-
-// Check if a reminder is overdue and fire it.
-// Async so we sync the SW's last-fired timestamp first — prevents double-notification
-// when both the SW timer and the foreground 60s poller expire at the same wall-clock time.
-async function checkMissedReminder() {
-  if (localStorage.getItem('huda_notifs') !== '1') return;
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  await _syncSwTimestamp(); // pick up SW's last-fired before checking
-  const last = parseInt(localStorage.getItem('huda_last_reminder') || '0');
-  if (!last) {
-    localStorage.setItem('huda_last_reminder', Date.now().toString());
-    _swScheduleReminder();
-    return;
-  }
-  const hours = parseInt(localStorage.getItem('huda_notifs_interval') || '2') || 2;
-  if (Date.now() - last >= hours * 3600000) {
-    fireReminder();
-  }
-}
-
-// Debounced version for event listeners — prevents stacking on rapid app open/focus
-function _debouncedCheck() {
-  if (_checkPending) return;
-  _checkPending = true;
-  setTimeout(() => {
-    _checkPending = false;
-    checkMissedReminder(); // checkMissedReminder handles _syncSwTimestamp itself
-  }, 800);
-}
-
-function fireReminder() {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  const hours = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
-  const last = parseInt(localStorage.getItem('huda_last_reminder') || '0');
-  const intervalMs = hours * 3600000;
-  // Advance from the scheduled time (not from now) so the schedule doesn't drift/reset
-  const scheduledTime = last ? last + intervalMs : Date.now();
-  const newLast = Math.min(scheduledTime, Date.now());
-  localStorage.setItem('huda_last_reminder', String(newLast));
-  const msg = REMINDER_MSGS[Math.floor(Math.random() * REMINDER_MSGS.length)];
-  navigator.serviceWorker?.ready.then(reg => {
-    reg.showNotification('Huda — ' + msg.title, {
-      body: msg.body, icon: '/icons/icon-192.png', badge: '/icons/icon-192.png',
-      tag: 'huda-reminder', renotify: true,
-    });
-  }).catch(() => {});
-  _swScheduleReminder();
-}
-
-// Write next-fire schedule to Cache API so the SW can check it when woken by periodicSync
-async function _writeScheduleToCache(nextFireTime, intervalMs) {
-  try {
-    const cache = await caches.open('huda-schedule');
-    await cache.put('/__huda_next_reminder__', new Response(String(nextFireTime)));
-    await cache.put('/__huda_interval__', new Response(String(intervalMs)));
-  } catch(e) {}
-}
-
-// Schedule background notification via SW timer + Periodic Background Sync
-function _swScheduleReminder() {
-  const hours = parseInt(localStorage.getItem('huda_notifs_interval') || '2');
-  const last = parseInt(localStorage.getItem('huda_last_reminder') || '0');
-  const intervalMs = hours * 3600000;
-  const elapsed = last ? Date.now() - last : 0;
-  const remaining = intervalMs - elapsed;
-  const firstMs = remaining > 30000 ? remaining : intervalMs;
-  const nextFireTime = Date.now() + firstMs;
-
-  // Write to cache so SW periodicSync handler can check if it's time to fire
-  _writeScheduleToCache(nextFireTime, intervalMs);
-
-  navigator.serviceWorker?.ready.then(reg => {
-    // SW setTimeout — works on desktop and short intervals before SW is terminated
-    reg.active?.postMessage({ type: 'SCHEDULE_REMINDER', firstMs, intervalMs });
-    // Periodic Background Sync — the only reliable background mechanism on mobile
-    // Requires installed PWA on Chrome Android; silently ignored otherwise
-    if ('periodicSync' in reg) {
-      reg.periodicSync.register('huda-reminder', { minInterval: intervalMs }).catch(() => {});
-    }
-  });
-}
-
-// Listen for SW firing — update our timestamp
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.addEventListener('message', e => {
-    if (e.data?.type === 'REMINDER_FIRED') {
-      // SW already wrote to cache; sync it into localStorage
-      _syncSwTimestamp();
-    }
-  });
-}
-
-// Single entry point for all app-open events — debounced to prevent stacking
-document.addEventListener('visibilitychange', () => { if (!document.hidden) _debouncedCheck(); });
-window.addEventListener('pageshow', e => { if (e.persisted) _debouncedCheck(); });
-
-async function enableReminders() {
-  if (!('Notification' in window)) {
-    alert('Your browser doesn\'t support web notifications. Try opening Huda in Chrome.');
-    return;
-  }
-  if (/DuckDuckGo/i.test(navigator.userAgent || '')) {
-    alert('DuckDuckGo blocks web notifications.\n\nTo get reminders, open Huda in Chrome instead.');
-    return;
-  }
-  const perm = await Notification.requestPermission();
-  if (perm === 'granted') {
-    localStorage.setItem('huda_notifs', '1');
-    localStorage.setItem('huda_last_reminder', Date.now().toString());
-    setupReminders();
-  } else {
-    localStorage.setItem('huda_notifs', '0');
-  }
-  renderHome();
-}
-
-function disableReminders() {
-  localStorage.setItem('huda_notifs', '0');
-  if (_reminderInterval) { clearInterval(_reminderInterval); _reminderInterval = null; }
-  navigator.serviceWorker?.ready.then(reg => {
-    reg.active?.postMessage({ type: 'CANCEL_REMINDER' });
-  });
-  renderHome();
-}
-
-function setReminderInterval(h) {
-  localStorage.setItem('huda_notifs_interval', h);
-  localStorage.setItem('huda_last_reminder', Date.now().toString()); // reset clock
-  _startForegroundPoller();
-  _swScheduleReminder();
-  renderHome();
-}
 
 // ── PWA ───────────────────────────────────────────────────────
 function registerSW() {

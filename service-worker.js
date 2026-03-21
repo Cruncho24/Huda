@@ -2,7 +2,7 @@
 // HUDA PWA — Service Worker
 // ============================================================
 
-const CACHE_NAME = 'huda-v89';
+const CACHE_NAME = 'huda-v91';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -112,94 +112,6 @@ async function cacheFirst(request) {
   }
 }
 
-// ── Reminder notifications ────────────────────────────────────
-const SW_REMINDERS = [
-  { title: 'Istighfar', body: 'أَسْتَغْفِرُ اللّٰه\nPause and seek Allah\'s forgiveness' },
-  { title: 'Subhan Allah', body: 'سُبْحَانَ اللّٰه\nGlory be to Allah — say it 33 times' },
-  { title: 'Alhamdulillah', body: 'الحَمْدُ لِلّٰه\nCount your blessings and praise Allah' },
-  { title: 'Allahu Akbar', body: 'اللّٰهُ أَكْبَر\nAllah is Greater than everything you worry about' },
-  { title: 'La ilaha illallah', body: 'لَا إِلٰهَ إِلَّا اللّٰه\nRenew your faith with the Shahada' },
-  { title: 'Salawat', body: 'اللّٰهُمَّ صَلِّ عَلَى مُحَمَّد\nSend blessings upon the Prophet ﷺ' },
-  { title: 'Dhikr', body: 'In the remembrance of Allah do hearts find rest — Quran 13:28' },
-  { title: 'Subhanallahi wa bihamdih', body: 'سُبْحَانَ اللّٰهِ وَبِحَمْدِهِ\nLight on the tongue, heavy on the scale' },
-];
-
-// SW-based reminder timer — runs independently of the page
-let _swTimer = null;
-let _swIntervalMs = 0;
-
-self.addEventListener('message', event => {
-  const d = event.data;
-  if (!d) return;
-  if (d.type === 'SCHEDULE_REMINDER') {
-    // intervalMs = recurring interval; firstMs = time until next fire (may be shorter if overdue)
-    _swIntervalMs = d.intervalMs || d.ms;
-    _swSetTimer(d.firstMs || d.ms);
-  } else if (d.type === 'CANCEL_REMINDER') {
-    if (_swTimer) { clearTimeout(_swTimer); _swTimer = null; }
-    _swIntervalMs = 0;
-  }
-});
-
-function _swSetTimer(ms) {
-  if (_swTimer) clearTimeout(_swTimer);
-  _swTimer = setTimeout(() => {
-    _swFireReminder();
-    if (_swIntervalMs) _swSetTimer(_swIntervalMs); // reschedule
-  }, ms);
-}
-
-async function _swFireReminder() {
-  const now = Date.now();
-  // Update last-fired and advance next-fire timestamps in cache
-  const schedCache = await caches.open('huda-schedule');
-  const intResp = await schedCache.match('/__huda_interval__');
-  const intervalMs = intResp ? (parseInt(await intResp.text()) || 7200000) : 7200000;
-  await schedCache.put('/__huda_next_reminder__', new Response(String(now + intervalMs)));
-  // Write last-fired so page can sync via _syncSwTimestamp()
-  const appCache = await caches.open(CACHE_NAME);
-  await appCache.put('/__huda_last_reminder__', new Response(String(now)));
-  const msg = SW_REMINDERS[Math.floor(Math.random() * SW_REMINDERS.length)];
-  self.registration.showNotification('Huda — ' + msg.title, {
-    body: msg.body,
-    icon: '/icons/icon-192.png',
-    badge: '/icons/icon-192.png',
-    tag: 'huda-reminder',
-    renotify: true,
-  });
-  // Tell open clients to sync their timestamp
-  self.clients.matchAll({ includeUncontrolled: true }).then(clients => {
-    clients.forEach(c => c.postMessage({ type: 'REMINDER_FIRED' }));
-  });
-}
-
-// periodicsync — only fires on Chrome Android for installed PWAs, but it's reliable
-self.addEventListener('periodicsync', event => {
-  if (event.tag !== 'huda-reminder') return;
-  event.waitUntil((async () => {
-    try {
-      const cache = await caches.open('huda-schedule');
-      const nextResp = await cache.match('/__huda_next_reminder__');
-      if (nextResp) {
-        const nextTime = parseInt(await nextResp.text());
-        if (!isNaN(nextTime) && Date.now() < nextTime) return; // not time yet
-      }
-    } catch(e) {}
-    await _swFireReminder();
-  })());
-});
-
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-      for (const client of list) {
-        if ('focus' in client) return client.focus();
-      }
-      if (clients.openWindow) return clients.openWindow('/');
-    })
-  );
-});
 
 function stripQuery(url) {
   const u = new URL(url);
