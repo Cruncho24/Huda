@@ -88,6 +88,9 @@ const state = {
   calendar: { displayYear: null, displayMonth: null },
 };
 
+// Tracks which ayahs have tafsir expanded; cleared on each renderSurahContent
+const _openTafsir = new Set(); // "surah:ayah" strings
+
 // ── Init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   applyDarkMode();
@@ -1961,6 +1964,54 @@ function navigateCalendar(delta) {
   state.calendar.displayMonth = m;
   state.calendar.displayYear = y;
   renderCalendar();
+}
+
+// ── Tafsir ────────────────────────────────────────────────────
+async function toggleTafsir(surah, ayah) {
+  const key = `${surah}:${ayah}`;
+  const boxId = `tafsir-box-${surah}-${ayah}`;
+  const btnId = `tafsir-btn-${surah}-${ayah}`;
+  const box = document.getElementById(boxId);
+  const btn = document.getElementById(btnId);
+  if (!box || !btn) return;
+
+  if (_openTafsir.has(key)) {
+    _openTafsir.delete(key);
+    box.style.display = 'none';
+    btn.textContent = 'Tafsir ›';
+    return;
+  }
+
+  _openTafsir.add(key);
+  btn.textContent = 'Hide Tafsir';
+  box.style.display = 'block';
+  box.innerHTML = '<div class="spinner" style="margin:8px auto"></div>';
+
+  // Check cache first
+  let text;
+  try {
+    const cache = JSON.parse(localStorage.getItem(`huda_tafsir_${surah}`) || '{}');
+    if (cache[ayah]) {
+      text = cache[ayah];
+    } else {
+      const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/en.maududi`);
+      const json = await res.json();
+      text = json.data?.text;
+      if (text) {
+        cache[ayah] = text;
+        try { localStorage.setItem(`huda_tafsir_${surah}`, JSON.stringify(cache)); } catch(e) {}
+      }
+    }
+  } catch(e) {
+    text = null;
+  }
+
+  // Stale check — user may have closed the box while loading
+  if (!_openTafsir.has(key)) return;
+
+  box.innerHTML = text
+    ? `<p class="tafsir-text">${esc(text)}</p>`
+    : `<p class="tafsir-error">Tafsir temporarily unavailable.</p>`;
 }
 
 function updateDhikrCard(i) {
