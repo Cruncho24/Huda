@@ -166,8 +166,16 @@ async function handleSignUp() {
   if (pass.length < 6) { showAuthError('Password must be at least 6 characters.'); return; }
   btn.disabled = true; btn.textContent = 'Creating…';
   try {
-    await authSignUp(email, pass);
-    document.getElementById('auth-modal').style.display = 'none';
+    const { session } = await authSignUp(email, pass);
+    if (!session) {
+      // Email confirmation required — show instructions instead of closing
+      document.getElementById('auth-modal-body').innerHTML = `
+        <div class="auth-modal-title">Check your email</div>
+        <div class="auth-user-email">We sent a confirmation link to <strong>${esc(email)}</strong>.<br><br>Click the link in the email to activate your account, then sign in.</div>
+      `;
+    } else {
+      document.getElementById('auth-modal').style.display = 'none';
+    }
   } catch(e) {
     showAuthError(e.message || 'Sign up failed.');
     btn.disabled = false; btn.textContent = 'Create Account';

@@ -13,10 +13,15 @@ function _getClient() {
 }
 
 async function authSignUp(email, password) {
-  const { data, error } = await _getClient().auth.signUp({ email, password });
+  const { data, error } = await _getClient().auth.signUp({
+    email,
+    password,
+    options: { emailRedirectTo: 'https://huda-six.vercel.app/auth/confirm' },
+  });
   if (error) throw error;
-  _cachedUser = data.user;
-  return data.user;
+  // session is null when email confirmation is required
+  _cachedUser = data.session?.user ?? null;
+  return { user: data.user, session: data.session };
 }
 
 async function authSignIn(email, password) {

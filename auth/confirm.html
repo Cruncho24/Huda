@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Huda — Confirming Email</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f8fafc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 36px 28px;
+      max-width: 320px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+    .icon { font-size: 48px; margin-bottom: 16px; }
+    h1 { font-size: 22px; margin: 0 0 10px; color: #0f172a; }
+    p  { font-size: 15px; color: #64748b; margin: 0 0 20px; line-height: 1.5; }
+    a  {
+      display: inline-block;
+      background: #059669;
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon" id="icon">⏳</div>
+    <h1 id="title">Confirming your email…</h1>
+    <p id="msg">Please wait a moment.</p>
+    <a href="/" id="link" style="display:none">Open Huda</a>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script>
+    const SUPABASE_URL  = 'https://yfzjvxzeomrmsasqqwqd.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inlmemp2eHplb21ybXNhc3Fxd3FkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMTQ1OTMsImV4cCI6MjA4OTY5MDU5M30.0wvjwGpuuyy0gQHAhuOXXEREVqQVHesqW-JsJXU5LcA';
+
+    const client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+    function showSuccess() {
+      document.getElementById('icon').textContent  = '✅';
+      document.getElementById('title').textContent = 'Email confirmed!';
+      document.getElementById('msg').textContent   = 'Your account is ready. Redirecting…';
+      document.getElementById('link').style.display = 'inline-block';
+      setTimeout(() => { window.location.href = '/'; }, 2000);
+    }
+
+    function showError(msg) {
+      document.getElementById('icon').textContent  = '❌';
+      document.getElementById('title').textContent = 'Confirmation failed';
+      document.getElementById('msg').textContent   = msg || 'The link may have expired. Try signing up again.';
+      document.getElementById('link').style.display = 'inline-block';
+    }
+
+    // Supabase will exchange the token from the URL automatically
+    client.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
+        showSuccess();
+      }
+    });
+
+    // Fallback: check for existing session
+    client.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) { showError(error.message); return; }
+      if (session) showSuccess();
+    });
+  </script>
+</body>
+</html>

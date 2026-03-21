@@ -8,6 +8,11 @@
   ],
   "routes": [
     {
+      "src": "/auth/confirm",
+      "headers": { "Cache-Control": "no-cache" },
+      "dest": "/auth/confirm.html"
+    },
+    {
       "src": "/service-worker.js",
       "headers": {
         "Service-Worker-Allowed": "/",
