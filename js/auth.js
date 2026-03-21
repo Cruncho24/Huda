@@ -37,6 +37,13 @@ async function authSignOut() {
   _cachedUser = null;
 }
 
+async function authResetPassword(email) {
+  const { error } = await _getClient().auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://huda-six.vercel.app/auth/reset',
+  });
+  if (error) throw error;
+}
+
 // Returns cached user synchronously (null until first authOnChange fires)
 function authGetCachedUser() {
   return _cachedUser;
