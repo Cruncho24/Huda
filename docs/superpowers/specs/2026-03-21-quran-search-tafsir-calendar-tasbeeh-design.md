@@ -1,7 +1,7 @@
 # Quran Search, Tafsir, Islamic Calendar & Tasbeeh Counter — Design Spec
 **Date:** 2026-03-21
 **Project:** Huda Islamic Companion PWA
-**Status:** Approved for implementation
+**Status:** Approved for implementation (v2 — all review issues resolved)
 
 ---
 
@@ -14,197 +14,237 @@ Four independent features added to the existing vanilla JS PWA. Each has its own
 ## Feature 1 — Tasbeeh Counter
 
 ### What
-A free-form, unlimited tap counter added to the top of the Dhikr tab. No target, no preset — just count. Designed for users doing adhkar beyond the 7 preset dhikrs.
+A free-form, unlimited tap counter at the top of the Dhikr tab. No target, no preset — just count.
 
 ### UI
 - New card at the very top of the Dhikr tab, above the existing preset dhikr list
-- Large centered count number (e.g. `0`)
+- Large centered count number
 - Full card is tappable — tap anywhere to increment
-- Small reset button (↺) in the top-right corner of the card
+- Small reset button (↺) in the top-right corner
 - Label: "Tasbeeh Counter"
 
 ### Behaviour
 - Tap → increment by 1, haptic feedback (reuse existing `haptic()`)
-- Reset button → confirm with nothing (no confirm dialog needed — it's just a counter), reset to 0
+- Reset → set to 0, no confirm dialog needed
 - Count persists in `localStorage` as `huda_tasbeeh` (integer string)
-- Count is NOT daily-reset — it persists until manually reset (unlike preset dhikrs)
+- Count is NOT daily-reset — persists until manually reset (unlike preset dhikrs)
 
 ### State
+Add `tasbeeh` to the existing `state` object at lines 57–87 of `app.js`:
 ```js
-state.tasbeeh = parseInt(localStorage.getItem('huda_tasbeeh') || '0') || 0;
+tasbeeh: parseInt(localStorage.getItem('huda_tasbeeh') || '0') || 0,
 ```
+This must be added to the `state` constant — it is not a standalone initialiser.
 
 ### Functions
-- `tapTasbeeh()` — increment, save, update DOM in-place (no full re-render)
-- `resetTasbeeh()` — set to 0, save, update DOM in-place
+- `tapTasbeeh()` — `state.tasbeeh++`, save, update `#tasbeeh-count` text content directly (no full re-render)
+- `resetTasbeeh()` — `state.tasbeeh = 0`, save, update `#tasbeeh-count` directly
 - `saveTasbeeh()` — `localStorage.setItem('huda_tasbeeh', String(state.tasbeeh))`
 
-### DOM update (in-place, no re-render)
-Update `#tasbeeh-count` text content directly — avoid re-rendering the whole Dhikr tab on every tap.
+### DOM update
+Update `#tasbeeh-count` text content in-place — never re-render the whole Dhikr tab on each tap.
 
 ### Integration
-- `renderDhikr()` renders the tasbeeh card at top, then the existing preset dhikr list below
-- `state.tasbeeh` added to the state object initialisation
+`renderDhikr()` renders the tasbeeh card first, then the preset dhikr list below.
 
 ---
 
 ## Feature 2 — Islamic Calendar
 
 ### What
-A Hijri calendar card in the Learn tab showing the current month as a grid, with key Islamic dates highlighted. Previous/next month navigation.
+A Hijri calendar card in the Learn tab. Opens a full-screen calendar view showing the current Hijri month as a grid, with key Islamic dates highlighted.
 
 ### Where
-New card in the Learn hub (`renderLearnHub`), alongside existing cards (New Muslim Guide, Children's Quran, etc.). Clicking it opens a full-screen calendar view (same pattern as other Learn sections).
+New card in `renderLearnHub()`, alongside existing cards. Clicking it opens a full-screen view using the same pattern as other Learn sections (`openCalendar()`).
 
 ### UI — Calendar View
 - Header: Hijri month name + year, with ‹ › navigation arrows
 - Grid: 7-column weekday header (Sun–Sat), days of the month as numbered cells
 - Today's Hijri date highlighted in green
-- Key dates shown with a dot indicator and label beneath the grid
+- Key dates shown with a coloured dot; a legend list beneath the grid
 
-### Key Islamic Dates (hardcoded)
-All dates are in Hijri (month, day) — repeat annually:
+### Key Islamic Dates (hardcoded in `data.js` as `ISLAMIC_DATES`)
 
-| Date (Hijri) | Event |
-|---|---|
-| Muharram 1 | Islamic New Year |
-| Muharram 10 | Ashura |
-| Rabi ul-Awwal 12 | Mawlid al-Nabi ﷺ |
-| Rajab 27 | Isra wal-Miraj |
-| Sha'ban 15 | Laylat al-Bara'ah |
-| Ramadan 1 | Start of Ramadan |
-| Ramadan 27 | Laylat al-Qadr |
-| Shawwal 1 | Eid ul-Fitr |
-| Dhul Hijjah 9 | Day of Arafah |
-| Dhul Hijjah 10 | Eid ul-Adha |
+Store as `{ month: number, day: number, name: string }` using numeric Hijri month (1–12) to avoid string-matching issues with the `HIJRI_MONTHS` array:
 
-### Hijri Date Calculation
-Use the existing `getHijriSync()` function already in the app. It already converts Gregorian to Hijri. To build the calendar grid:
-1. Get today's Hijri date
-2. Calculate the first day of the displayed Hijri month by converting Hijri → Gregorian (reverse: try Gregorian dates near the expected new moon until the Hijri month matches)
-3. Simpler alternative: use the `aladhan.com` API endpoint `GET /v1/gToH/{dd}-{mm}-{yyyy}` (already in CSP) to find which Gregorian date corresponds to Hijri 1st of the target month — binary search on nearby dates
+```js
+const ISLAMIC_DATES = [
+  { month: 1,  day: 1,  name: 'Islamic New Year' },
+  { month: 1,  day: 10, name: 'Ashura' },
+  { month: 3,  day: 12, name: "Mawlid al-Nabi ﷺ" },  // Rabi al-Awwal 12
+  { month: 7,  day: 27, name: "Isra wal-Mi'raj" },
+  { month: 8,  day: 15, name: "Laylat al-Bara'ah" },
+  { month: 9,  day: 1,  name: 'Start of Ramadan' },
+  { month: 9,  day: 27, name: "Laylat al-Qadr" },
+  { month: 10, day: 1,  name: 'Eid ul-Fitr' },
+  { month: 12, day: 9,  name: 'Day of Arafah' },
+  { month: 12, day: 10, name: 'Eid ul-Adha' },
+];
+```
 
-**Recommended approach:** Since the existing `getHijriSync()` works by calling `aladhan.com`, use the same API to find the Gregorian start of any Hijri month. Cache results in `localStorage` keyed by `huda_cal_{hijriYear}_{hijriMonth}`.
+**Note on Mawlid:** The date 12 Rabi al-Awwal is the majority scholarly position. A small disclaimer note in the calendar UI is appropriate (e.g. "Dates are approximate — scholars may differ").
+
+### Hijri Calendar Grid Construction
+
+To render a month grid, need to know which Gregorian date corresponds to Hijri day 1 of the displayed month. Use `hToG` (Hijri to Gregorian), **not** `gToH`:
+
+```
+GET https://api.aladhan.com/v1/hToG/01-{hijriMonth}-{hijriYear}
+```
+
+Returns the Gregorian date for the 1st of that Hijri month. One API call per month navigation. Cache result in `localStorage` as `huda_cal_{hijriYear}_{hijriMonth}`.
+
+Once the Gregorian start date is known:
+1. Determine day-of-week for Hijri 1st (using JS `Date` with the Gregorian date)
+2. Hijri months are 29 or 30 days — determine length from the Gregorian offset to the 1st of the next Hijri month (one more `hToG` call, also cacheable)
+3. Build the grid cells
 
 ### State
+Add `calendar` to the existing `state` constant at lines 57–87 of `app.js` (same pattern as `tasbeeh`):
 ```js
-state.calendar = {
-  displayMonth: null,  // { year, month } in Hijri — null = current month
-};
+calendar: { displayYear: null, displayMonth: null },
 ```
 
 ### Functions
-- `openCalendar()` — sets display month to current Hijri month, renders full-screen view
-- `renderCalendar()` — builds the grid HTML, fetches/caches Gregorian start date if needed
-- `navigateCalendar(delta)` — delta = +1 or -1, updates displayMonth, re-renders
+- `openCalendar()` — sets `state.calendar.displayYear/Month` to current Hijri, calls `renderCalendar()`
+- `renderCalendar()` — fetches/caches Gregorian start via two `hToG` calls (current month + next month to determine length), builds and injects grid HTML
+  - **Error handling:** if either `hToG` call fails, assume 30 days (Hijri maximum) and show a "⚠️ Calendar data unavailable" note beneath the grid
+  - **Error handling:** wrap each API call in try/catch independently — first call (month start) failing is fatal for the grid; second call (month length) failing gracefully falls back to 30 days
+- `navigateCalendar(delta)` — delta = +1 or -1, advances month with wrap:
+  ```js
+  let m = state.calendar.displayMonth + delta;
+  let y = state.calendar.displayYear;
+  if (m > 12) { m = 1; y++; }
+  if (m < 1)  { m = 12; y--; }
+  state.calendar.displayMonth = m;
+  state.calendar.displayYear = y;
+  renderCalendar();
+  ```
 
 ---
 
 ## Feature 3 — Tafsir
 
 ### What
-Per-ayah tafsir (Ibn Kathir) accessible from the Quran Study view. Tap a button on any ayah to see its explanation inline.
+Per-ayah tafsir accessible from the Quran Study view. Tap a button on any ayah to see its explanation inline.
 
 ### API
-`GET https://api.alquran.cloud/v1/ayah/{surah}:{ayah}/en.ibn-kathir`
+```
+GET https://api.alquran.cloud/v1/ayah/{surah}:{ayah}/en.maududi
+```
 
-Returns a single ayah's tafsir text. Example: `/v1/ayah/2:255/en.ibn-kathir`
+Maududi's Tafheem ul Quran — a respected English-language Quranic commentary, confirmed available on the API. Example: `/v1/ayah/2:255/en.maududi`.
 
-**Fallback:** If `en.ibn-kathir` edition is unavailable for an ayah, fall back to `en.jalalayn` (Tafsir Al-Jalalayn).
+**Note:** This is not a line-by-line tafsir but a section-level commentary. The response `text` field contains the commentary text for the ayah. This is the best English tafsir option available on the free alquran.cloud API — `en.ibn-kathir` does not exist on this API.
 
 ### UI
-In `renderSurahContent()` (Study view), each ayah card gets a small "Tafsir ›" button below the English translation line. Tapping it:
-1. Shows a loading spinner in place
+In `renderSurahContent()` (Study view only — not Mushaf view), each ayah card gets a small "Tafsir ›" button below the English translation. Tapping it:
+1. Shows a loading spinner inline
 2. Fetches tafsir for that specific ayah
 3. Renders the tafsir text in an expandable box below the ayah
 4. Button label toggles to "Hide Tafsir"
-5. Tap again → collapses, button returns to "Tafsir ›"
+5. Tap again → collapses
 
 ### Caching
-Tafsir is cached in `state.quran.cache[surahNum]` alongside existing `arData`/`enData`:
+Tafsir is cached **separately** from the Quran text — in its own `localStorage` key per surah: `huda_tafsir_{n}`. This is a JSON object mapping ayah numbers to tafsir text strings.
+
+Do NOT store tafsir inside `state.quran.cache[n]` or serialize it into `huda_quran` — tafsir text is long (500–2000 words per ayah) and would cause `QuotaExceededError` when the whole surah cache is serialised together.
+
 ```js
-state.quran.cache[n] = { arData, enData, tafsirData: {} }
-// tafsirData[ayahNum] = "tafsir text string"
+// On fetch:
+const tafsirCache = JSON.parse(localStorage.getItem(`huda_tafsir_${surahNum}`) || '{}');
+tafsirCache[ayahNum] = responseText;
+try { localStorage.setItem(`huda_tafsir_${surahNum}`, JSON.stringify(tafsirCache)); } catch(e) {}
+
+// On lookup:
+const tafsirCache = JSON.parse(localStorage.getItem(`huda_tafsir_${surahNum}`) || '{}');
+const cached = tafsirCache[ayahNum];
 ```
 
-Also persisted to `localStorage` via the existing `huda_quran` key (same JSON blob). Since tafsir text is long, only cache what the user has actually opened — not the whole surah at once.
-
-### State per ayah card
-Track which ayahs have tafsir open using a simple Set in module scope:
+### Open tafsir tracking
 ```js
-const _openTafsir = new Set(); // Set of "surah:ayah" strings
+const _openTafsir = new Set(); // Set of "surah:ayah" strings — module scope
 ```
 
-`toggleTafsir(surah, ayah)` — opens/closes tafsir for that ayah, fetches if not cached.
+Call `_openTafsir.clear()` at the start of each `renderSurahContent()` call (DOM is fully rebuilt). Use `const` + `.clear()` — do not reassign the Set. Do NOT restore open tafsir boxes after re-render — ephemeral UI state.
 
 ### Error handling
-If the API fails: show "Tafsir temporarily unavailable" in the expand box. No retry — user can tap again.
+If the API fails: show "Tafsir temporarily unavailable" in the expand box. No retry.
 
-### Mushaf view
-Tafsir button is NOT shown in Mushaf (page) view — page layout has no room. Study view only.
+### `toggleTafsir(surah, ayah)`
+- If in `_openTafsir`: remove, collapse the box
+- If not: add, fetch (check cache first), render text
 
 ---
 
 ## Feature 4 — Quran Search
 
 ### What
-Full-text search across all 6,236 ayahs in both Arabic and English. Accessed via a search icon in the Quran tab header.
+Full-text search of English Quran translation (Sahih International) across all 6,236 ayahs. Arabic search is **not included** — the alquran.cloud search endpoint does not support Uthmani script or simple Arabic editions (returns 404). English-only covers the primary use case for this app's audience.
 
 ### API
-Al-Quran Cloud search endpoint:
 ```
-GET https://api.alquran.cloud/v1/search/{keyword}/all/{edition}
+GET https://api.alquran.cloud/v1/search/{keyword}/all/en.sahih
 ```
-- Arabic: `edition = quran-uthmani`
-- English: `edition = en.sahih`
 
-Run both in parallel with `Promise.all`. Returns up to 50 results per edition.
+Returns up to 60 matching ayahs. No pagination available. If results are truncated (60 returned), show a note: "Showing top 60 results — try a more specific search."
 
 ### UI Flow
-1. Search icon (🔍) added to the Quran tab header, next to the existing surah filter input
-2. Tapping it shows a full-screen search view (replaces the surah list — same pattern as opening a surah)
+1. Search icon (🔍) added to the Quran tab header — confirm exact DOM anchor in the surah list header during implementation
+2. Tapping opens a full-screen search view (hides surah list, shows search UI)
 3. Search input at top, auto-focused
-4. As user types (debounced 400ms), fire both API calls
-5. Results displayed as a unified list — Arabic matches and English matches merged, deduplicated by surah:ayah
-6. Each result row shows:
-   - Surah name (Arabic + English) + ayah number badge
-   - Matched text snippet (Arabic or English depending on which matched)
-7. Tap a result → `openSurah(surahNum)`, scroll to that ayah
-8. Back button returns to surah list
+4. Typing (debounced 400ms, minimum 2 chars) → fires API call
+5. Results list: each row shows surah name, ayah number badge, matching text snippet
+6. Tap result → `openSurah(surahNum, targetAyah)` then close search view
+7. Back button → returns to surah list
 
-### Deduplication
-If the same ayah matches both Arabic and English queries, show it once — prefer showing the English snippet (more readable) with an Arabic indicator.
-
-### Debounce
-400ms after last keypress before firing API. Minimum 2 characters before searching.
-
-### Empty / loading states
-- Typing (< 2 chars): "Type to search the Quran"
-- Loading: spinner
-- No results: "No results for '{query}'"
-- Error: "Search unavailable — check your connection"
-
-### Scroll to ayah
-After `openSurah()` loads the surah, scroll to the target ayah. Pass the target ayah number to `openSurah(surahNum, targetAyah)` — after render, `document.getElementById('ayah-{n}')?.scrollIntoView({ behavior: 'smooth' })`.
-
-Each ayah `div` in `renderSurahContent` already needs an `id="ayah-{n}"` attribute added.
-
-### Search view state
+### Search state
+Add `searchOpen` and `searchQuery` to the `state.quran` object in the `state` constant at lines 57–87 of `app.js`:
 ```js
-state.quran.searchOpen = false;
-state.quran.searchQuery = '';
+quran: {
+  // ... existing properties ...
+  searchOpen: false,
+  searchQuery: '',
+},
 ```
+These are additions to the literal — not runtime assignments.
 
 ### Functions
-- `openQuranSearch()` — show search view, focus input
-- `closeQuranSearch()` — hide search view, return to surah list
-- `runQuranSearch(query)` — debounced, fires both API calls, renders results
-- `openSurah(n, targetAyah = null)` — extend existing function with optional scroll target
+- `openQuranSearch()` — `state.quran.searchOpen = true`, render search view, focus input
+- `closeQuranSearch()` — `state.quran.searchOpen = false`, show surah list
+- `runQuranSearch(query)` — debounced 400ms; fetches `en.sahih` search; renders results
+  - Wrap the fetch in try/catch; on error show "Search unavailable — check your connection"
+  - On empty results: "No results for '{query}'"
+  - While loading: spinner
+
+### `openSurah(n, targetAyah = null)` — extend existing function
+All existing call sites pass only `n` — no changes to call sites needed. `targetAyah` defaults to `null` and existing behaviour is unchanged when not provided.
+After `renderSurahContent()` completes and `scrollTop = 0` runs:
+```js
+if (targetAyah) {
+  requestAnimationFrame(() => {
+    document.getElementById(`ayah-${targetAyah}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+}
+```
+
+Use `requestAnimationFrame` to ensure scroll runs **after** the existing `scrollTop = 0` reset. Do NOT skip the reset — just schedule the scroll target after it.
+
+Each ayah `div` in `renderSurahContent` needs `id="ayah-{ayahNumber}"` added.
+
+### Empty / error states
+| State | Message |
+|---|---|
+| < 2 chars typed | "Type at least 2 characters to search" |
+| Loading | Spinner |
+| 0 results | "No results for '{query}'" |
+| 60 results | Show results + "Showing top 60 results — try a more specific search" |
+| API error | "Search unavailable — check your connection" |
 
 ---
 
 ## CSP / vercel.json
-No changes needed. `api.alquran.cloud` is already in `connect-src`.
+No changes needed. `api.alquran.cloud` and `api.aladhan.com` are already in `connect-src`.
 
 ---
 
@@ -212,17 +252,18 @@ No changes needed. `api.alquran.cloud` is already in `connect-src`.
 
 | File | Changes |
 |---|---|
-| `js/app.js` | All 4 features — new functions, updated render functions |
-| `js/data.js` | Add `ISLAMIC_DATES` array (key dates for calendar) |
-| `css/styles.css` | New styles for tasbeeh card, calendar grid, tafsir expand box, search results |
+| `js/app.js` | All 4 features — new functions, updated `renderDhikr`, `renderLearnHub`, `renderSurahContent`, `openSurah` |
+| `js/data.js` | Add `ISLAMIC_DATES` array |
+| `css/styles.css` | New styles: tasbeeh card, calendar grid, tafsir expand box, search view + results |
 
-No new files needed. No new APIs beyond what's already in the CSP.
+No new files. No new APIs beyond what's already allowed in CSP.
 
 ---
 
 ## What is NOT included
-- Tasbeeh history/log — just the current count
-- Multiple tafsir options — Ibn Kathir only (with Jalalayn fallback)
-- Saving search results — ephemeral per session
-- Calendar event reminders — display only
-- Quran search in Mushaf view — Study view result navigation only
+- Tasbeeh history or session log
+- Multiple tafsir options (Maududi only; Ibn Kathir not available on this API)
+- Arabic Quran search (API limitation)
+- Saving search results across sessions
+- Calendar event reminders or notifications
+- Quran search in Mushaf view
