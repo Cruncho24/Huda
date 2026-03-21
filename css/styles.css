@@ -2258,6 +2258,26 @@ html.dark .auth-modal-box { background: #1e293b; color: #f1f5f9; }
   margin-bottom: 16px;
   color: var(--emerald, #059669);
 }
+.auth-pass-wrap {
+  position: relative;
+  margin-bottom: 10px;
+}
+.auth-pass-wrap .auth-input {
+  margin-bottom: 0;
+  padding-right: 44px;
+}
+.auth-pass-eye {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  line-height: 1;
+}
 .auth-input {
   width: 100%;
   padding: 10px 12px;

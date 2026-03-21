@@ -120,7 +120,10 @@ function renderAuthModalBody(mode = 'signin', user = null) {
     el.innerHTML = `
       <div class="auth-modal-title">Create Account</div>
       <input id="auth-email" class="auth-input" type="email" placeholder="Email" autocomplete="email">
-      <input id="auth-pass" class="auth-input" type="password" placeholder="Password (min 6 chars)" autocomplete="new-password">
+      <div class="auth-pass-wrap">
+        <input id="auth-pass" class="auth-input" type="password" placeholder="Password (min 6 chars)" autocomplete="new-password">
+        <button type="button" class="auth-pass-eye" onclick="togglePassVisibility()" title="Show/hide password">👁</button>
+      </div>
       <div id="auth-err" class="auth-error" style="display:none"></div>
       <button class="auth-btn-primary" onclick="handleSignUp()">Create Account</button>
       <div class="auth-switch-link">Already have an account? <a onclick="renderAuthModalBody('signin')">Sign in</a></div>
@@ -129,7 +132,10 @@ function renderAuthModalBody(mode = 'signin', user = null) {
     el.innerHTML = `
       <div class="auth-modal-title">Sign In</div>
       <input id="auth-email" class="auth-input" type="email" placeholder="Email" autocomplete="email">
-      <input id="auth-pass" class="auth-input" type="password" placeholder="Password" autocomplete="current-password">
+      <div class="auth-pass-wrap">
+        <input id="auth-pass" class="auth-input" type="password" placeholder="Password" autocomplete="current-password">
+        <button type="button" class="auth-pass-eye" onclick="togglePassVisibility()" title="Show/hide password">👁</button>
+      </div>
       <div id="auth-err" class="auth-error" style="display:none"></div>
       <button class="auth-btn-primary" onclick="handleSignIn()">Sign In</button>
       <div class="auth-switch-link">No account? <a onclick="renderAuthModalBody('signup')">Create one</a></div>
@@ -177,6 +183,14 @@ async function handleSignOut() {
 function showAuthError(msg) {
   const el = document.getElementById('auth-err');
   if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+
+function togglePassVisibility() {
+  const inp = document.getElementById('auth-pass');
+  const btn = document.querySelector('.auth-pass-eye');
+  if (!inp) return;
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  if (btn) btn.textContent = inp.type === 'password' ? '👁' : '🙈';
 }
 
 function updateAccountBtn(user) {
