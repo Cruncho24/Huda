@@ -13,6 +13,11 @@
       "dest": "/auth/confirm.html"
     },
     {
+      "src": "/auth/reset",
+      "headers": { "Cache-Control": "no-cache" },
+      "dest": "/auth/reset.html"
+    },
+    {
       "src": "/service-worker.js",
       "headers": {
         "Service-Worker-Allowed": "/",
