@@ -56,9 +56,14 @@
     function showSuccess() {
       document.getElementById('icon').textContent  = '✅';
       document.getElementById('title').textContent = 'Email confirmed!';
-      document.getElementById('msg').textContent   = 'Your account is ready. Redirecting…';
       document.getElementById('link').style.display = 'inline-block';
-      setTimeout(() => { window.location.href = '/'; }, 2000);
+      // Try to close this tab (works if email client opened it as a new tab)
+      // and fall back to redirecting if the tab can't be closed
+      try { window.close(); } catch(e) {}
+      setTimeout(() => {
+        // If still open, show message and let user navigate manually
+        document.getElementById('msg').textContent = 'You\'re all set! Close this tab and return to Huda, or tap the button below.';
+      }, 300);
     }
 
     function showError(msg) {
