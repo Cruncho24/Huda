@@ -100,11 +100,24 @@
     <button class="install-dismiss" onclick="dismissInstall()">✕</button>
   </div>
 
+  <!-- Account Modal -->
+  <div id="auth-modal" class="auth-modal-overlay" style="display:none" onclick="closeAuthModal(event)">
+    <div class="auth-modal-box" onclick="event.stopPropagation()">
+      <button class="auth-modal-close" onclick="closeAuthModal()">✕</button>
+      <div id="auth-modal-body"></div>
+    </div>
+  </div>
+
 </div>
 
 <!-- Vercel Analytics -->
 <script defer src="/_vercel/insights/script.js"></script>
 
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<!-- Auth & Sync -->
+<script src="/js/auth.js?v=92"></script>
+<script src="/js/sync.js?v=92"></script>
 <!-- Data & App -->
 <script src="/js/data.js?v=89"></script>
 <script src="/js/app.js?v=89"></script>
