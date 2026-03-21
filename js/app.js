@@ -499,7 +499,9 @@ function renderHome() {
 
   // Friday Jumu'ah banner — uses local date parts to match getDay() which is also local
   const isFriday = now.getDay() === 5;
-  const localDateStr = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const dd = String(now.getDate()).padStart(2,'0');
+  const localDateStr = `${now.getFullYear()}-${mm}-${dd}`;
   const jumuahDismissKey = `huda_jumuah_dismissed_${localDateStr}`;
   const jumuahDismissed = localStorage.getItem(jumuahDismissKey) === '1';
   const jumuahCard = (isFriday && !jumuahDismissed) ? `
@@ -635,7 +637,9 @@ function renderHome() {
 
 function dismissJumuah() {
   const now = new Date();
-  const key = `huda_jumuah_dismissed_${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const dd = String(now.getDate()).padStart(2,'0');
+  const key = `huda_jumuah_dismissed_${now.getFullYear()}-${mm}-${dd}`;
   localStorage.setItem(key, '1');
   const el = document.getElementById('jumuah-card');
   if (el) el.remove();

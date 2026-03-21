@@ -2342,7 +2342,7 @@ html.dark .auth-input { background: #0f172a; border-color: #334155; }
 /* ── Jumu'ah Banner ───────────────────────────────────────── */
 .jumuah-card {
   margin: 0 16px 16px;
-  background: linear-gradient(135deg, #065f46, #059669);
+  background: linear-gradient(135deg, var(--emerald-dark, #047857), var(--emerald, #059669));
   border-radius: 16px;
   padding: 16px;
   display: flex;
@@ -2381,4 +2381,9 @@ html.dark .auth-input { background: #0f172a; border-color: #334155; }
   padding: 0;
   line-height: 1;
   flex-shrink: 0;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
