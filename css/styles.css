@@ -606,7 +606,6 @@ html.dark .saved-surah-name { color: var(--gray-100); }
 }
 #compass-disc {
   transform-origin: 120px 120px;
-  transition: transform 0.15s ease-out;
 }
 .qibla-status {
   font-size: 14px;
@@ -1970,4 +1969,44 @@ html.dark .share-dua-btn { background: #334155; border-color: #475569; color: #9
   .reciter-select { max-width: 105px; }
   .view-toggle-btn { padding: 5px 8px; font-size: 11px; }
   .feature-grid { padding: 0 10px 10px; }
+}
+
+/* ── Tasbeeh Counter ───────────────────────────────────────── */
+.tasbeeh-card {
+  position: relative;
+  margin: 12px 16px;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 24px 16px;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  -webkit-tap-highlight-color: transparent;
+}
+.tasbeeh-card:active { opacity: 0.85; transform: scale(0.98); }
+.tasbeeh-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+.tasbeeh-count {
+  font-size: 64px;
+  font-weight: 800;
+  color: var(--emerald);
+  line-height: 1;
+}
+.tasbeeh-reset {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--gray-400);
+  cursor: pointer;
+  padding: 4px 8px;
 }

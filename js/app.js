@@ -1744,6 +1744,11 @@ function renderDhikr() {
       </div>
       <button class="reset-all-btn" onclick="resetAllDhikr()">Reset All</button>
     </div>
+    <div class="tasbeeh-card" onclick="tapTasbeeh()">
+      <div class="tasbeeh-label">Tasbeeh Counter</div>
+      <div class="tasbeeh-count" id="tasbeeh-count">${state.tasbeeh}</div>
+      <button class="tasbeeh-reset" onclick="event.stopPropagation();resetTasbeeh()" title="Reset">↺</button>
+    </div>
     <div class="dhikr-list">
       ${DHIKRS.map((d, i) => renderDhikrCard(d, i)).join('')}
     </div>
