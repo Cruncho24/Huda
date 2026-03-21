@@ -230,6 +230,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Auth — fires on sign-in, sign-out, and page reload with existing session
   authOnChange(async user => {
     updateAccountBtn(user);
+    // If the modal is open (e.g. showing "Check your email"), update it
+    const modal = document.getElementById('auth-modal');
+    if (modal && modal.style.display !== 'none') {
+      renderAuthModalBody(user ? 'account' : 'signin', user);
+    }
     if (user) {
       const changed = await pullSync();
       if (changed) {
