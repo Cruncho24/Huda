@@ -1489,6 +1489,25 @@ function renderPrayer() {
     return;
   }
   renderPrayerTimes();
+  // Silently refresh GPS in background — recalculate if user has moved >0.1° (~11 km)
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        const prev = state.prayer.location;
+        if (!prev || Math.abs(lat - prev.lat) > 0.1 || Math.abs(lng - prev.lng) > 0.1) {
+          state.prayer.qibla = calcQibla(lat, lng);
+          try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+            const data = await res.json();
+            state.prayer.city = data.address?.city || data.address?.town || data.address?.state || 'Your Location';
+          } catch(e) {}
+          calcPrayerTimes(lat, lng);
+        }
+      },
+      () => {} // silent fail — cached data stays shown
+    );
+  }
 }
 
 async function requestLocation() {
