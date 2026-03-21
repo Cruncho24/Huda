@@ -128,6 +128,14 @@ function renderAuthModalBody(mode = 'signin', user = null) {
       <button class="auth-btn-primary" onclick="handleSignUp()">Create Account</button>
       <div class="auth-switch-link">Already have an account? <a onclick="renderAuthModalBody('signin')">Sign in</a></div>
     `;
+  } else if (mode === 'reset') {
+    el.innerHTML = `
+      <div class="auth-modal-title">Reset Password</div>
+      <input id="auth-email" class="auth-input" type="email" placeholder="Email" autocomplete="email">
+      <div id="auth-err" class="auth-error" style="display:none"></div>
+      <button class="auth-btn-primary" onclick="handleResetRequest()">Send Reset Link</button>
+      <div class="auth-switch-link"><a onclick="renderAuthModalBody('signin')">← Back to sign in</a></div>
+    `;
   } else {
     el.innerHTML = `
       <div class="auth-modal-title">Sign In</div>
@@ -139,6 +147,7 @@ function renderAuthModalBody(mode = 'signin', user = null) {
       <div id="auth-err" class="auth-error" style="display:none"></div>
       <button class="auth-btn-primary" onclick="handleSignIn()">Sign In</button>
       <div class="auth-switch-link">No account? <a onclick="renderAuthModalBody('signup')">Create one</a></div>
+      <div class="auth-switch-link" style="margin-top:6px"><a onclick="renderAuthModalBody('reset')">Forgot password?</a></div>
     `;
   }
 }
@@ -186,6 +195,24 @@ async function handleSignOut() {
   await authSignOut();
   document.getElementById('auth-modal').style.display = 'none';
   updateAccountBtn(null);
+}
+
+async function handleResetRequest() {
+  const email = document.getElementById('auth-email')?.value?.trim();
+  const btn   = document.querySelector('.auth-btn-primary');
+  if (!email) { showAuthError('Please enter your email.'); return; }
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    await authResetPassword(email);
+    document.getElementById('auth-modal-body').innerHTML = `
+      <div class="auth-modal-title">Check your email</div>
+      <div class="auth-user-email">We sent a password reset link to <strong>${esc(email)}</strong>. Click the link to set a new password.</div>
+      <div class="auth-switch-link" style="margin-top:16px"><a onclick="renderAuthModalBody('signin')">← Back to sign in</a></div>
+    `;
+  } catch(e) {
+    showAuthError(e.message || 'Failed to send reset email.');
+    btn.disabled = false; btn.textContent = 'Send Reset Link';
+  }
 }
 
 function showAuthError(msg) {
