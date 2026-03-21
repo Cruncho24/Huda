@@ -2209,8 +2209,8 @@ html.dark .qs-snippet { color: var(--gray-300); }
 /* ── Account Button ───────────────────────────────────────── */
 .account-btn {
   position: absolute;
-  top: 14px;
-  right: 14px;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  right: calc(14px + env(safe-area-inset-right, 0px));
   background: rgba(255,255,255,0.15);
   border: none;
   border-radius: 50%;
