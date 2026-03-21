@@ -475,9 +475,12 @@ function renderQuranList() {
   const tab = document.getElementById('tab-quran');
   tab.innerHTML = `
     <div id="quran-list-view">
-      <div style="background:var(--emerald);padding:16px 20px;padding-top:calc(16px + env(safe-area-inset-top,0px));color:white">
-        <h1 style="font-size:22px;font-weight:800;margin-bottom:2px">القُرْآن الكَرِيم</h1>
-        <p style="font-size:13px;opacity:0.8">The Noble Quran · 114 Surahs</p>
+      <div style="background:var(--emerald);padding:16px 20px;padding-top:calc(16px + env(safe-area-inset-top,0px));color:white;display:flex;align-items:flex-start;justify-content:space-between">
+        <div>
+          <h1 style="font-size:22px;font-weight:800;margin-bottom:2px">القُرْآن الكَرِيم</h1>
+          <p style="font-size:13px;opacity:0.8">The Noble Quran · 114 Surahs</p>
+        </div>
+        <button onclick="openQuranSearch()" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:6px 10px;font-size:18px;cursor:pointer;margin-top:2px" title="Search Quran">🔍</button>
       </div>
       <div class="search-bar">
         <input class="search-input" id="surah-search" placeholder="🔍 Search by name or number..." oninput="filterSurahs(this.value)">
