@@ -68,14 +68,21 @@
       document.getElementById('link').style.display = 'inline-block';
     }
 
-    // Supabase will exchange the token from the URL automatically
+    // PKCE flow: Supabase sends ?code=... in the URL — exchange it for a session
+    const code = new URLSearchParams(window.location.search).get('code');
+    if (code) {
+      client.auth.exchangeCodeForSession(code)
+        .then(({ data, error }) => {
+          if (error) showError(error.message);
+          else if (data.session) showSuccess();
+        });
+    }
+
+    // Implicit flow / already-signed-in fallback
     client.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
-        showSuccess();
-      }
+      if (event === 'SIGNED_IN' || event === 'USER_UPDATED') showSuccess();
     });
 
-    // Fallback: check for existing session
     client.auth.getSession().then(({ data: { session }, error }) => {
       if (error) { showError(error.message); return; }
       if (session) showSuccess();
