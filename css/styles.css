@@ -1976,7 +1976,7 @@ html.dark .share-dua-btn { background: #334155; border-color: #475569; color: #9
 .tasbeeh-card {
   position: relative;
   margin: 12px 16px;
-  background: var(--card);
+  background: var(--white);
   border-radius: 16px;
   padding: 24px 16px;
   text-align: center;
@@ -2058,7 +2058,7 @@ html.dark .share-dua-btn { background: #334155; border-color: #475569; color: #9
   align-items: center;
   justify-content: center;
   border-radius: 8px;
-  background: var(--card);
+  background: var(--white);
 }
 .cal-cell.cal-empty { background: transparent; }
 .cal-cell.cal-today {
@@ -2075,7 +2075,7 @@ html.dark .share-dua-btn { background: #334155; border-color: #475569; color: #9
 }
 .cal-cell.cal-today .cal-dot { background: white; }
 .cal-legend {
-  background: var(--card);
+  background: var(--white);
   border-radius: 12px;
   padding: 12px;
   margin-bottom: 12px;
@@ -2115,7 +2115,7 @@ html.dark .share-dua-btn { background: #334155; border-color: #475569; color: #9
 }
 .tafsir-box {
   margin-top: 8px;
-  background: var(--gray-50, #f9fafb);
+  background: var(--off-white);
   border-left: 3px solid var(--emerald);
   border-radius: 0 8px 8px 0;
   padding: 10px 12px;
@@ -2148,7 +2148,7 @@ html.dark .tafsir-text { color: var(--gray-300); }
 .qs-header h2 { font-size: 18px; font-weight: 700; color: white; margin: 0; }
 .qs-input-wrap {
   padding: 12px 16px;
-  background: var(--card);
+  background: var(--white);
   border-bottom: 1px solid var(--gray-200);
 }
 .qs-input {
@@ -2156,10 +2156,10 @@ html.dark .tafsir-text { color: var(--gray-300); }
   box-sizing: border-box;
   padding: 10px 14px;
   border-radius: 10px;
-  border: 1px solid var(--gray-300);
+  border: 1px solid var(--gray-200);
   font-size: 15px;
-  background: var(--bg);
-  color: var(--text);
+  background: var(--off-white);
+  color: var(--gray-900);
   outline: none;
 }
 .qs-input:focus { border-color: var(--emerald); }
@@ -2175,7 +2175,7 @@ html.dark .tafsir-text { color: var(--gray-300); }
   border-bottom: 1px solid var(--gray-100);
   cursor: pointer;
 }
-.qs-result:active { background: var(--gray-50); }
+.qs-result:active { background: var(--gray-100); }
 html.dark .qs-result:active { background: var(--gray-800, #1f2937); }
 .qs-result-meta {
   display: flex;

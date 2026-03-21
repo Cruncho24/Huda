@@ -596,7 +596,9 @@ async function openSurah(n, targetAyah = null) {
     document.getElementById('quran-reader').scrollTop = 0;
     if (targetAyah) {
       requestAnimationFrame(() => {
-        document.getElementById(`ayah-${targetAyah}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          document.getElementById(`ayah-${targetAyah}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 0);
       });
     }
     updateSurahNavBtns();
@@ -2037,7 +2039,7 @@ async function runQuranSearch(query) {
     const res = await fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(query)}/all/en.sahih`);
     if (!res.ok) throw new Error(res.status);
     const json = await res.json();
-    if (query !== state.quran.searchQuery) return; // stale response
+    if (!state.quran.searchOpen || query !== state.quran.searchQuery) return; // stale/closed
     const matches = json.data?.matches ?? [];
     if (matches.length === 0) {
       results.innerHTML = `<p class="qs-hint">No results for '<strong>${esc(query)}</strong>'</p>`;
