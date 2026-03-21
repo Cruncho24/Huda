@@ -1953,6 +1953,7 @@ async function renderCalendar() {
 }
 
 function navigateCalendar(delta) {
+  if (!state.calendar.displayMonth || !state.calendar.displayYear) return;
   let m = state.calendar.displayMonth + delta;
   let y = state.calendar.displayYear;
   if (m > 12) { m = 1; y++; }
