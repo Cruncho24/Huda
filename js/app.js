@@ -1796,8 +1796,8 @@ function resetDhikr(i) {
 // ── Tasbeeh Counter ───────────────────────────────────────────
 function tapTasbeeh() {
   state.tasbeeh++;
-  saveTasbeeh();
   haptic();
+  saveTasbeeh();
   const el = document.getElementById('tasbeeh-count');
   if (el) el.textContent = state.tasbeeh;
 }
