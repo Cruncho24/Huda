@@ -90,6 +90,103 @@ const state = {
   calendar: { displayYear: null, displayMonth: null },
 };
 
+// ── Auth Modal ────────────────────────────────────────────────
+function openAuthModal() {
+  const modal = document.getElementById('auth-modal');
+  if (!modal) return;
+  modal.style.display = 'flex';
+  const user = authGetCachedUser();
+  renderAuthModalBody(user ? 'account' : 'signin', user);
+}
+
+function closeAuthModal(e) {
+  if (e && e.target !== document.getElementById('auth-modal')) return;
+  const modal = document.getElementById('auth-modal');
+  if (modal) modal.style.display = 'none';
+}
+
+function renderAuthModalBody(mode = 'signin', user = null) {
+  const el = document.getElementById('auth-modal-body');
+  if (!el) return;
+  if (mode === 'account' && user) {
+    el.innerHTML = `
+      <div class="auth-modal-title">👤 Account</div>
+      <div class="auth-user-email">${user.email}</div>
+      <div class="sync-status">✓ Synced across devices</div>
+      <br>
+      <button class="auth-btn-secondary" onclick="handleSignOut()">Sign out</button>
+    `;
+  } else if (mode === 'signup') {
+    el.innerHTML = `
+      <div class="auth-modal-title">Create Account</div>
+      <input id="auth-email" class="auth-input" type="email" placeholder="Email" autocomplete="email">
+      <input id="auth-pass" class="auth-input" type="password" placeholder="Password (min 6 chars)" autocomplete="new-password">
+      <div id="auth-err" class="auth-error" style="display:none"></div>
+      <button class="auth-btn-primary" onclick="handleSignUp()">Create Account</button>
+      <div class="auth-switch-link">Already have an account? <a onclick="renderAuthModalBody('signin')">Sign in</a></div>
+    `;
+  } else {
+    el.innerHTML = `
+      <div class="auth-modal-title">Sign In</div>
+      <input id="auth-email" class="auth-input" type="email" placeholder="Email" autocomplete="email">
+      <input id="auth-pass" class="auth-input" type="password" placeholder="Password" autocomplete="current-password">
+      <div id="auth-err" class="auth-error" style="display:none"></div>
+      <button class="auth-btn-primary" onclick="handleSignIn()">Sign In</button>
+      <div class="auth-switch-link">No account? <a onclick="renderAuthModalBody('signup')">Create one</a></div>
+    `;
+  }
+}
+
+async function handleSignIn() {
+  const email = document.getElementById('auth-email')?.value?.trim();
+  const pass  = document.getElementById('auth-pass')?.value;
+  const btn   = document.querySelector('.auth-btn-primary');
+  if (!email || !pass) { showAuthError('Please fill in all fields.'); return; }
+  btn.disabled = true; btn.textContent = 'Signing in…';
+  try {
+    await authSignIn(email, pass);
+    document.getElementById('auth-modal').style.display = 'none';
+  } catch(e) {
+    showAuthError(e.message || 'Sign in failed.');
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
+}
+
+async function handleSignUp() {
+  const email = document.getElementById('auth-email')?.value?.trim();
+  const pass  = document.getElementById('auth-pass')?.value;
+  const btn   = document.querySelector('.auth-btn-primary');
+  if (!email || !pass) { showAuthError('Please fill in all fields.'); return; }
+  if (pass.length < 6) { showAuthError('Password must be at least 6 characters.'); return; }
+  btn.disabled = true; btn.textContent = 'Creating…';
+  try {
+    await authSignUp(email, pass);
+    document.getElementById('auth-modal').style.display = 'none';
+  } catch(e) {
+    showAuthError(e.message || 'Sign up failed.');
+    btn.disabled = false; btn.textContent = 'Create Account';
+  }
+}
+
+async function handleSignOut() {
+  await authSignOut();
+  document.getElementById('auth-modal').style.display = 'none';
+  updateAccountBtn(null);
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('auth-err');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+
+function updateAccountBtn(user) {
+  const btn = document.getElementById('account-btn');
+  if (!btn) return;
+  btn.textContent = user ? '👤' : '🔑';
+  btn.classList.toggle('signed-in', !!user);
+  btn.title = user ? `Signed in as ${user.email}` : 'Sign in / Create account';
+}
+
 // Tracks which ayahs have tafsir expanded; cleared on each renderSurahContent
 const _openTafsir = new Set(); // "surah:ayah" strings
 let _searchDebounce = null;
@@ -107,6 +204,22 @@ document.addEventListener('DOMContentLoaded', () => {
   registerSW();
   setupInstallPrompt();
   setInterval(rotateHadith, 12000);
+
+  // Auth — fires on sign-in, sign-out, and page reload with existing session
+  authOnChange(async user => {
+    updateAccountBtn(user);
+    if (user) {
+      const changed = await pullSync();
+      if (changed) {
+        applySyncedState();
+        renderHome();
+        if (state.activeTab && state.activeTab !== 'home') {
+          switchTab(state.activeTab);
+        }
+      }
+      await pushSync();
+    }
+  });
 });
 
 // ── Dark Mode ─────────────────────────────────────────────────
@@ -118,6 +231,7 @@ function toggleDarkMode() {
   localStorage.setItem('huda_dark', state.darkMode ? '1' : '0');
   applyDarkMode();
   renderHome();
+  debouncedPush();
 }
 
 // ── Haptic ────────────────────────────────────────────────────
@@ -141,6 +255,7 @@ function toggleBookmark(surahNum, ayahNum, arText) {
   if (idx >= 0) state.bookmarks.splice(idx, 1);
   else state.bookmarks.unshift({ s: surahNum, a: ayahNum, ar: arText.slice(0, 80) });
   localStorage.setItem('huda_bookmarks', JSON.stringify(state.bookmarks));
+  debouncedPush();
   // refresh bookmark btn
   const btn = document.getElementById(`bm-${surahNum}-${ayahNum}`);
   if (btn) btn.textContent = isBookmarked(surahNum, ayahNum) ? '🔖' : '🏷️';
@@ -149,6 +264,7 @@ function isBookmarked(s, a) { return state.bookmarks.some(b => b.s === s && b.a 
 function removeBookmark(s, a) {
   state.bookmarks = state.bookmarks.filter(b => !(b.s === s && b.a === a));
   localStorage.setItem('huda_bookmarks', JSON.stringify(state.bookmarks));
+  debouncedPush();
   renderHome();
 }
 
@@ -160,6 +276,7 @@ function toggleSurahBookmark(num) {
     state.surahBookmarks = [num, ...state.surahBookmarks];
   }
   localStorage.setItem('huda_surah_bm', JSON.stringify(state.surahBookmarks));
+  debouncedPush();
   const isNowBm = isSurahBookmarked(num);
   // refresh button in surah list if visible
   const btn = document.getElementById(`sbm-${num}`);
@@ -175,6 +292,7 @@ function toggleReaderBookmark() {
 function removeSurahBookmark(num) {
   state.surahBookmarks = state.surahBookmarks.filter(n => n !== num);
   localStorage.setItem('huda_surah_bm', JSON.stringify(state.surahBookmarks));
+  debouncedPush();
   const btn = document.getElementById(`sbm-${num}`);
   if (btn) btn.textContent = '🏷️';
   renderHome();
@@ -318,7 +436,8 @@ function renderHome() {
   }
 
   document.getElementById('tab-home').innerHTML = `
-    <div class="hero fade-in">
+    <div class="hero fade-in" style="position:relative">
+      <button class="account-btn" id="account-btn" onclick="openAuthModal()" title="Account">🔑</button>
       <div class="hero-arabic">السَّلَامُ عَلَيْكُمْ</div>
       <div class="hero-sub">Peace be upon you</div>
       <div class="hero-date">${dateStr}</div>
@@ -432,6 +551,7 @@ function renderHome() {
       `).join('')}
     </div>
   `;
+  updateAccountBtn(authGetCachedUser());
 }
 
 function rotateHadith() {
@@ -541,6 +661,7 @@ async function openSurah(n, targetAyah = null) {
   state.quran.currentPage = 0;
   const s = SURAHS[n - 1];
   localStorage.setItem('huda_last_read', JSON.stringify({ surah: n, name: s[2], arabic: s[1] }));
+  debouncedPush();
   document.getElementById('reader-title').textContent = `${s[2]} — ${s[1]}`;
   document.getElementById('reader-meta').textContent = `${s[5]} · ${s[4]} verses · ${s[3]}`;
   const rbm = document.getElementById('reader-bm-btn');
@@ -948,6 +1069,7 @@ function setReciter(id) {
   _poolFor[0] = _poolFor[1] = null; // invalidate preload cache
   state.reciter = id;
   localStorage.setItem('huda_reciter', id);
+  debouncedPush();
 }
 
 async function navigateSurah(dir) {
@@ -1820,6 +1942,7 @@ function resetTasbeeh() {
 
 function saveTasbeeh() {
   localStorage.setItem('huda_tasbeeh', String(state.tasbeeh));
+  debouncedPush();
 }
 
 // ── Islamic Calendar ──────────────────────────────────────────
@@ -2124,6 +2247,7 @@ function resetAllDhikr() {
 
 function saveDhikr() {
   localStorage.setItem('huda_dhikr', JSON.stringify(state.dhikrCounts));
+  debouncedPush();
 }
 
 // ── DUAS TAB ──────────────────────────────────────────────────
@@ -2751,6 +2875,7 @@ function dismissInstall() {
 function changeFontSize(delta) {
   state.fontSize = Math.max(16, Math.min(36, state.fontSize + delta));
   localStorage.setItem('huda_fontsize', state.fontSize);
+  debouncedPush();
   // Re-render mushaf if open
   const n = state.quran.currentSurah;
   if (n && state.quran.viewMode === 'page' && state.quran.cache[n]) {
