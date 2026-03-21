@@ -1099,6 +1099,7 @@ function stripBismillah(text) {
 }
 
 function renderSurahContent(n, arData, enData) {
+  _openTafsir.clear();
   const content = document.getElementById('reader-content');
   const bismillah = n !== 9 && n !== 1
     ? `<div class="bismillah">بِسْمِ اللّٰهِ الرَّحْمٰنِ الرَّحِيم</div>`
@@ -1107,7 +1108,7 @@ function renderSurahContent(n, arData, enData) {
   const ayahs = arData.ayahs.map((a, i) => {
     const displayText = (hasBism && a.numberInSurah === 1) ? stripBismillah(a.text) : a.text;
     return `
-    <div class="ayah" data-global="${a.number}" data-surah="${n}" data-ayah="${a.numberInSurah}">
+    <div class="ayah" id="ayah-${a.numberInSurah}" data-global="${a.number}" data-surah="${n}" data-ayah="${a.numberInSurah}">
       <div class="ayah-arabic"><span class="ayah-num-badge">${a.numberInSurah}</span> ${esc(displayText)}</div>
       <div class="ayah-english">${esc(enData.ayahs[i]?.text ?? '')}</div>
       <div class="ayah-actions">
@@ -1116,7 +1117,10 @@ function renderSurahContent(n, arData, enData) {
           onclick="toggleBookmark(${n},${a.numberInSurah},'${a.text.replace(/'/g,"\\'").slice(0,60)}')" title="Bookmark">
           ${isBookmarked(n, a.numberInSurah) ? '🔖' : '🏷️'}
         </button>
+        <button class="ayah-btn tafsir-btn" id="tafsir-btn-${n}-${a.numberInSurah}"
+          onclick="toggleTafsir(${n},${a.numberInSurah})">Tafsir ›</button>
       </div>
+      <div class="tafsir-box" id="tafsir-box-${n}-${a.numberInSurah}" style="display:none"></div>
     </div>`;
   }).join('');
   content.innerHTML = bismillah + ayahs;

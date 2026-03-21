@@ -2101,3 +2101,36 @@ html.dark .share-dua-btn { background: #334155; border-color: #475569; color: #9
 }
 .cal-container { position: relative; }
 .cal-cell.cal-key { background: rgba(245, 158, 11, 0.1); }
+
+/* ── Tafsir ────────────────────────────────────────────────── */
+.tafsir-btn {
+  font-size: 11px;
+  color: var(--emerald);
+  border: 1px solid var(--emerald);
+  border-radius: 6px;
+  padding: 2px 8px;
+  background: transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.tafsir-box {
+  margin-top: 8px;
+  background: var(--gray-50, #f9fafb);
+  border-left: 3px solid var(--emerald);
+  border-radius: 0 8px 8px 0;
+  padding: 10px 12px;
+}
+html.dark .tafsir-box { background: var(--gray-800, #1f2937); }
+.tafsir-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--gray-700);
+  margin: 0;
+}
+html.dark .tafsir-text { color: var(--gray-300); }
+.tafsir-error {
+  font-size: 13px;
+  color: var(--gray-400);
+  margin: 0;
+  font-style: italic;
+}
