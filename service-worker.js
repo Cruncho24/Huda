@@ -2,7 +2,7 @@
 // HUDA PWA — Service Worker
 // ============================================================
 
-const CACHE_NAME = 'huda-v92';
+const CACHE_NAME = 'huda-v93';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -17,6 +17,7 @@ const STATIC_ASSETS = [
   '/icons/icon-512.png',
   '/fonts/UthmanicHafs1Ver13.woff2',
   '/fonts/UthmanicHafs1Ver13.ttf',
+  '/auth/reset.html',
 ];
 
 // ── Install: pre-cache everything needed for offline ──────────

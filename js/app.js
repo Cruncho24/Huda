@@ -128,6 +128,14 @@ function renderAuthModalBody(mode = 'signin', user = null) {
       <button class="auth-btn-primary" onclick="handleSignUp()">Create Account</button>
       <div class="auth-switch-link">Already have an account? <a onclick="renderAuthModalBody('signin')">Sign in</a></div>
     `;
+  } else if (mode === 'reset') {
+    el.innerHTML = `
+      <div class="auth-modal-title">Reset Password</div>
+      <input id="auth-email" class="auth-input" type="email" placeholder="Email" autocomplete="email">
+      <div id="auth-err" class="auth-error" style="display:none"></div>
+      <button class="auth-btn-primary" onclick="handleResetRequest()">Send Reset Link</button>
+      <div class="auth-switch-link"><a onclick="renderAuthModalBody('signin')">← Back to sign in</a></div>
+    `;
   } else {
     el.innerHTML = `
       <div class="auth-modal-title">Sign In</div>
@@ -139,6 +147,7 @@ function renderAuthModalBody(mode = 'signin', user = null) {
       <div id="auth-err" class="auth-error" style="display:none"></div>
       <button class="auth-btn-primary" onclick="handleSignIn()">Sign In</button>
       <div class="auth-switch-link">No account? <a onclick="renderAuthModalBody('signup')">Create one</a></div>
+      <div class="auth-switch-link" style="margin-top:6px"><a onclick="renderAuthModalBody('reset')">Forgot password?</a></div>
     `;
   }
 }
@@ -151,6 +160,7 @@ async function handleSignIn() {
   btn.disabled = true; btn.textContent = 'Signing in…';
   try {
     await authSignIn(email, pass);
+    haptic(50);
     document.getElementById('auth-modal').style.display = 'none';
   } catch(e) {
     showAuthError(e.message || 'Sign in failed.');
@@ -184,8 +194,27 @@ async function handleSignUp() {
 
 async function handleSignOut() {
   await authSignOut();
+  haptic(50);
   document.getElementById('auth-modal').style.display = 'none';
   updateAccountBtn(null);
+}
+
+async function handleResetRequest() {
+  const email = document.getElementById('auth-email')?.value?.trim();
+  const btn   = document.querySelector('.auth-btn-primary');
+  if (!email) { showAuthError('Please enter your email.'); return; }
+  btn.disabled = true; btn.textContent = 'Sending…';
+  try {
+    await authResetPassword(email);
+    document.getElementById('auth-modal-body').innerHTML = `
+      <div class="auth-modal-title">Check your email</div>
+      <div class="auth-user-email">We sent a password reset link to <strong>${esc(email)}</strong>. Click the link to set a new password.</div>
+      <div class="auth-switch-link" style="margin-top:16px"><a onclick="renderAuthModalBody('signin')">← Back to sign in</a></div>
+    `;
+  } catch(e) {
+    showAuthError(e.message || 'Failed to send reset email.');
+    btn.disabled = false; btn.textContent = 'Send Reset Link';
+  }
 }
 
 function showAuthError(msg) {
@@ -257,6 +286,7 @@ function toggleDarkMode() {
   state.darkMode = !state.darkMode;
   localStorage.setItem('huda_dark', state.darkMode ? '1' : '0');
   applyDarkMode();
+  haptic();
   renderHome();
   debouncedPush();
 }
@@ -282,6 +312,7 @@ function toggleBookmark(surahNum, ayahNum, arText) {
   if (idx >= 0) state.bookmarks.splice(idx, 1);
   else state.bookmarks.unshift({ s: surahNum, a: ayahNum, ar: arText.slice(0, 80) });
   localStorage.setItem('huda_bookmarks', JSON.stringify(state.bookmarks));
+  haptic();
   debouncedPush();
   // refresh bookmark btn
   const btn = document.getElementById(`bm-${surahNum}-${ayahNum}`);
@@ -291,6 +322,7 @@ function isBookmarked(s, a) { return state.bookmarks.some(b => b.s === s && b.a 
 function removeBookmark(s, a) {
   state.bookmarks = state.bookmarks.filter(b => !(b.s === s && b.a === a));
   localStorage.setItem('huda_bookmarks', JSON.stringify(state.bookmarks));
+  haptic();
   debouncedPush();
   renderHome();
 }
@@ -303,6 +335,7 @@ function toggleSurahBookmark(num) {
     state.surahBookmarks = [num, ...state.surahBookmarks];
   }
   localStorage.setItem('huda_surah_bm', JSON.stringify(state.surahBookmarks));
+  haptic();
   debouncedPush();
   const isNowBm = isSurahBookmarked(num);
   // refresh button in surah list if visible
@@ -319,6 +352,7 @@ function toggleReaderBookmark() {
 function removeSurahBookmark(num) {
   state.surahBookmarks = state.surahBookmarks.filter(n => n !== num);
   localStorage.setItem('huda_surah_bm', JSON.stringify(state.surahBookmarks));
+  haptic();
   debouncedPush();
   const btn = document.getElementById(`sbm-${num}`);
   if (btn) btn.textContent = '🏷️';
@@ -374,6 +408,7 @@ function setupNav() {
 
 function switchTab(tab) {
   state.activeTab = tab;
+  haptic();
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   document.getElementById(`tab-${tab}`).classList.add('active');
@@ -462,6 +497,23 @@ function renderHome() {
     }, 1000);
   }
 
+  // Friday Jumu'ah banner — uses local date parts to match getDay() which is also local
+  const isFriday = now.getDay() === 5;
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const dd = String(now.getDate()).padStart(2,'0');
+  const localDateStr = `${now.getFullYear()}-${mm}-${dd}`;
+  const jumuahDismissKey = `huda_jumuah_dismissed_${localDateStr}`;
+  const jumuahDismissed = localStorage.getItem(jumuahDismissKey) === '1';
+  const jumuahCard = (isFriday && !jumuahDismissed) ? `
+    <div class="jumuah-card" id="jumuah-card">
+      <div class="jumuah-content">
+        <div class="jumuah-title">🕌 Jumu'ah Mubarak</div>
+        <div class="jumuah-sub">Read Surah Al-Kahf today — whoever reads it on Friday, a light will shine for them until the next Friday.</div>
+        <button class="jumuah-btn" onclick="switchTab('quran');setTimeout(()=>openSurah(18),100);dismissJumuah()">Read Surah Al-Kahf →</button>
+      </div>
+      <button class="jumuah-dismiss" onclick="dismissJumuah()" aria-label="Dismiss">✕</button>
+    </div>` : '';
+
   document.getElementById('tab-home').innerHTML = `
     <div class="hero fade-in" style="position:relative">
       <button class="account-btn" id="account-btn" onclick="openAuthModal()" title="Account">🔑</button>
@@ -482,6 +534,8 @@ function renderHome() {
     </div>
 
     ${ramadanCard}
+
+    ${jumuahCard}
 
     ${lastRead ? `
     <div class="continue-card" onclick="switchTab('quran');setTimeout(()=>openSurah(${lastRead.surah}),100)">
@@ -579,6 +633,16 @@ function renderHome() {
     </div>
   `;
   updateAccountBtn(authGetCachedUser());
+}
+
+function dismissJumuah() {
+  const now = new Date();
+  const mm = String(now.getMonth()+1).padStart(2,'0');
+  const dd = String(now.getDate()).padStart(2,'0');
+  const key = `huda_jumuah_dismissed_${now.getFullYear()}-${mm}-${dd}`;
+  localStorage.setItem(key, '1');
+  const el = document.getElementById('jumuah-card');
+  if (el) el.remove();
 }
 
 function rotateHadith() {
