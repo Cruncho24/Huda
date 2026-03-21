@@ -2188,6 +2188,7 @@ function renderLearnHub() {
         { icon:'✨', bg:'#fef3c7', title:'99 Names of Allah', desc:'Asmaul Husna — all 99 names', fn:'openNamesOfAllah' },
         { icon:'🕋', bg:'#ede9fe', title:'Hajj & Umrah Guide', desc:'Complete step-by-step guide', fn:'openHajjGuide' },
         { icon:'💰', bg:'#fce7f3', title:'Zakat Calculator', desc:'Calculate your obligatory charity', fn:'openZakatCalc' },
+        { icon:'🗓️', bg:'#e0f2fe', title:'Islamic Calendar', desc:'Hijri calendar with key Islamic dates', fn:'openCalendar' },
       ].map(c => `
         <div class="learn-card" onclick="${c.fn}()">
           <div class="learn-card-icon" style="background:${c.bg}">${c.icon}</div>

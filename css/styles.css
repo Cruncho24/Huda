@@ -2011,3 +2011,91 @@ html.dark .share-dua-btn { background: #334155; border-color: #475569; color: #9
   cursor: pointer;
   padding: 4px 8px;
 }
+
+/* ── Islamic Calendar ──────────────────────────────────────── */
+.cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.cal-nav-btn {
+  background: var(--emerald);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cal-month-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--gray-800);
+}
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 16px;
+}
+.cal-weekday {
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gray-500);
+  padding: 4px 0;
+}
+.cal-cell {
+  position: relative;
+  aspect-ratio: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: var(--card);
+}
+.cal-cell.cal-empty { background: transparent; }
+.cal-cell.cal-today {
+  background: var(--emerald);
+}
+.cal-cell.cal-today .cal-day-num { color: white; font-weight: 800; }
+.cal-day-num { font-size: 13px; color: var(--gray-700); }
+.cal-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #f59e0b;
+  margin-top: 2px;
+}
+.cal-cell.cal-today .cal-dot { background: white; }
+.cal-legend {
+  background: var(--card);
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 12px;
+}
+.cal-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--gray-700);
+  padding: 4px 0;
+}
+.cal-disclaimer {
+  font-size: 11px;
+  color: var(--gray-400);
+  text-align: center;
+  margin-top: 8px;
+}
+.cal-error {
+  text-align: center;
+  color: var(--gray-500);
+  padding: 24px;
+}
