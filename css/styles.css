@@ -606,6 +606,7 @@ html.dark .saved-surah-name { color: var(--gray-100); }
 }
 #compass-disc {
   transform-origin: 120px 120px;
+  transition: transform 0.15s ease-out;
 }
 .qibla-status {
   font-size: 14px;
