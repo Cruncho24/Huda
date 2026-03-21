@@ -6,9 +6,9 @@ Add two features to the Huda PWA: (1) a one-tap "Download for offline" button th
 
 ## Architecture
 
-**Offline Quran**: The service worker already caches `api.alquran.cloud` responses using a network-first strategy. The download feature fetches all 114 surahs (Arabic + English) in batches of 5, letting the SW cache each response. No additional storage logic needed — once fetched, the SW serves them offline. A `huda_quran_offline = '1'` localStorage flag tracks completion. Download state and progress live in module-level variables (not state object) since they don't need to persist across reloads.
+**Offline Quran**: The service worker already caches `api.alquran.cloud` responses using a network-first strategy. The download feature fetches all 114 surahs (Arabic + English) in batches of 5, letting the SW cache each response. No additional storage logic needed — once fetched, the SW serves them offline. A `huda_quran_offline = '1'` localStorage flag tracks completion. Download state and progress live in module-level variables (`_offlineDownloading`, `_offlineCancelled`). **Important**: `renderQuranList()` has an early-return guard (`if (document.getElementById('quran-list-view')) return;`) that prevents re-renders after initial mount. All banner state transitions (A→B→C) must use direct DOM manipulation via a `_renderOfflineBanner()` helper — never call `renderQuranList()` again.
 
-**Share Ayah**: A 📤 button on each ayah row opens a bottom sheet modal with the Arabic text, English translation, reference line, a Copy button (clipboard API + toast), and a Share button (Web Share API with clipboard fallback). The share sheet is rendered into a fixed overlay div, not re-rendered into the tab content.
+**Share Ayah**: A 📤 button on each ayah row opens a bottom sheet modal. Share text (Arabic + translation + reference) is stored in a module-level `_pendingShareText` variable — never passed as an onclick argument — avoiding all escaping issues. The sheet has a Copy button (clipboard API + toast) and a Share button (Web Share API with clipboard fallback). The overlay div is appended to `document.body` once and reused.
 
 **Tech Stack**: Vanilla JS, existing SW cache infrastructure, Web Share API (`navigator.share`), Clipboard API (`navigator.clipboard.writeText`), CSS bottom sheet animation.
 
@@ -18,8 +18,8 @@ Add two features to the Huda PWA: (1) a one-tap "Download for offline" button th
 
 | File | Action | Responsibility |
 |---|---|---|
-| `js/app.js` | Modify | `renderQuranList()` download banner, `downloadQuranOffline()`, `renderSurahContent()` share buttons, `shareAyah()`, share sheet open/close, copy toast |
-| `css/styles.css` | Modify | Download banner styles, share sheet overlay + animation, copy toast |
+| `js/app.js` | Modify | Download banner in `renderQuranList()`, `_renderOfflineBanner()`, `downloadQuranOffline()`, `cancelQuranDownload()`, share button in `renderSurahContent()`, `shareAyah()`, `openShareSheet()`, `closeShareSheet()`, `copyShareText()`, `nativeShare()`, `showCopyToast()` |
+| `css/styles.css` | Modify | Download banner styles + dark mode, share sheet overlay + animation + dark mode, copy toast |
 | `service-worker.js` | Modify | Bump to v95 |
 | `index.html` | Modify | Bump version strings to v95 |
 
@@ -27,53 +27,76 @@ Add two features to the Huda PWA: (1) a one-tap "Download for offline" button th
 
 ## Feature 1: Offline Quran Download
 
-### UI — Download Banner
+### Module-level variables (add near top of app.js, with other module vars)
 
-Rendered at the top of `renderQuranList()`, above the surah list. Three mutually exclusive states based on `huda_quran_offline` localStorage and `_offlineDownloading` module variable:
-
-**State A — Not downloaded** (`huda_quran_offline` not set, not downloading):
-```html
-<div class="offline-banner" id="offline-banner">
-  <div class="offline-banner-text">
-    <span class="offline-banner-icon">📥</span>
-    <div>
-      <div class="offline-banner-title">Download for offline reading</div>
-      <div class="offline-banner-sub">Save all 114 surahs to your device</div>
-    </div>
-  </div>
-  <button class="offline-banner-btn" onclick="downloadQuranOffline()">Download</button>
-</div>
+```js
+let _offlineDownloading = false;
+let _offlineCancelled = false;
 ```
 
-**State B — Downloading** (`_offlineDownloading === true`):
+### UI — Download Banner in renderQuranList()
+
+`renderQuranList()` has a one-shot guard: `if (document.getElementById('quran-list-view')) return;`. The banner is rendered once on initial mount. All subsequent state changes go through `_renderOfflineBanner()`.
+
+In `renderQuranList()`, in the template literal that builds `#quran-list-view`, add the banner HTML **above the surah list** (above the `<div class="surah-list">` or equivalent):
+
 ```html
-<div class="offline-banner" id="offline-banner">
-  <div class="offline-banner-progress-wrap">
-    <div class="offline-banner-title">Downloading… <span id="offline-count">0</span> / 114</div>
-    <div class="offline-progress-bar"><div class="offline-progress-fill" id="offline-fill" style="width:0%"></div></div>
-  </div>
-  <button class="offline-banner-btn offline-cancel-btn" onclick="cancelQuranDownload()">Cancel</button>
-</div>
+<div id="offline-banner"></div>
 ```
 
-**State C — Done** (`huda_quran_offline === '1'`):
-```html
-<div class="offline-banner offline-banner-done" id="offline-banner">
-  <span>✅ Full Quran available offline</span>
-</div>
+Then immediately after the innerHTML assignment, call:
+```js
+_renderOfflineBanner();
+```
+
+### _renderOfflineBanner()
+
+Reads current state and updates `#offline-banner` in-place:
+
+```js
+function _renderOfflineBanner() {
+  const el = document.getElementById('offline-banner');
+  if (!el) return;
+
+  if (localStorage.getItem('huda_quran_offline') === '1') {
+    el.innerHTML = `<div class="offline-banner offline-banner-done">✅ Full Quran available offline</div>`;
+    return;
+  }
+
+  if (_offlineDownloading) {
+    el.innerHTML = `
+      <div class="offline-banner">
+        <div class="offline-banner-progress-wrap">
+          <div class="offline-banner-title">Downloading… <span id="offline-count">0</span> / 114</div>
+          <div class="offline-progress-bar"><div class="offline-progress-fill" id="offline-fill" style="width:0%"></div></div>
+        </div>
+        <button class="offline-banner-btn offline-cancel-btn" onclick="cancelQuranDownload()">Cancel</button>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="offline-banner">
+      <div class="offline-banner-text">
+        <span class="offline-banner-icon">📥</span>
+        <div>
+          <div class="offline-banner-title">Download for offline reading</div>
+          <div class="offline-banner-sub">Save all 114 surahs to your device</div>
+        </div>
+      </div>
+      <button class="offline-banner-btn" onclick="downloadQuranOffline()">Download</button>
+    </div>`;
+}
 ```
 
 ### downloadQuranOffline()
 
 ```js
-let _offlineDownloading = false;
-let _offlineCancelled = false;
-
 async function downloadQuranOffline() {
   if (_offlineDownloading) return;
   _offlineDownloading = true;
   _offlineCancelled = false;
-  renderQuranList(); // re-render to show progress state
+  _renderOfflineBanner();
 
   const BATCH = 5;
   let done = 0;
@@ -86,18 +109,17 @@ async function downloadQuranOffline() {
         Promise.all([
           fetch(`https://api.alquran.cloud/v1/surah/${j}/quran-uthmani`),
           fetch(`https://api.alquran.cloud/v1/surah/${j}/en.sahih`)
-        ]).then(([arRes, enRes]) => {
-          // Consume responses so SW caches them
-          return Promise.all([arRes.json(), enRes.json()]);
-        }).then(([arJson, enJson]) => {
-          state.quran.cache[j] = { arData: arJson.data, enData: enJson.data };
-          done++;
-          // Update progress UI without full re-render
-          const countEl = document.getElementById('offline-count');
-          const fillEl = document.getElementById('offline-fill');
-          if (countEl) countEl.textContent = done;
-          if (fillEl) fillEl.style.width = `${Math.round(done / 114 * 100)}%`;
-        }).catch(() => { done++; }) // silent per-surah failure — don't abort batch
+        ]).then(([arRes, enRes]) => Promise.all([arRes.json(), enRes.json()]))
+          .then(([arJson, enJson]) => {
+            state.quran.cache[j] = { arData: arJson.data, enData: enJson.data };
+            done++;
+            // Update progress in-place (banner may be gone if user navigated away — null-check guards this)
+            const countEl = document.getElementById('offline-count');
+            const fillEl  = document.getElementById('offline-fill');
+            if (countEl) countEl.textContent = done;
+            if (fillEl)  fillEl.style.width = `${Math.round(done / 114 * 100)}%`;
+          })
+          .catch(() => { done++; }) // silent per-surah failure — SW will cache on next open
       );
     }
     await Promise.all(batch);
@@ -107,39 +129,43 @@ async function downloadQuranOffline() {
   if (!_offlineCancelled) {
     localStorage.setItem('huda_quran_offline', '1');
   }
-  renderQuranList(); // re-render to show done/cancelled state
-}
-
-function cancelQuranDownload() {
-  _offlineCancelled = true;
-  _offlineDownloading = false;
-  renderQuranList();
+  _renderOfflineBanner();
 }
 ```
 
-### Error handling
+### cancelQuranDownload()
 
-- Per-surah failures are silently skipped (counter still increments) — partial download is acceptable; the SW will retry on next open
-- If the user cancels, `huda_quran_offline` is NOT set — banner returns to "Download" state
-- No global error state needed
+```js
+function cancelQuranDownload() {
+  _offlineCancelled = true;
+  _offlineDownloading = false;
+  // In-flight batch promises continue to resolve but their DOM updates
+  // are null-guarded and huda_quran_offline is not set since _offlineCancelled=true.
+  _renderOfflineBanner();
+}
+```
 
 ---
 
 ## Feature 2: Share Ayah
 
-### Share button in renderSurahContent()
+### Module-level variable
 
-In the ayah row template inside `renderSurahContent()`, add a share button after the existing ayah controls:
-
-```html
-<button class="ayah-share-btn" onclick="shareAyah(${n}, ${i+1})" aria-label="Share ayah">📤</button>
+```js
+let _pendingShareText = '';
 ```
 
-Where `n` is the surah number and `i+1` is the ayah number.
+### Share button in renderSurahContent()
+
+`renderSurahContent()` renders each ayah with a `.ayah-actions` div containing existing buttons (play, bookmark, tafsir). Add the share button as the **4th button inside `.ayah-actions`**, using the existing `.ayah-btn` class:
+
+```html
+<button class="ayah-btn" onclick="shareAyah(${n}, ${i+1})" aria-label="Share ayah">📤</button>
+```
+
+Where `n` is the surah number and `i+1` is the ayah number (1-based). The `.ayah-btn` class already handles styling and dark mode — no new CSS needed for the button itself.
 
 ### shareAyah(surahNum, ayahNum)
-
-Reads from `state.quran.cache[surahNum]` (already loaded since we're in the reader). Builds share text and opens the share sheet:
 
 ```js
 function shareAyah(surahNum, ayahNum) {
@@ -147,19 +173,19 @@ function shareAyah(surahNum, ayahNum) {
   if (!cached) return;
   const ar = cached.arData.ayahs[ayahNum - 1].text;
   const en = cached.enData.ayahs[ayahNum - 1].text;
-  const surahName = SURAHS[surahNum - 1][2]; // e.g. "Al-Fatiha"
+  const surahName = SURAHS[surahNum - 1][2]; // index 2 = English name e.g. "Al-Fatiha"
   const ref = `Surah ${surahName} (${surahNum}:${ayahNum})`;
-  const shareText = `${ar}\n\n${en}\n\n— ${ref}`;
-  openShareSheet(shareText, ref);
+  _pendingShareText = `${ar}\n\n${en}\n\n— ${ref}`;
+  openShareSheet(ref);
 }
 ```
 
-### Share sheet
+Note: `state.quran.cache[surahNum]` is always populated when the reader is open — `openSurah()` populates it before rendering. The `if (!cached) return` guard is a safety net only.
 
-A fixed bottom-sheet overlay rendered into a `<div id="share-sheet-overlay">` appended to `document.body` (created once on first use, reused thereafter).
+### Share sheet functions
 
 ```js
-function openShareSheet(text, title) {
+function openShareSheet(title) {
   let overlay = document.getElementById('share-sheet-overlay');
   if (!overlay) {
     overlay = document.createElement('div');
@@ -170,16 +196,19 @@ function openShareSheet(text, title) {
     <div class="share-sheet-backdrop" onclick="closeShareSheet()"></div>
     <div class="share-sheet">
       <div class="share-sheet-handle"></div>
-      <div class="share-sheet-text">${esc(text)}</div>
+      <div class="share-sheet-text">${esc(_pendingShareText)}</div>
       <div class="share-sheet-actions">
-        <button class="share-action-btn" onclick="copyShareText(${JSON.stringify(esc(text))})">📋 Copy</button>
-        ${navigator.share ? `<button class="share-action-btn share-action-primary" onclick="nativeShare(${JSON.stringify(esc(text))}, ${JSON.stringify(esc(title))})">📤 Share</button>` : ''}
+        <button class="share-action-btn" onclick="copyShareText()">📋 Copy</button>
+        ${navigator.share ? `<button class="share-action-btn share-action-primary" onclick="nativeShare()">📤 Share</button>` : ''}
       </div>
       <button class="share-close-btn" onclick="closeShareSheet()">Close</button>
     </div>
   `;
   overlay.style.display = 'flex';
-  requestAnimationFrame(() => overlay.querySelector('.share-sheet').classList.add('open'));
+  requestAnimationFrame(() => {
+    const sheet = overlay.querySelector('.share-sheet');
+    if (sheet) sheet.classList.add('open');
+  });
 }
 
 function closeShareSheet() {
@@ -190,22 +219,29 @@ function closeShareSheet() {
   setTimeout(() => { overlay.style.display = 'none'; }, 250);
 }
 
-async function copyShareText(text) {
+async function copyShareText() {
   try {
-    await navigator.clipboard.writeText(text);
+    await navigator.clipboard.writeText(_pendingShareText);
   } catch(e) {
-    // Fallback: textarea select
+    // Fallback for browsers without clipboard API
     const ta = document.createElement('textarea');
-    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-    document.body.appendChild(ta); ta.select();
+    ta.value = _pendingShareText;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
     document.execCommand('copy');
     document.body.removeChild(ta);
   }
   showCopyToast();
 }
 
-async function nativeShare(text, title) {
-  try { await navigator.share({ title, text }); } catch(e) {}
+async function nativeShare() {
+  try {
+    await navigator.share({ text: _pendingShareText });
+  } catch(e) {
+    // User cancelled or share failed — silent
+  }
 }
 
 function showCopyToast() {
@@ -222,22 +258,20 @@ function showCopyToast() {
 }
 ```
 
-### Security note
-
-All user-sourced text passed into `innerHTML` must go through `esc()` (already defined in app.js). The `JSON.stringify(esc(text))` pattern safely passes the escaped text as a JS string argument in the onclick attribute.
-
 ---
 
 ## CSS
 
-### Download banner
+Use hardcoded color values throughout (not undefined CSS vars). Follow existing dark mode pattern: `html.dark .class { ... }` rules.
+
+### Download banner (append to css/styles.css)
 
 ```css
 /* ── Offline Download Banner ──────────────────────────────── */
 .offline-banner {
-  margin: 12px 16px;
-  background: var(--surface, #fff);
-  border: 1.5px solid var(--border, #e2e8f0);
+  margin: 12px 16px 0;
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
   border-radius: 14px;
   padding: 12px 14px;
   display: flex;
@@ -247,16 +281,16 @@ All user-sourced text passed into `innerHTML` must go through `esc()` (already d
 }
 .offline-banner-done {
   justify-content: center;
-  color: var(--emerald, #059669);
+  color: #059669;
   font-weight: 600;
   font-size: 14px;
 }
 .offline-banner-text { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
 .offline-banner-icon { font-size: 22px; flex-shrink: 0; }
-.offline-banner-title { font-size: 14px; font-weight: 600; color: var(--text, #0f172a); }
-.offline-banner-sub { font-size: 12px; color: var(--gray-500, #64748b); margin-top: 1px; }
+.offline-banner-title { font-size: 14px; font-weight: 600; color: #0f172a; }
+.offline-banner-sub { font-size: 12px; color: #64748b; margin-top: 1px; }
 .offline-banner-btn {
-  background: var(--emerald, #059669);
+  background: #059669;
   color: #fff;
   border: none;
   border-radius: 8px;
@@ -266,24 +300,28 @@ All user-sourced text passed into `innerHTML` must go through `esc()` (already d
   cursor: pointer;
   flex-shrink: 0;
 }
-.offline-cancel-btn { background: var(--gray-400, #94a3b8); }
+.offline-cancel-btn { background: #94a3b8; }
 .offline-banner-progress-wrap { flex: 1; min-width: 0; }
 .offline-progress-bar {
   height: 4px;
-  background: var(--border, #e2e8f0);
+  background: #e2e8f0;
   border-radius: 2px;
   margin-top: 6px;
   overflow: hidden;
 }
 .offline-progress-fill {
   height: 100%;
-  background: var(--emerald, #059669);
+  background: #059669;
   border-radius: 2px;
   transition: width 0.3s ease;
 }
+html.dark .offline-banner { background: #1e293b; border-color: #334155; }
+html.dark .offline-banner-title { color: #f1f5f9; }
+html.dark .offline-banner-sub { color: #94a3b8; }
+html.dark .offline-progress-bar { background: #334155; }
 ```
 
-### Share sheet
+### Share sheet + toast (append to css/styles.css)
 
 ```css
 /* ── Share Sheet ──────────────────────────────────────────── */
@@ -297,7 +335,7 @@ All user-sourced text passed into `innerHTML` must go through `esc()` (already d
 }
 .share-sheet {
   position: relative;
-  background: var(--surface, #fff);
+  background: #fff;
   border-radius: 20px 20px 0 0;
   padding: 12px 20px 32px;
   width: 100%;
@@ -308,16 +346,16 @@ All user-sourced text passed into `innerHTML` must go through `esc()` (already d
 .share-sheet.open { transform: translateY(0); }
 .share-sheet-handle {
   width: 36px; height: 4px;
-  background: var(--border, #e2e8f0);
+  background: #e2e8f0;
   border-radius: 2px;
   margin: 0 auto 16px;
 }
 .share-sheet-text {
   font-size: 14px;
   line-height: 1.7;
-  color: var(--text, #0f172a);
+  color: #0f172a;
   white-space: pre-wrap;
-  background: var(--bg, #f8fafc);
+  background: #f8fafc;
   border-radius: 10px;
   padding: 12px;
   margin-bottom: 14px;
@@ -327,25 +365,30 @@ All user-sourced text passed into `innerHTML` must go through `esc()` (already d
 .share-sheet-actions { display: flex; gap: 10px; margin-bottom: 10px; }
 .share-action-btn {
   flex: 1; padding: 11px;
-  border: 1.5px solid var(--border, #e2e8f0);
-  background: var(--surface, #fff);
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
   border-radius: 10px;
   font-size: 14px; font-weight: 600;
-  cursor: pointer; color: var(--text, #0f172a);
+  cursor: pointer; color: #0f172a;
 }
 .share-action-primary {
-  background: var(--emerald, #059669);
-  border-color: var(--emerald, #059669);
+  background: #059669;
+  border-color: #059669;
   color: #fff;
 }
 .share-close-btn {
   width: 100%; padding: 11px;
   background: none;
-  border: 1.5px solid var(--border, #e2e8f0);
+  border: 1.5px solid #e2e8f0;
   border-radius: 10px;
   font-size: 14px; font-weight: 600;
-  cursor: pointer; color: var(--gray-500, #64748b);
+  cursor: pointer; color: #64748b;
 }
+html.dark .share-sheet { background: #1e293b; }
+html.dark .share-sheet-handle { background: #334155; }
+html.dark .share-sheet-text { background: #0f172a; color: #f1f5f9; }
+html.dark .share-action-btn { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+html.dark .share-close-btn { border-color: #334155; color: #94a3b8; }
 
 /* ── Copy Toast ───────────────────────────────────────────── */
 .copy-toast {
@@ -372,10 +415,10 @@ All user-sourced text passed into `innerHTML` must go through `esc()` (already d
 
 ---
 
-## Constraints
+## Existing code reference
 
-- `esc()` is already defined in app.js — use it for all user-visible text in innerHTML
-- `SURAHS` array is defined in data.js: `SURAHS[n-1][2]` = English name, `SURAHS[n-1][1]` = Arabic name
-- `state.quran.cache[n]` has `{ arData, enData }` where `arData.ayahs` and `enData.ayahs` are arrays indexed 0-based
-- The share sheet overlay is appended to `document.body`, not to any tab div, so it survives tab switches
-- Dark mode: use CSS variables (`var(--surface)`, `var(--text)`, `var(--emerald)`, `var(--border)`, `var(--bg)`) throughout — the existing dark mode class on `body` flips these automatically
+- `esc(str)` — defined in app.js, escapes HTML special chars for safe innerHTML use
+- `SURAHS[n-1]` — array from data.js: index 0=number, 1=Arabic name, 2=English name, 3=revelation type, 4=verse count, 5=juz
+- `state.quran.cache[n]` — `{ arData, enData }` where `arData.ayahs` and `enData.ayahs` are 0-indexed arrays; ayah number is 1-based so use `ayahs[ayahNum - 1]`
+- Dark mode pattern: `html.dark .class-name { ... }` rules in styles.css; body gets class `dark` via `applyDarkMode()`
+- SW already handles `api.alquran.cloud` with network-first + cache — fetching surahs in `downloadQuranOffline` automatically populates the SW cache
