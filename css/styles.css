@@ -2035,7 +2035,7 @@ html.dark .share-dua-btn { background: #334155; border-color: #475569; color: #9
 .cal-month-title {
   font-size: 16px;
   font-weight: 700;
-  color: var(--gray-800);
+  color: var(--gray-700);
 }
 .cal-grid {
   display: grid;
