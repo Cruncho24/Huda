@@ -2034,6 +2034,7 @@ async function runQuranSearch(query) {
     const res = await fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(query)}/all/en.sahih`);
     if (!res.ok) throw new Error(res.status);
     const json = await res.json();
+    if (query !== state.quran.searchQuery) return; // stale response
     const matches = json.data?.matches ?? [];
     if (matches.length === 0) {
       results.innerHTML = `<p class="qs-hint">No results for '<strong>${esc(query)}</strong>'</p>`;
@@ -2060,6 +2061,7 @@ async function runQuranSearch(query) {
 }
 
 function selectSearchResult(surahNum, ayahNum) {
+  state.quran.viewMode = 'verse'; // ensure ayah-N id elements are rendered for scroll
   closeQuranSearch();
   openSurah(surahNum, ayahNum);
 }
