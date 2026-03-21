@@ -77,6 +77,8 @@ const state = {
     currentPage: 0,
     showTranslation: false,
     timings: {},
+    searchOpen: false,
+    searchQuery: '',
   },
   learn: {
     currentSection: null, currentLesson: null,
@@ -90,6 +92,7 @@ const state = {
 
 // Tracks which ayahs have tafsir expanded; cleared on each renderSurahContent
 const _openTafsir = new Set(); // "surah:ayah" strings
+let _searchDebounce = null;
 
 // ── Init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -543,7 +546,7 @@ function filterSurahs(query) {
   renderSurahList(filtered);
 }
 
-async function openSurah(n) {
+async function openSurah(n, targetAyah = null) {
   mushafStop();
   document.getElementById('quran-list-view').style.display = 'none';
   const reader = document.getElementById('quran-reader');
@@ -588,6 +591,11 @@ async function openSurah(n) {
       renderSurahContent(n, arData, enData);
     }
     document.getElementById('quran-reader').scrollTop = 0;
+    if (targetAyah) {
+      requestAnimationFrame(() => {
+        document.getElementById(`ayah-${targetAyah}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      });
+    }
     updateSurahNavBtns();
   } catch(e) {
     content.innerHTML = `
@@ -1968,6 +1976,92 @@ function navigateCalendar(delta) {
   state.calendar.displayMonth = m;
   state.calendar.displayYear = y;
   renderCalendar();
+}
+
+// ── Quran Search ──────────────────────────────────────────────
+function openQuranSearch() {
+  state.quran.searchOpen = true;
+  state.quran.searchQuery = '';
+  const listView = document.getElementById('quran-list-view');
+  if (!listView) return;
+  let sv = document.getElementById('quran-search-view');
+  if (!sv) {
+    sv = document.createElement('div');
+    sv.id = 'quran-search-view';
+    listView.parentNode.insertBefore(sv, listView);
+  }
+  listView.style.display = 'none';
+  sv.style.display = 'block';
+  sv.innerHTML = `
+    <div class="qs-header" style="padding-top:calc(16px + env(safe-area-inset-top,0px))">
+      <button class="back-btn" onclick="closeQuranSearch()">←</button>
+      <h2>Search Quran</h2>
+    </div>
+    <div class="qs-input-wrap">
+      <input class="qs-input" id="qs-input" placeholder="Search in English translation..."
+        oninput="scheduleQuranSearch(this.value)" autocomplete="off">
+    </div>
+    <div id="qs-results" class="qs-results">
+      <p class="qs-hint">Type at least 2 characters to search</p>
+    </div>
+  `;
+  document.getElementById('qs-input')?.focus();
+}
+
+function closeQuranSearch() {
+  state.quran.searchOpen = false;
+  const sv = document.getElementById('quran-search-view');
+  if (sv) sv.style.display = 'none';
+  const listView = document.getElementById('quran-list-view');
+  if (listView) listView.style.display = 'block';
+}
+
+function scheduleQuranSearch(query) {
+  state.quran.searchQuery = query;
+  clearTimeout(_searchDebounce);
+  if (query.length < 2) {
+    document.getElementById('qs-results').innerHTML = `<p class="qs-hint">Type at least 2 characters to search</p>`;
+    return;
+  }
+  _searchDebounce = setTimeout(() => runQuranSearch(query), 400);
+}
+
+async function runQuranSearch(query) {
+  const results = document.getElementById('qs-results');
+  if (!results) return;
+  results.innerHTML = `<div class="loading-state"><div class="spinner"></div></div>`;
+  try {
+    const res = await fetch(`https://api.alquran.cloud/v1/search/${encodeURIComponent(query)}/all/en.sahih`);
+    if (!res.ok) throw new Error(res.status);
+    const json = await res.json();
+    const matches = json.data?.matches ?? [];
+    if (matches.length === 0) {
+      results.innerHTML = `<p class="qs-hint">No results for '<strong>${esc(query)}</strong>'</p>`;
+      return;
+    }
+    const truncated = matches.length === 60;
+    results.innerHTML = matches.map(m => {
+      const surahNum = m.surah.number;
+      const ayahNum = m.numberInSurah;
+      const surahName = m.surah.englishName;
+      const snippet = esc(m.text);
+      return `
+        <div class="qs-result" onclick="selectSearchResult(${surahNum},${ayahNum})">
+          <div class="qs-result-meta">
+            <span class="qs-surah-name">${esc(surahName)}</span>
+            <span class="qs-ayah-badge">${ayahNum}</span>
+          </div>
+          <div class="qs-snippet">${snippet}</div>
+        </div>`;
+    }).join('') + (truncated ? `<p class="qs-truncated">Showing top 60 results — try a more specific search.</p>` : '');
+  } catch(e) {
+    results.innerHTML = `<p class="qs-hint">Search unavailable — check your connection</p>`;
+  }
+}
+
+function selectSearchResult(surahNum, ayahNum) {
+  closeQuranSearch();
+  openSurah(surahNum, ayahNum);
 }
 
 // ── Tafsir ────────────────────────────────────────────────────
