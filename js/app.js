@@ -497,6 +497,21 @@ function renderHome() {
     }, 1000);
   }
 
+  // Friday Jumu'ah banner — uses local date parts to match getDay() which is also local
+  const isFriday = now.getDay() === 5;
+  const localDateStr = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+  const jumuahDismissKey = `huda_jumuah_dismissed_${localDateStr}`;
+  const jumuahDismissed = localStorage.getItem(jumuahDismissKey) === '1';
+  const jumuahCard = (isFriday && !jumuahDismissed) ? `
+    <div class="jumuah-card" id="jumuah-card">
+      <div class="jumuah-content">
+        <div class="jumuah-title">🕌 Jumu'ah Mubarak</div>
+        <div class="jumuah-sub">Read Surah Al-Kahf today — whoever reads it on Friday, a light will shine for them until the next Friday.</div>
+        <button class="jumuah-btn" onclick="switchTab('quran');setTimeout(()=>openSurah(18),100);dismissJumuah()">Read Surah Al-Kahf →</button>
+      </div>
+      <button class="jumuah-dismiss" onclick="dismissJumuah()" aria-label="Dismiss">✕</button>
+    </div>` : '';
+
   document.getElementById('tab-home').innerHTML = `
     <div class="hero fade-in" style="position:relative">
       <button class="account-btn" id="account-btn" onclick="openAuthModal()" title="Account">🔑</button>
@@ -517,6 +532,8 @@ function renderHome() {
     </div>
 
     ${ramadanCard}
+
+    ${jumuahCard}
 
     ${lastRead ? `
     <div class="continue-card" onclick="switchTab('quran');setTimeout(()=>openSurah(${lastRead.surah}),100)">
@@ -614,6 +631,14 @@ function renderHome() {
     </div>
   `;
   updateAccountBtn(authGetCachedUser());
+}
+
+function dismissJumuah() {
+  const now = new Date();
+  const key = `huda_jumuah_dismissed_${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+  localStorage.setItem(key, '1');
+  const el = document.getElementById('jumuah-card');
+  if (el) el.remove();
 }
 
 function rotateHadith() {
