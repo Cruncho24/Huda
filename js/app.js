@@ -1995,6 +1995,7 @@ async function toggleTafsir(surah, ayah) {
       text = cache[ayah];
     } else {
       const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/en.maududi`);
+      if (!res.ok) throw new Error(res.status);
       const json = await res.json();
       text = json.data?.text;
       if (text) {
