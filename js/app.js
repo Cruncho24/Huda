@@ -160,6 +160,7 @@ async function handleSignIn() {
   btn.disabled = true; btn.textContent = 'Signing in…';
   try {
     await authSignIn(email, pass);
+    haptic(50);
     document.getElementById('auth-modal').style.display = 'none';
   } catch(e) {
     showAuthError(e.message || 'Sign in failed.');
@@ -193,6 +194,7 @@ async function handleSignUp() {
 
 async function handleSignOut() {
   await authSignOut();
+  haptic(50);
   document.getElementById('auth-modal').style.display = 'none';
   updateAccountBtn(null);
 }
@@ -284,6 +286,7 @@ function toggleDarkMode() {
   state.darkMode = !state.darkMode;
   localStorage.setItem('huda_dark', state.darkMode ? '1' : '0');
   applyDarkMode();
+  haptic();
   renderHome();
   debouncedPush();
 }
@@ -309,6 +312,7 @@ function toggleBookmark(surahNum, ayahNum, arText) {
   if (idx >= 0) state.bookmarks.splice(idx, 1);
   else state.bookmarks.unshift({ s: surahNum, a: ayahNum, ar: arText.slice(0, 80) });
   localStorage.setItem('huda_bookmarks', JSON.stringify(state.bookmarks));
+  haptic();
   debouncedPush();
   // refresh bookmark btn
   const btn = document.getElementById(`bm-${surahNum}-${ayahNum}`);
@@ -318,6 +322,7 @@ function isBookmarked(s, a) { return state.bookmarks.some(b => b.s === s && b.a 
 function removeBookmark(s, a) {
   state.bookmarks = state.bookmarks.filter(b => !(b.s === s && b.a === a));
   localStorage.setItem('huda_bookmarks', JSON.stringify(state.bookmarks));
+  haptic();
   debouncedPush();
   renderHome();
 }
@@ -330,6 +335,7 @@ function toggleSurahBookmark(num) {
     state.surahBookmarks = [num, ...state.surahBookmarks];
   }
   localStorage.setItem('huda_surah_bm', JSON.stringify(state.surahBookmarks));
+  haptic();
   debouncedPush();
   const isNowBm = isSurahBookmarked(num);
   // refresh button in surah list if visible
@@ -346,6 +352,7 @@ function toggleReaderBookmark() {
 function removeSurahBookmark(num) {
   state.surahBookmarks = state.surahBookmarks.filter(n => n !== num);
   localStorage.setItem('huda_surah_bm', JSON.stringify(state.surahBookmarks));
+  haptic();
   debouncedPush();
   const btn = document.getElementById(`sbm-${num}`);
   if (btn) btn.textContent = '🏷️';
@@ -401,6 +408,7 @@ function setupNav() {
 
 function switchTab(tab) {
   state.activeTab = tab;
+  haptic();
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   document.getElementById(`tab-${tab}`).classList.add('active');
