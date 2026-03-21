@@ -85,6 +85,7 @@ const state = {
     zakat: { currency: 'USD', nisab: 'gold' },
   },
   tasbeeh: parseInt(localStorage.getItem('huda_tasbeeh') || '0') || 0,
+  calendar: { displayYear: null, displayMonth: null },
 };
 
 // ── Init ─────────────────────────────────────────────────────

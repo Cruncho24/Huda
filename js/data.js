@@ -1272,3 +1272,17 @@ const AYATUL_KURSI = {
   translation: "Allah — there is no deity except Him, the Ever-Living, the Sustainer of existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Throne extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.",
   ref: "Quran 2:255"
 };
+
+// ── Islamic Key Dates ─────────────────────────────────────────
+const ISLAMIC_DATES = [
+  { month: 1,  day: 1,  name: 'Islamic New Year' },
+  { month: 1,  day: 10, name: 'Ashura' },
+  { month: 3,  day: 12, name: "Mawlid al-Nabi \uFDFA" },
+  { month: 7,  day: 27, name: "Isra wal-Mi'raj" },
+  { month: 8,  day: 15, name: "Laylat al-Bara'ah" },
+  { month: 9,  day: 1,  name: 'Start of Ramadan' },
+  { month: 9,  day: 27, name: "Laylat al-Qadr" },
+  { month: 10, day: 1,  name: 'Eid ul-Fitr' },
+  { month: 12, day: 9,  name: 'Day of Arafah' },
+  { month: 12, day: 10, name: 'Eid ul-Adha' },
+];
