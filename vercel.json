@@ -75,6 +75,14 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://vitals.vercel-insights.com https://api.aladhan.com https://api.alquran.cloud https://api.qurancdn.com https://nominatim.openstreetmap.org https://api.gold-api.com https://open.er-api.com https://cdn.islamic.network https://everyayah.com https://mp3quran.net https://server8.mp3quran.net https://server11.mp3quran.net https://download.quranicaudio.com; media-src 'self' blob: https://cdn.islamic.network https://everyayah.com https://mp3quran.net https://server8.mp3quran.net https://server11.mp3quran.net https://download.quranicaudio.com https://api.qurancdn.com; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), payment=(), usb=(), bluetooth=()"
         }
       ]
     }
