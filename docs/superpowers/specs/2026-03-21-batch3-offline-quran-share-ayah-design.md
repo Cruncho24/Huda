@@ -160,10 +160,10 @@ let _pendingShareText = '';
 `renderSurahContent()` renders each ayah with a `.ayah-actions` div containing existing buttons (play, bookmark, tafsir). Add the share button as the **4th button inside `.ayah-actions`**, using the existing `.ayah-btn` class:
 
 ```html
-<button class="ayah-btn" onclick="shareAyah(${n}, ${i+1})" aria-label="Share ayah">📤</button>
+<button class="ayah-btn" onclick="shareAyah(${n}, ${a.numberInSurah})" aria-label="Share ayah">📤</button>
 ```
 
-Where `n` is the surah number and `i+1` is the ayah number (1-based). The `.ayah-btn` class already handles styling and dark mode — no new CSS needed for the button itself.
+Where `n` is the surah number and `a.numberInSurah` is the ayah number (1-based, matches the convention used by all other buttons in this block). The `.ayah-btn` class already handles styling and dark mode — no new CSS needed for the button itself.
 
 ### shareAyah(surahNum, ayahNum)
 
