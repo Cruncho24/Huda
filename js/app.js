@@ -83,7 +83,8 @@ const state = {
     currentDuaCategory: null, currentDuaIndex: 0,
     currentNameIndex: null, hajjTab: 'umrah',
     zakat: { currency: 'USD', nisab: 'gold' },
-  }
+  },
+  tasbeeh: parseInt(localStorage.getItem('huda_tasbeeh') || '0') || 0,
 };
 
 // ── Init ─────────────────────────────────────────────────────
@@ -1790,6 +1791,26 @@ function resetDhikr(i) {
   state.dhikrCounts[i] = 0;
   saveDhikr();
   updateDhikrCard(i);
+}
+
+// ── Tasbeeh Counter ───────────────────────────────────────────
+function tapTasbeeh() {
+  state.tasbeeh++;
+  saveTasbeeh();
+  haptic();
+  const el = document.getElementById('tasbeeh-count');
+  if (el) el.textContent = state.tasbeeh;
+}
+
+function resetTasbeeh() {
+  state.tasbeeh = 0;
+  saveTasbeeh();
+  const el = document.getElementById('tasbeeh-count');
+  if (el) el.textContent = '0';
+}
+
+function saveTasbeeh() {
+  localStorage.setItem('huda_tasbeeh', String(state.tasbeeh));
 }
 
 function updateDhikrCard(i) {
