@@ -1819,6 +1819,149 @@ function saveTasbeeh() {
   localStorage.setItem('huda_tasbeeh', String(state.tasbeeh));
 }
 
+// ── Islamic Calendar ──────────────────────────────────────────
+const HIJRI_MONTHS = [
+  'Muharram','Safar','Rabi al-Awwal','Rabi al-Thani',
+  'Jumada al-Awwal','Jumada al-Thani','Rajab',"Sha'ban",
+  'Ramadan','Shawwal',"Dhu al-Qi'dah",'Dhu al-Hijjah'
+];
+const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+async function openCalendar() {
+  const tab = document.getElementById('tab-learn');
+  tab.innerHTML = `
+    <div class="page-header">
+      <button class="back-btn" onclick="renderLearnHub()">←</button>
+      <h2>Islamic Calendar</h2>
+    </div>
+    <div id="cal-container" style="padding:16px">
+      <div class="loading-state"><div class="spinner"></div><p>Loading calendar...</p></div>
+    </div>
+  `;
+  // Get current Hijri date from aladhan
+  try {
+    const today = new Date();
+    const dd = String(today.getDate()).padStart(2,'0');
+    const mm = String(today.getMonth()+1).padStart(2,'0');
+    const yyyy = today.getFullYear();
+    const res = await fetch(`https://api.aladhan.com/v1/gToH/${dd}-${mm}-${yyyy}`);
+    const json = await res.json();
+    const hijri = json.data.hijri;
+    state.calendar.displayYear = parseInt(hijri.year);
+    state.calendar.displayMonth = parseInt(hijri.month.number);
+  } catch(e) {
+    // fallback: keep null and renderCalendar will show error
+  }
+  renderCalendar();
+}
+
+async function renderCalendar() {
+  const container = document.getElementById('cal-container');
+  if (!container) return;
+  const y = state.calendar.displayYear;
+  const m = state.calendar.displayMonth;
+  if (!y || !m) {
+    container.innerHTML = `<p class="cal-error">⚠️ Calendar data unavailable</p>`;
+    return;
+  }
+
+  container.innerHTML = `<div class="loading-state"><div class="spinner"></div><p>Loading...</p></div>`;
+
+  // Fetch Gregorian start date of this Hijri month (with cache)
+  const cacheKey = `huda_cal_${y}_${m}`;
+  const nextCacheKey = `huda_cal_${m === 12 ? y+1 : y}_${m === 12 ? 1 : m+1}`;
+
+  let startGreg, monthLen;
+  try {
+    let startData = localStorage.getItem(cacheKey);
+    if (!startData) {
+      const r = await fetch(`https://api.aladhan.com/v1/hToG/01-${String(m).padStart(2,'0')}-${y}`);
+      const j = await r.json();
+      startData = j.data.gregorian.date; // "DD-MM-YYYY"
+      try { localStorage.setItem(cacheKey, startData); } catch(e) {}
+    }
+    // Parse "DD-MM-YYYY"
+    const [dd,mm,yyyy] = startData.split('-').map(Number);
+    startGreg = new Date(yyyy, mm-1, dd);
+  } catch(e) {
+    container.innerHTML = `<p class="cal-error">⚠️ Calendar data unavailable</p>`;
+    return;
+  }
+
+  // Fetch start of next Hijri month to determine current month length
+  try {
+    let nextData = localStorage.getItem(nextCacheKey);
+    if (!nextData) {
+      const nm = m === 12 ? 1 : m+1;
+      const ny = m === 12 ? y+1 : y;
+      const r = await fetch(`https://api.aladhan.com/v1/hToG/01-${String(nm).padStart(2,'0')}-${ny}`);
+      const j = await r.json();
+      nextData = j.data.gregorian.date;
+      try { localStorage.setItem(nextCacheKey, nextData); } catch(e) {}
+    }
+    const [dd,mm,yyyy] = nextData.split('-').map(Number);
+    const nextGreg = new Date(yyyy, mm-1, dd);
+    monthLen = Math.round((nextGreg - startGreg) / 86400000);
+    if (monthLen < 29 || monthLen > 30) monthLen = 30; // sanity
+  } catch(e) {
+    monthLen = 30; // safe fallback
+  }
+
+  // Today's Hijri date for highlighting
+  const todayGreg = new Date();
+  todayGreg.setHours(0,0,0,0);
+
+  // Key dates for this month
+  const keyDates = ISLAMIC_DATES.filter(d => d.month === m);
+
+  // Build grid
+  const startDow = startGreg.getDay(); // 0=Sun
+  let cells = '';
+  // Empty cells before day 1
+  for (let i = 0; i < startDow; i++) cells += `<div class="cal-cell cal-empty"></div>`;
+  for (let day = 1; day <= monthLen; day++) {
+    const gregDate = new Date(startGreg);
+    gregDate.setDate(startGreg.getDate() + day - 1);
+    gregDate.setHours(0,0,0,0);
+    const isToday = gregDate.getTime() === todayGreg.getTime();
+    const keyDate = keyDates.find(d => d.day === day);
+    cells += `
+      <div class="cal-cell${isToday ? ' cal-today' : ''}${keyDate ? ' cal-key' : ''}">
+        <span class="cal-day-num">${day}</span>
+        ${keyDate ? '<span class="cal-dot"></span>' : ''}
+      </div>`;
+  }
+
+  const legendHtml = keyDates.length ? `
+    <div class="cal-legend">
+      ${keyDates.map(d => `<div class="cal-legend-item"><span class="cal-dot"></span>${d.day} — ${esc(d.name)}</div>`).join('')}
+    </div>` : '';
+
+  container.innerHTML = `
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="navigateCalendar(-1)">‹</button>
+      <div class="cal-month-title">${HIJRI_MONTHS[m-1]} ${y} AH</div>
+      <button class="cal-nav-btn" onclick="navigateCalendar(1)">›</button>
+    </div>
+    <div class="cal-grid">
+      ${WEEKDAYS.map(d => `<div class="cal-weekday">${d}</div>`).join('')}
+      ${cells}
+    </div>
+    ${legendHtml}
+    <p class="cal-disclaimer">Dates are approximate — scholars may differ on exact sightings.</p>
+  `;
+}
+
+function navigateCalendar(delta) {
+  let m = state.calendar.displayMonth + delta;
+  let y = state.calendar.displayYear;
+  if (m > 12) { m = 1; y++; }
+  if (m < 1)  { m = 12; y--; }
+  state.calendar.displayMonth = m;
+  state.calendar.displayYear = y;
+  renderCalendar();
+}
+
 function updateDhikrCard(i) {
   const d = DHIKRS[i];
   const count = state.dhikrCounts[i] || 0;
