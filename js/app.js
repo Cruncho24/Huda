@@ -253,6 +253,10 @@ document.addEventListener('DOMContentLoaded', () => {
   setupInstallPrompt();
   setInterval(rotateHadith, 12000);
 
+  // Handle notification tap — open to specific tab
+  const _notifTab = new URLSearchParams(location.search).get('tab');
+  if (_notifTab) switchTab(_notifTab);
+
   // Auth — fires on sign-in, sign-out, and page reload with existing session
   authOnChange(async user => {
     updateAccountBtn(user);
@@ -433,6 +437,10 @@ function registerSW() {
   }).catch(() => {});
   // New SW activated → reload so users get the latest version
   navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
+  // Handle notification tap when app is already open
+  navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data?.type === 'OPEN_TAB') switchTab(e.data.tab);
+  });
 }
 
 let deferredPrompt = null;
