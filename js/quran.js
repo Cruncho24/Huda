@@ -544,13 +544,9 @@ function playMushafAyah(globalNum, surahNum, ayahNum) {
   if (state.audio.playingId === globalNum && state.audio.player) {
     mushafStop(); return;
   }
-  // Stop previous
-  if (state.audio.player) {
-    state.audio.player.onended = null; // prevent old chain from firing
-    state.audio.player.pause();
-    const prev = document.getElementById(`maud-${state.audio.playingId}`);
-    if (prev) prev.classList.remove('maud-playing');
-  }
+  // Stop previous — use mushafStop() to also clear _surahAudio, otherwise
+  // toggleMushafPlayback picks _surahAudio over the new per-ayah player
+  if (state.audio.player || _surahAudio) mushafStop();
 
   // Use preloaded slot if ready, otherwise load now
   if (_poolFor[1 - _poolIdx] === globalNum) _poolIdx = 1 - _poolIdx;
