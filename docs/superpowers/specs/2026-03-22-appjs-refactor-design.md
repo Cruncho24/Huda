@@ -20,13 +20,15 @@ Load order: `app.js` first (defines `state`, `esc()`, `RECITERS`), then tab file
 |---|---|---|
 | `js/app.js` | Keep: Security (5), Reciters (17), State (56), Auth Modal (93), Init (248), Dark Mode (284), Haptic (297), Daily Dhikr Reset (302), Bookmarks (312), Audio (365), Navigation (402), PWA (3115), Font Size (3153) | ~400 |
 | `js/home.js` | Hijri Date (431), HOME TAB (464) | ~205 |
-| `js/quran.js` | QURAN TAB (669), Surah-level audio (970), Mushaf word-timing (1021), Ayatul Kursi audio (1072), Long-press (1507), Preloaded audio pool (1512), Quran Search (2366), Tafsir (2454) | ~1,400 |
+| `js/quran.js` | QURAN TAB (669), Surah-level audio (970), Mushaf word-timing (1021), Ayatul Kursi audio (1072), Long-press (1507), Preloaded audio pool (1512), Quran Search (2366), Tafsir (2454–2526) | ~1,400 |
 | `js/prayer.js` | PRAYER TIMES TAB (1625), Qibla Compass (1973) | ~514 |
-| `js/dhikr.js` | DHIKR TAB (2139), Tasbeeh Counter (2206), Islamic Calendar (2227) | ~226 |
+| `js/dhikr.js` | DHIKR TAB (2139), Tasbeeh Counter (2206), Islamic Calendar (2227), `saveDhikr()` (2527–2530) | ~230 |
 | `js/duas.js` | DUAS TAB (2532), Prophet list (2570), Share Dua (3166) | ~180 |
 | `js/learn.js` | LEARN TAB (2709), New Muslim Guide (2744), Children's Quran (2786), 99 Names (2864), Hajj Guide (2923), Zakat Calculator (2961) | ~406 |
 
-**Module-level vars** `_offlineDownloading`, `_offlineCancelled`, `_pendingShareText` move from app.js to `quran.js` (they belong to Quran features).
+**Module-level vars that move out of app.js:**
+- To `quran.js`: `_offlineDownloading`, `_offlineCancelled`, `_pendingShareText` (lines ~241–246), `_openTafsir` (line 242), `_searchDebounce` (line 243) — all Quran-feature vars
+- To `home.js`: `_hijriCacheMem` (line 432) — declared immediately before the Hijri Date section
 
 ---
 

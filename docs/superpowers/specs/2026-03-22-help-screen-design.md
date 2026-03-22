@@ -84,7 +84,6 @@ function openHelpScreen() {
           <ul class="help-list">
             <li>Daily dhikr cards with tap counter</li>
             <li>Tasbeeh counter</li>
-            <li>Islamic (Hijri) calendar</li>
           </ul>
         </div>
 
@@ -105,6 +104,7 @@ function openHelpScreen() {
             <li>99 Names of Allah (Asmaul Husna)</li>
             <li>Hajj & Umrah Guide — step-by-step rituals</li>
             <li>Zakat Calculator</li>
+            <li>Islamic (Hijri) calendar</li>
           </ul>
         </div>
 
@@ -207,8 +207,8 @@ Use hardcoded color values (no undefined CSS vars). Follow existing dark mode pa
 }
 .help-btn {
   position: absolute;
-  top: 16px;
-  right: 52px;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  right: calc(52px + env(safe-area-inset-right, 0px));
   background: rgba(255,255,255,0.2);
   border: none;
   border-radius: 50%;
@@ -229,7 +229,7 @@ html.dark .help-body { background: #0f172a; }
 html.dark .help-section { background: #1e293b; border-color: #334155; }
 html.dark .help-section-title { color: #f1f5f9; }
 html.dark .help-list li { color: #94a3b8; }
-html.dark .help-intro { color: #64748b; }
+html.dark .help-intro { color: #94a3b8; }
 ```
 
 ---
@@ -237,6 +237,6 @@ html.dark .help-intro { color: #64748b; }
 ## Existing Code Reference
 
 - `renderHome()` in `js/home.js` — add `?` button to hero, `openHelpScreen()` and `closeHelpScreen()` go in same file
-- `.account-btn` — existing absolute-positioned button in hero; `help-btn` sits at `right: 52px` to leave room for it
+- `.account-btn` — existing absolute-positioned button in hero using `top: calc(14px + env(safe-area-inset-top, 0px))` and `right: calc(14px + env(safe-area-inset-right, 0px))`; `.help-btn` mirrors this with `right: calc(52px + env(safe-area-inset-right, 0px))` to sit 38px to the left of it
 - Dark mode pattern: `html.dark .class { ... }` in `styles.css`
 - Version bump: `service-worker.js` `CACHE_NAME` → `huda-v97`, all `?v=96` → `?v=97` in `index.html`
