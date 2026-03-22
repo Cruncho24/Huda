@@ -2387,3 +2387,56 @@ html.dark .auth-input { background: #0f172a; border-color: #334155; }
   align-items: center;
   justify-content: center;
 }
+
+/* ── Offline Download Banner ──────────────────────────────── */
+.offline-banner {
+  margin: 12px 16px 0;
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.offline-banner-done {
+  justify-content: center;
+  color: #059669;
+  font-weight: 600;
+  font-size: 14px;
+}
+.offline-banner-text { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+.offline-banner-icon { font-size: 22px; flex-shrink: 0; }
+.offline-banner-title { font-size: 14px; font-weight: 600; color: #0f172a; }
+.offline-banner-sub { font-size: 12px; color: #64748b; margin-top: 1px; }
+.offline-banner-btn {
+  background: #059669;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.offline-cancel-btn { background: #94a3b8; }
+.offline-banner-progress-wrap { flex: 1; min-width: 0; }
+.offline-progress-bar {
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.offline-progress-fill {
+  height: 100%;
+  background: #059669;
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+html.dark .offline-banner { background: #1e293b; border-color: #334155; }
+html.dark .offline-banner-title { color: #f1f5f9; }
+html.dark .offline-banner-sub { color: #94a3b8; }
+html.dark .offline-progress-bar { background: #334155; }
