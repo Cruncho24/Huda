@@ -224,10 +224,15 @@ async function openSurah(n, targetAyah = null) {
     if (targetAyah) {
       requestAnimationFrame(() => {
         setTimeout(() => {
-          const el = document.getElementById(`ayah-${targetAyah}`);
-          if (el) {
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            setTimeout(() => flashAyah(el), 400);
+          if (state.quran.viewMode === 'page') {
+            const wrap = document.querySelector(`#mushaf-page .mushaf-ayah-wrap[data-ayah="${targetAyah}"]`);
+            wrap?.closest('.mushaf-page-block')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          } else {
+            const el = document.getElementById(`ayah-${targetAyah}`);
+            if (el) {
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+              setTimeout(() => flashAyah(el), 400);
+            }
           }
         }, 0);
       });
@@ -315,6 +320,29 @@ function renderMushafPage(n, arData, enData) {
   `;
   setupAyahLongPress(el);
   updateMushafPlayerBar();
+
+  // Track reading position by page block — same delayed approach as verse mode
+  if (_ayahObserver) _ayahObserver.disconnect();
+  _ayahObserver = null;
+  setTimeout(() => {
+    if (!el.isConnected) return;
+    _ayahObserver = new IntersectionObserver(entries => {
+      const visibleBlocks = entries.filter(e => e.isIntersecting).map(e => e.target);
+      if (!visibleBlocks.length) return;
+      const topBlock = visibleBlocks.reduce((top, cur) =>
+        cur.getBoundingClientRect().top < top.getBoundingClientRect().top ? cur : top
+      );
+      const firstWrap = topBlock.querySelector('.mushaf-ayah-wrap[data-ayah]');
+      if (!firstWrap) return;
+      const ayah = parseInt(firstWrap.dataset.ayah, 10);
+      if (isNaN(ayah)) return;
+      try {
+        const lr = JSON.parse(localStorage.getItem('huda_last_read') || 'null');
+        if (lr) { lr.ayah = ayah; localStorage.setItem('huda_last_read', JSON.stringify(lr)); }
+      } catch(e) { console.warn('[huda] failed to save reading position', e); }
+    }, { threshold: 0.3 });
+    el.querySelectorAll('.mushaf-page-block').forEach(block => _ayahObserver.observe(block));
+  }, 650);
 }
 
 // ── Surah-level audio (gapless) ───────────────────────────────
