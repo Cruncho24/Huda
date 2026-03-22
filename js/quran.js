@@ -662,12 +662,14 @@ function toggleMushafPlayback() {
   if (state.audio.paused) {
     player.play().then(() => {
       state.audio.paused = false;
+      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
       updateMushafPlayBtn(true);
       updateMushafPlayerBar();
     }).catch(() => {});
   } else {
     player.pause();
     state.audio.paused = true;
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
     updateMushafPlayBtn(false);
     updateMushafPlayerBar();
   }
@@ -685,7 +687,7 @@ function updateMushafPlayerBar() {
     const ayah = state.audio.playingAyah;
 
     const info = document.getElementById('mpb-info');
-    if (info) info.textContent = `${surahName} · ${ayah}`;
+    if (info) info.textContent = surahName;
 
     const btn = document.getElementById('mpb-pause-btn');
     if (btn) btn.textContent = state.audio.paused ? '▶' : '⏸';
@@ -693,7 +695,7 @@ function updateMushafPlayerBar() {
     // ── Media Session (lock screen / car display) ──────────────
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = new MediaMetadata({
-        title: `${surahName} — Ayah ${ayah}`,
+        title: surahName,
         artist: surahEn,
         album: 'Quran — Huda',
         artwork: [{ src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }],
