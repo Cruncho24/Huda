@@ -342,6 +342,25 @@ function updateCountdown(target) {
   if (diff <= 0) {
     el.textContent = '00:00:00';
     clearInterval(state.prayer.countdownInterval);
+
+    // Foreground notification fallback (fires when app is open — covers iOS 16.4+ and non-Triggers browsers)
+    if ('Notification' in window && Notification.permission === 'granted' && state.prayer.times) {
+      const _now = new Date();
+      const _hit = ['fajr','dhuhr','asr','maghrib','isha'].find(key => {
+        const t = new Date(state.prayer.times[key]);
+        return Math.abs(t - _now) < 90000; // within 90 seconds of prayer time
+      });
+      if (_hit) {
+        const _names = { fajr:'Fajr', dhuhr:'Dhuhr', asr:'Asr', maghrib:'Maghrib', isha:'Isha' };
+        const _arabic = { fajr:'الفَجْر', dhuhr:'الظُّهْر', asr:'العَصْر', maghrib:'المَغْرِب', isha:'العِشَاء' };
+        new Notification(_names[_hit], {
+          body: `${_arabic[_hit]} — Time to pray`,
+          icon: '/icons/icon-192.png',
+          tag: `prayer-${_hit}`,
+        });
+      }
+    }
+
     // Re-render immediately to pick up the next prayer (avoids 1s 00:00:00 flash)
     setTimeout(renderPrayerTimes, 0);
     return;
