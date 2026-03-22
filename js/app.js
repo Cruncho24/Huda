@@ -241,6 +241,9 @@ function updateAccountBtn(user) {
 // Tracks which ayahs have tafsir expanded; cleared on each renderSurahContent
 const _openTafsir = new Set(); // "surah:ayah" strings
 let _searchDebounce = null;
+let _offlineDownloading = false;
+let _offlineCancelled   = false;
+let _pendingShareText   = '';
 
 // ── Init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -679,6 +682,7 @@ function renderQuranList() {
       <div class="search-bar">
         <input class="search-input" id="surah-search" placeholder="🔍 Search by name or number..." oninput="filterSurahs(this.value)">
       </div>
+      <div id="offline-banner"></div>
       <div id="surah-list"></div>
     </div>
     <div id="quran-reader" style="display:none">
@@ -716,6 +720,41 @@ function renderQuranList() {
     </div>
   `;
   renderSurahList(SURAHS);
+  _renderOfflineBanner();
+}
+
+function _renderOfflineBanner() {
+  const el = document.getElementById('offline-banner');
+  if (!el) return;
+
+  if (localStorage.getItem('huda_quran_offline') === '1') {
+    el.innerHTML = `<div class="offline-banner offline-banner-done">✅ Full Quran available offline</div>`;
+    return;
+  }
+
+  if (_offlineDownloading) {
+    el.innerHTML = `
+      <div class="offline-banner">
+        <div class="offline-banner-progress-wrap">
+          <div class="offline-banner-title">Downloading… <span id="offline-count">0</span> / 114</div>
+          <div class="offline-progress-bar"><div class="offline-progress-fill" id="offline-fill" style="width:0%"></div></div>
+        </div>
+        <button class="offline-banner-btn offline-cancel-btn" onclick="cancelQuranDownload()">Cancel</button>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="offline-banner">
+      <div class="offline-banner-text">
+        <span class="offline-banner-icon">📥</span>
+        <div>
+          <div class="offline-banner-title">Download for offline reading</div>
+          <div class="offline-banner-sub">Save all 114 surahs to your device</div>
+        </div>
+      </div>
+      <button class="offline-banner-btn" onclick="downloadQuranOffline()">Download</button>
+    </div>`;
 }
 
 function renderSurahList(list) {
