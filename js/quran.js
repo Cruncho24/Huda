@@ -457,6 +457,7 @@ function playAyatulKursi() {
     if (btn) btn.innerHTML = '▶ Play';
   };
   if (state.audio.player && state.audio.playingId === GLOBAL) {
+    state.audio.player.onended = null;
     state.audio.player.pause();
     resetAK();
     return;
