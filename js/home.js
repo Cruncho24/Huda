@@ -37,6 +37,11 @@ async function fetchAndCacheHijri(date) {
 
 // ── HOME TAB ──────────────────────────────────────────────────
 function renderHome() {
+  if (!localStorage.getItem('huda_onboarded')) {
+    showOnboarding();
+    return;
+  }
+
   const now = new Date();
   const dateStr = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
   const hijri = getHijriSync(now);
@@ -94,21 +99,11 @@ function renderHome() {
   document.getElementById('tab-home').innerHTML = `
     <div class="hero fade-in" style="position:relative">
       <button class="help-btn" onclick="openHelpScreen()" aria-label="Help">?</button>
-      <button class="account-btn" id="account-btn" onclick="openAuthModal()" title="Account">🔑</button>
+      <button class="account-btn" id="account-btn" onclick="openSettings()" title="Settings">⚙️</button>
       <div class="hero-arabic">السَّلَامُ عَلَيْكُمْ</div>
       <div class="hero-sub">Peace be upon you</div>
       <div class="hero-date">${dateStr}</div>
       <div class="hero-hijri">${hijriStr}${isRamadan ? ' · 🌙 Ramadan Mubarak' : ''}</div>
-    </div>
-
-    <div class="theme-bar">
-      <span class="theme-bar-label">Appearance</span>
-      <div class="theme-toggle-track" onclick="toggleDarkMode()" title="Toggle theme">
-        <div class="theme-toggle-thumb ${state.darkMode ? 'dark' : ''}">
-          ${state.darkMode ? '🌙' : '☀️'}
-        </div>
-        <span class="theme-toggle-text">${state.darkMode ? 'Dark' : 'Light'}</span>
-      </div>
     </div>
 
     ${ramadanCard}
@@ -318,6 +313,149 @@ function openHelpScreen() {
 }
 
 function closeHelpScreen() {
+  renderHome();
+}
+
+function openSettings() {
+  // Stop audio if playing to avoid button/state desync
+  if (state.audio.player) {
+    state.audio.player.pause();
+    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+  }
+
+  const perm = ('Notification' in window) ? Notification.permission : 'unsupported';
+  const notifRow = perm === 'granted'
+    ? `<div class="settings-row">
+        <span class="settings-label">Prayer Notifications</span>
+        <span class="settings-value-on">On ✓</span>
+       </div>
+       <div class="settings-subtitle">Fajr, Dhuhr, Asr, Maghrib and Isha</div>`
+    : perm === 'default'
+    ? `<div class="settings-row">
+        <span class="settings-label">Prayer Notifications</span>
+        <button class="settings-enable-btn" onclick="requestNotifPermission().then(()=>openSettings())">Enable</button>
+       </div>
+       <div class="settings-subtitle">Get notified at each prayer time</div>`
+    : `<div class="settings-row">
+        <span class="settings-label">Prayer Notifications</span>
+        <span class="settings-value-off">Blocked</span>
+       </div>
+       <div class="settings-subtitle">To enable: device Settings → Browser → Notifications → Allow</div>`;
+
+  const reciterOptions = RECITERS.map(r =>
+    `<option value="${r.id}" ${state.reciter === r.id ? 'selected' : ''}>${r.name}</option>`
+  ).join('');
+
+  document.getElementById('tab-home').innerHTML = `
+    <div class="settings-screen">
+      <div class="help-header">
+        <button class="help-back-btn" onclick="closeSettings()">← Back</button>
+        <div class="help-title">Settings</div>
+      </div>
+      <div style="overflow-y:auto;flex:1">
+
+        <div class="settings-section-label">Account</div>
+        <div class="settings-group">
+          <div class="settings-row" onclick="openAuthModal()" style="cursor:pointer">
+            <span class="settings-label">Sign In / Sign Up</span>
+            <span class="settings-arrow">›</span>
+          </div>
+          <div class="settings-subtitle">Sync bookmarks and reading progress across devices</div>
+        </div>
+
+        <div class="settings-section-label">Quran</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <span class="settings-label">Reciter</span>
+            <select class="settings-select" onchange="setReciter(this.value)">${reciterOptions}</select>
+          </div>
+          <div class="settings-row">
+            <span class="settings-label">Arabic Font Size</span>
+            <div class="settings-font-row">
+              <button class="settings-font-btn" onclick="changeFontSize(-2);this.closest('.settings-screen').querySelector('.settings-font-val').textContent=state.fontSize+'px'">A−</button>
+              <span class="settings-font-val">${state.fontSize}px</span>
+              <button class="settings-font-btn" onclick="changeFontSize(2);this.closest('.settings-screen').querySelector('.settings-font-val').textContent=state.fontSize+'px'">A+</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="settings-section-label">Appearance</div>
+        <div class="settings-group">
+          <div class="settings-row">
+            <span class="settings-label">Dark Mode</span>
+            <button class="settings-toggle ${state.darkMode ? 'on' : 'off'}"
+              onclick="toggleDarkMode();this.classList.toggle('on');this.classList.toggle('off')"
+              aria-label="Toggle dark mode"></button>
+          </div>
+        </div>
+
+        <div class="settings-section-label">Notifications</div>
+        <div class="settings-group">
+          ${notifRow}
+        </div>
+
+        <div class="settings-section-label">About</div>
+        <div class="settings-group">
+          <div class="settings-row" onclick="closeSettings();setTimeout(openHelpScreen,50)" style="cursor:pointer">
+            <span class="settings-label">About Huda</span>
+            <span class="settings-arrow">›</span>
+          </div>
+          <div class="settings-row">
+            <span class="settings-label" style="color:#6b7280">Version</span>
+            <span class="settings-value" style="color:#9ca3af">v107</span>
+          </div>
+        </div>
+
+        <div style="height:48px"></div>
+      </div>
+    </div>
+  `;
+}
+
+function closeSettings() {
+  renderHome();
+}
+
+function showOnboarding() {
+  document.getElementById('tab-home').innerHTML = `
+    <div class="onboarding">
+      <div class="onboarding-icon">🕌</div>
+      <div class="onboarding-title">Huda</div>
+      <div class="onboarding-subtitle">Your Islamic companion</div>
+      <button class="onboarding-location-btn" onclick="onboardingEnableLocation(this)">
+        📍 Enable Location<br>
+        <span style="font-size:12px;opacity:0.8;font-weight:400">For accurate prayer times</span>
+      </button>
+      <button class="onboarding-start-btn" onclick="dismissOnboarding()">Get Started</button>
+      <button class="onboarding-skip" onclick="dismissOnboarding()">Skip for now</button>
+    </div>
+  `;
+}
+
+function onboardingEnableLocation(btn) {
+  btn.disabled = true;
+  btn.textContent = 'Getting location...';
+  if (!navigator.geolocation) { dismissOnboarding(); return; }
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      state.prayer.location = { lat, lng };
+      state.prayer.qibla = calcQibla(lat, lng);
+      try {
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
+        const data = await res.json();
+        state.prayer.city = data.address?.city || data.address?.town || data.address?.state || 'Your Location';
+      } catch(e) { state.prayer.city = 'Your Location'; }
+      calcPrayerTimes(lat, lng);
+      dismissOnboarding();
+    },
+    () => dismissOnboarding(),
+    { timeout: 10000 }
+  );
+}
+
+function dismissOnboarding() {
+  localStorage.setItem('huda_onboarded', '1');
   renderHome();
 }
 
