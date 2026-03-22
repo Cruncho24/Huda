@@ -475,6 +475,8 @@ function playAyatulKursi() {
 // so the audio pipeline has the shortest possible cold-start gap.
 function _mushafSetupOnEnded(audio, globalNum, surahNum, ayahNum) {
   audio.onended = () => {
+    // Guard: bail if we've been stopped or a new audio has taken over
+    if (state.audio.player !== audio) return;
     const nextEl = document.getElementById(`maud-${globalNum + 1}`);
     if (!nextEl) { advanceToNextSurah(); return; }
 
@@ -543,6 +545,7 @@ function playMushafAyah(globalNum, surahNum, ayahNum) {
   }
   // Stop previous
   if (state.audio.player) {
+    state.audio.player.onended = null; // prevent old chain from firing
     state.audio.player.pause();
     const prev = document.getElementById(`maud-${state.audio.playingId}`);
     if (prev) prev.classList.remove('maud-playing');
@@ -661,12 +664,14 @@ async function advanceToNextSurah() {
 function mushafStop() {
   // Clean up surah-level audio
   if (_surahAudio) {
+    _surahAudio.onended = null; // prevent queued ended event from firing after stop
     _surahAudio.removeEventListener('timeupdate', _surahTimeUpdate);
     _surahAudio.pause();
   }
   if (_surahBadge) { _surahBadge.classList.remove('maud-playing'); }
   // Also stop per-ayah pool player if it's different from surahAudio
   if (state.audio.player && state.audio.player !== _surahAudio) {
+    state.audio.player.onended = null; // prevent stale chain from firing
     state.audio.player.pause();
     const prev = document.getElementById(`maud-${state.audio.playingId}`);
     if (prev) prev.classList.remove('maud-playing');
