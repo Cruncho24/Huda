@@ -74,7 +74,7 @@ letter-spacing: 0.05em;
 - Date line: `11px, uppercase, letter-spacing 0.04em, opacity 0.65` — single line (day + Hijri date)
 - Arabic greeting: `26px, font-weight:300, letter-spacing:1px`
 - English subtitle: `13px, opacity:0.7, font-weight:400`
-- **Next prayer pill inside hero** (replaces separate card):
+- **Next prayer pill inside hero** (replaces separate card). `renderHome()` already has access to `state.prayer.times` (global state). Compute next prayer inline using the same logic as `renderPrayerTimes()` in `prayer.js` lines 232–238: iterate `['fajr','dhuhr','asr','maghrib','isha']`, find first time after `Date.now()`. If no prayer times loaded yet (`!state.prayer.times`), render the pill as `<div class="hero-prayer-pill-empty">Prayer times loading...</div>` with `opacity:0.6`.
   ```html
   <div class="hero-prayer-pill">
     <div>
@@ -165,18 +165,20 @@ Prayer icon size: `font-size:16px; margin-right:12px`
 
 ### Qibla Card
 
-Tappable card below the prayer list:
+Tappable card below the prayer list. The existing function is `openQiblaCompass()` — use that:
 ```html
-<div class="qibla-card" onclick="openQibla()">
+<div class="qibla-card" onclick="openQiblaCompass()">
   <div class="qibla-icon-well">🧭</div>
   <div class="qibla-info">
     <div class="qibla-label">Qibla Direction</div>
-    <div class="qibla-value">118° South-East</div>
+    <div class="qibla-value">${state.prayer.qibla ? Math.round(state.prayer.qibla) + '°' : 'Tap to open'}</div>
   </div>
   <span class="qibla-arrow">›</span>
 </div>
 ```
 Style: `margin:0 12px 12px; background:white; border-radius:14px; padding:12px 14px; box-shadow:0 2px 10px rgba(0,0,0,0.06); display:flex; align-items:center; gap:10px`
+
+The existing qibla compass DOM (`#qibla-compass-wrap`) remains unchanged — this card just replaces the visual treatment of the "Find Qibla" button row.
 
 ---
 
@@ -316,6 +318,18 @@ background: #059669; color: white; border-radius: 10px;
 /* inactive tab */
 background: white; color: #94a3b8; border-radius: 10px; border: 1px solid #f1f5f9;
 ```
+
+---
+
+## Dark Mode
+
+Every new CSS class introduced by this redesign needs a corresponding `html.dark` override in `styles.css`. Key rules to add:
+- `.hero-prayer-pill` → `background: rgba(255,255,255,0.10)`
+- `.ayah-card` → `background: #1e293b; border-color: #334155`
+- `.tab-bar` (floating nav) → `background: #1e293b; border-color: #334155`
+- `.qibla-card` → `background: #1e293b`
+- Surah list rows → `background: #1e293b; border-color: #334155`
+- Section labels and meta text → use existing dark text tokens (`#94a3b8`, `#64748b`)
 
 ---
 
