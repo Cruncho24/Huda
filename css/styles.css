@@ -2528,3 +2528,96 @@ html.dark .share-close-btn { border-color: #334155; color: #94a3b8; }
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
+
+/* ── Help Screen ──────────────────────────────────────────── */
+.help-screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+.help-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 10;
+}
+.help-back-btn {
+  background: none;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  color: #059669;
+  cursor: pointer;
+  padding: 4px 0;
+}
+.help-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: #0f172a;
+}
+.help-body {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 40px;
+}
+.help-intro {
+  font-size: 14px;
+  color: #64748b;
+  margin: 0 0 4px;
+}
+.help-section {
+  background: #fff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 16px;
+}
+.help-section-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+.help-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.help-list li {
+  font-size: 13px;
+  color: #475569;
+  line-height: 1.5;
+}
+.help-btn {
+  position: absolute;
+  top: calc(14px + env(safe-area-inset-top, 0px));
+  right: calc(52px + env(safe-area-inset-right, 0px));
+  background: rgba(255,255,255,0.2);
+  border: none;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+html.dark .help-header { background: #0f172a; border-color: #334155; }
+html.dark .help-title { color: #f1f5f9; }
+html.dark .help-back-btn { color: #34d399; }
+html.dark .help-body { background: #0f172a; }
+html.dark .help-section { background: #1e293b; border-color: #334155; }
+html.dark .help-section-title { color: #f1f5f9; }
+html.dark .help-list li { color: #94a3b8; }
+html.dark .help-intro { color: #94a3b8; }
