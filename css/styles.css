@@ -160,17 +160,18 @@ body {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 100%;
-  max-width: 600px;
-  height: calc(var(--nav-height) + var(--safe-bottom));
-  background: var(--white);
-  border-top: 1px solid var(--gray-200);
+  width: calc(100% - 24px);
+  max-width: 576px;
+  background: #ffffff;
+  border-radius: 18px;
+  border: 1px solid rgba(0,0,0,0.04);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.10);
   display: flex;
   align-items: flex-start;
   padding-top: 6px;
-  padding-bottom: var(--safe-bottom);
+  padding-bottom: calc(6px + var(--safe-bottom));
+  margin-bottom: 12px;
   z-index: 100;
-  box-shadow: 0 -2px 12px rgba(0,0,0,0.08);
 }
 
 .nav-item {
@@ -207,43 +208,52 @@ body {
 }
 
 .nav-item.active .nav-icon { color: var(--emerald); }
-.nav-item.active .nav-label { color: var(--emerald); font-weight: 600; }
+.nav-item.active .nav-label { color: #059669; font-weight: 700 !important; font-size: 9px; }
 .nav-item:not(.active) .nav-icon { color: var(--gray-400); }
+.nav-item:not(.active) .nav-label { color: #94a3b8; font-weight: 500; font-size: 9px; }
 
 /* ── Hero Banner ────────────────────────────────────────────── */
 .hero {
-  background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%);
+  background: linear-gradient(160deg, #047857 0%, #065f46 100%);
   padding: 32px 20px 28px;
   text-align: center;
   color: white;
   position: relative;
   overflow: hidden;
 }
+
 .hero::before {
   content: '';
   position: absolute;
-  top: -40px; right: -40px;
-  width: 160px; height: 160px;
+  top: -40px; right: -30px;
+  width: 140px; height: 140px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.05);
 }
 .hero::after {
   content: '';
   position: absolute;
-  bottom: -30px; left: -30px;
-  width: 120px; height: 120px;
+  bottom: -20px; left: -15px;
+  width: 90px; height: 90px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.04);
+  background: rgba(255,255,255,0.05);
 }
 
 .hero-arabic {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 6px;
-  line-height: 1.4;
+  font-size: 26px;
+  font-weight: 300;
   letter-spacing: 1px;
+  margin-bottom: 4px;
+  line-height: 1.4;
 }
-.hero-sub { font-size: 13px; opacity: 0.85; margin-bottom: 6px; }
+.hero-sub { font-size: 13px; opacity: 0.7; font-weight: 400; margin-bottom: 0; }
+.hero-date-combined {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.65;
+  margin-bottom: 16px;
+}
 .hero-date { font-size: 12px; opacity: 0.7; }
 
 /* ── Cards ──────────────────────────────────────────────────── */
@@ -313,17 +323,17 @@ body {
 
 /* ── Hadith Card ────────────────────────────────────────────── */
 .hadith-card {
-  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
-  border: 1px solid var(--emerald-light);
-  border-radius: 14px;
-  padding: 18px;
-  margin: 0 16px 16px;
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.04);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  padding: 14px;
+  margin: 0 12px 10px;
 }
 .hadith-text {
-  font-size: 15px;
-  line-height: 1.7;
-  color: var(--gray-700);
-  margin-bottom: 10px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: #334155;
   font-style: italic;
 }
 .hadith-source {
@@ -331,6 +341,7 @@ body {
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+  margin-top: 6px;
 }
 .badge {
   display: inline-flex;
@@ -408,19 +419,33 @@ body {
 .surah-num {
   width: 36px; height: 36px;
   background: var(--emerald-light);
-  color: var(--emerald-dark);
-  border-radius: 50%;
+  color: var(--emerald);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   flex-shrink: 0;
+}
+.surah-num-reading { background: #d1fae5; }
+.surah-item-reading { background: #f0fdf4; }
+.surah-reading-pill {
+  font-size: 9px;
+  color: #059669;
+  font-weight: 700;
+  margin-top: 2px;
+  text-align: right;
 }
 .surah-info { flex: 1; }
 .surah-english { font-size: 14px; font-weight: 600; color: var(--gray-900); }
 .surah-meta { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
-.surah-arabic-name { font-size: 18px; color: var(--emerald-dark); font-weight: 600; }
+.surah-arabic-name {
+  font-size: 16px;
+  font-weight: 500;
+  color: #065f46;
+  font-family: 'Noto Naskh Arabic', serif;
+}
 .surah-bm-btn {
   background: none; border: none; font-size: 16px; padding: 4px 6px;
   cursor: pointer; flex-shrink: 0; opacity: 0.6; transition: opacity 0.15s;
@@ -518,7 +543,7 @@ html.dark .saved-surah-name { color: var(--gray-100); }
 
 /* ── Prayer Times ───────────────────────────────────────────── */
 .prayer-hero {
-  background: linear-gradient(135deg, var(--emerald) 0%, var(--emerald-dark) 100%);
+  background: linear-gradient(160deg, #047857 0%, #065f46 100%);
   padding: 28px 20px 24px;
   color: white;
   text-align: center;
@@ -544,10 +569,26 @@ html.dark .saved-surah-name { color: var(--gray-100); }
   transition: all 0.3s;
 }
 .prayer-item.next-prayer {
-  background: linear-gradient(135deg, var(--emerald-light), #bbf7d0);
-  border: 2px solid var(--emerald);
+  background: #f0fdf4;
+  border-left: 3px solid #059669;
 }
-.prayer-item.past-prayer { opacity: 0.5; }
+.prayer-item.next-prayer .prayer-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: #059669;
+}
+.prayer-item.next-prayer .prayer-time-text {
+  font-size: 14px;
+  font-weight: 700;
+  color: #059669;
+}
+.prayer-next-badge {
+  font-size: 10px;
+  color: #059669;
+  font-weight: 600;
+  line-height: 1;
+}
+.prayer-item.past-prayer { opacity: 0.45; }
 .prayer-icon { font-size: 22px; width: 32px; text-align: center; }
 .prayer-name { flex: 1; font-size: 15px; font-weight: 600; }
 .prayer-arabic-name { font-size: 13px; color: var(--gray-400); font-weight: 400; }
@@ -1605,7 +1646,7 @@ html.dark {
   --emerald-light: #064e3b;
 }
 html.dark body { background: #0f172a; color: #f1f5f9; }
-html.dark .hadith-card { background: linear-gradient(135deg, #0f2d1e, #0a2218); border-color: #064e3b; }
+html.dark .hadith-card { background: #1e293b; border-color: #334155; box-shadow: none; }
 html.dark .feature-card { background: #1e293b; border-color: #334155; }
 html.dark .surah-item:active { background: #334155; }
 html.dark .search-input { background: #334155; color: #f1f5f9; border-color: #475569; }
@@ -1626,7 +1667,7 @@ html.dark .nisab-btn { background: #334155; border-color: #475569; color: #cbd5e
 html.dark .currency-btn.active { background: var(--emerald); border-color: var(--emerald); color: white; }
 html.dark .nisab-btn.active { background: var(--emerald); border-color: var(--emerald); color: white; }
 html.dark .letter-card { background: #1e293b; }
-html.dark #bottom-nav { background: #111827; border-color: #1f2937; box-shadow: 0 -2px 16px rgba(0,0,0,0.5); }
+html.dark #bottom-nav { background: #1e293b; border-color: #334155; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
 html.dark .search-bar { background: #1e293b; border-color: #334155; }
 html.dark .ayah { border-color: #334155; }
 html.dark .bismillah { border-color: #334155; }
@@ -1649,7 +1690,7 @@ html.dark .currency-btn { background: #334155; border-color: #475569; color: #94
 html.dark .nisab-btn { background: #334155; border-color: #475569; color: #94a3b8; }
 html.dark .reset-btn { background: #334155; color: #94a3b8; }
 html.dark .install-banner { background: #0f172a; }
-html.dark .continue-card { background: #1e293b; border-color: #334155; }
+html.dark .continue-card { background: #1e293b; border-color: #334155; box-shadow: none; }
 html.dark .ayatul-kursi-card { background: #1e293b; border-color: #064e3b; }
 html.dark .ramadan-card { background: linear-gradient(135deg, #1a0a2e, #0d0518); }
 
@@ -1731,20 +1772,38 @@ html.dark .theme-toggle-text { color: #94a3b8; }
 
 /* ── Continue Reading Card ──────────────────────────────────── */
 .continue-card {
+  background: #ffffff;
+  border: 1px solid rgba(0,0,0,0.04);
+  border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+  padding: 14px;
+  margin: 0 12px 10px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  background: var(--white);
-  margin: 12px 16px 0;
-  border-radius: 14px;
-  padding: 14px 16px;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+  justify-content: space-between;
   cursor: pointer;
-  border: 1px solid var(--gray-100);
   -webkit-tap-highlight-color: transparent;
   transition: transform 0.15s;
 }
 .continue-card:active { transform: scale(0.98); }
+.continue-icon-well {
+  width: 38px; height: 38px;
+  background: #f0fdf4;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.card-section-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: #059669;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 3px;
+}
 .continue-icon { font-size: 28px; }
 .continue-info { flex: 1; }
 .continue-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--emerald); font-weight: 700; margin-bottom: 2px; }
@@ -2815,3 +2874,290 @@ html.dark .settings-value-off { color: #f87171; }
   background: none;
   border: none;
 }
+
+/* ── Hero Prayer Pill (home screen) ───────────────────────── */
+.hero-prayer-pill {
+  background: rgba(255,255,255,0.14);
+  border: 1px solid rgba(255,255,255,0.22);
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  position: relative;
+}
+.hero-pill-label {
+  font-size: 10px;
+  opacity: 0.65;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+.hero-pill-name { font-size: 16px; font-weight: 700; }
+.hero-pill-right { text-align: right; }
+.hero-pill-time { font-size: 18px; font-weight: 700; }
+.hero-pill-countdown { font-size: 10px; opacity: 0.65; }
+.hero-prayer-pill-empty { font-size: 13px; opacity: 0.6; text-align: center; padding: 8px; }
+
+/* ── Prayer screen redesign ────────────────────────────────── */
+.prayer-hero-city {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.6;
+  margin-bottom: 10px;
+}
+.prayer-hero-name {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 4px;
+}
+.prayer-hero-time {
+  font-size: 36px;
+  font-weight: 300;
+  letter-spacing: 2px;
+  margin: 4px 0;
+}
+.prayer-countdown-pill {
+  display: inline-block;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 20px;
+  padding: 5px 16px;
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+/* ── Qibla card redesign ───────────────────────────────────── */
+.qibla-tappable {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 12px 12px;
+  background: white;
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.qibla-icon-well {
+  width: 38px; height: 38px;
+  background: #f0fdf4;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+.qibla-dir-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #059669;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.qibla-dir-value {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-top: 1px;
+}
+.qibla-arrow-icon { font-size: 12px; color: #94a3b8; margin-left: auto; }
+
+/* ── Quran Reader — Ayah Cards ─────────────────────────────── */
+.ayah.ayah-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0,0,0,0.04);
+  margin-bottom: 8px;
+  margin-left: 0; margin-right: 0;
+}
+.ayah-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.ayah-num-badge-card {
+  width: 28px; height: 28px;
+  background: #f0fdf4;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #059669;
+  flex-shrink: 0;
+}
+.ayah-card-actions { display: flex; gap: 6px; }
+.ayah-card-btn {
+  background: #f0fdf4;
+  border: none;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  color: #059669;
+}
+.ayah-card-btn.bookmarked { background: #d1fae5; }
+.ayah-arabic-card {
+  font-size: 20px;
+  text-align: right;
+  line-height: 1.8;
+  color: #0f172a;
+  font-family: UthmanicHafs, 'Noto Naskh Arabic', serif;
+  margin-bottom: 10px;
+}
+.ayah-english-card {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.6;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 8px;
+}
+/* Playing state */
+.ayah.ayah-card.maud-playing-card {
+  border: 1.5px solid #bbf7d0;
+  box-shadow: 0 2px 10px rgba(5,150,105,0.12);
+}
+.ayah.ayah-card.maud-playing-card .ayah-num-badge-card {
+  background: #059669;
+  color: white;
+}
+.ayah.ayah-card.maud-playing-card .ayah-card-btn[data-play] {
+  background: #059669;
+  color: white;
+}
+#reader-content { padding: 8px; background: #f8fafc; }
+html.dark #reader-content { background: #0f172a; }
+#surah-search::placeholder { color: rgba(255,255,255,0.5); }
+
+/* ── Dhikr Counter Redesign ────────────────────────────────── */
+.dhikr-header-new {
+  background: linear-gradient(160deg, #047857 0%, #065f46 100%);
+  padding: calc(20px + env(safe-area-inset-top,0px)) 18px 20px;
+  color: white;
+  text-align: center;
+}
+.dhikr-header-label {
+  font-size: 11px;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.dhikr-header-arabic {
+  font-size: 20px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+.dhikr-counter-area {
+  background: white;
+  padding: 28px 20px;
+  text-align: center;
+}
+.dhikr-counter-text {
+  font-size: 26px;
+  color: #065f46;
+  font-family: 'Noto Naskh Arabic', serif;
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+.dhikr-counter-transliteration {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 28px;
+}
+.dhikr-counter-number {
+  font-size: 72px;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+.dhikr-counter-of {
+  font-size: 13px;
+  color: #94a3b8;
+  margin-bottom: 28px;
+}
+.dhikr-progress-bar {
+  width: 100px;
+  height: 8px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 0 auto 24px;
+}
+.dhikr-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #059669, #047857);
+  border-radius: 4px;
+  transition: width 0.2s;
+}
+.dhikr-tap-btn {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: linear-gradient(160deg, #059669, #047857);
+  border: none;
+  color: white;
+  font-size: 32px;
+  box-shadow: 0 8px 24px rgba(5,150,105,0.35);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  -webkit-tap-highlight-color: transparent;
+}
+.dhikr-tap-btn:active { transform: scale(0.95); }
+.dhikr-hint { margin-top: 20px; font-size: 12px; color: #94a3b8; }
+.dhikr-tabs-bar {
+  background: #f8fafc;
+  padding: 10px 12px;
+  display: flex;
+  gap: 6px;
+  border-top: 1px solid #f1f5f9;
+}
+.dhikr-tab-btn {
+  flex: 1;
+  border-radius: 10px;
+  padding: 7px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #f1f5f9;
+  background: white;
+  color: #94a3b8;
+  -webkit-tap-highlight-color: transparent;
+}
+.dhikr-tab-btn.active {
+  background: #059669;
+  color: white;
+  border-color: #059669;
+  font-weight: 700;
+}
+
+/* Dark mode — UI Polish additions */
+html.dark .hero-prayer-pill { background: rgba(255,255,255,0.10); }
+html.dark .nav-item:not(.active) .nav-label { color: #64748b; }
+html.dark .qibla-tappable { background: #1e293b; }
+html.dark .surah-item-reading { background: #0f2d1e; }
+html.dark .ayah.ayah-card { background: #1e293b; border-color: #334155; box-shadow: none; }
+html.dark .ayah-card-btn { background: #0f2d1e; color: #6ee7b7; }
+html.dark .ayah-arabic-card { color: #f1f5f9; }
+html.dark .ayah-english-card { color: #94a3b8; border-color: #334155; }
+html.dark .ayah-num-badge-card { background: #0f2d1e; }
+html.dark .dhikr-counter-area { background: #1e293b; }
+html.dark .dhikr-counter-text { color: #6ee7b7; }
+html.dark .dhikr-counter-number { color: #f1f5f9; }
+html.dark .dhikr-tabs-bar { background: #111827; border-color: #1f2937; }
+html.dark .dhikr-tab-btn { background: #1e293b; border-color: #334155; color: #64748b; }
+html.dark .dhikr-progress-bar { background: #334155; }
