@@ -400,11 +400,6 @@ function calculateZakat() {
 
 
 
-function showToast(msg) {
-  let t = document.getElementById('huda-toast');
-  if (!t) { t = document.createElement('div'); t.id = 'huda-toast'; document.body.appendChild(t); }
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
-}
+// showToast is defined globally in app.js
 
 

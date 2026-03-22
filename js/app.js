@@ -5,6 +5,13 @@
 // ── Security: HTML escape ────────────────────────────────────
 // Escapes untrusted strings before inserting into innerHTML.
 // Use on any value sourced from external APIs or localStorage.
+function showToast(msg) {
+  let t = document.getElementById('huda-toast');
+  if (!t) { t = document.createElement('div'); t.id = 'huda-toast'; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
 function esc(str) {
   return String(str)
     .replace(/&/g, '&amp;')
@@ -379,6 +386,7 @@ function playAyah(globalNum, surahNum, ayahNum) {
   audio.play().catch(() => {
     if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+    showToast('Audio unavailable — check connection');
   });
   audio.onended = () => {
     if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }

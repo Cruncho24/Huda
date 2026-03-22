@@ -61,7 +61,12 @@ function renderPrayer() {
 
 async function requestLocation() {
   if (!navigator.geolocation) {
-    alert('Geolocation is not supported by your browser.');
+    document.getElementById('tab-prayer').innerHTML = `
+      <div class="prayer-hero" style="padding-top:calc(24px + env(safe-area-inset-top,0px))">
+        <div style="font-size:40px;margin-bottom:12px">📍</div>
+        <p style="color:white;margin-bottom:8px;font-weight:700">Location not available</p>
+        <p style="color:white;opacity:0.85;font-size:13px">Your browser doesn't support location services. Try opening Huda in Safari (iOS) or Chrome (Android).</p>
+      </div>`;
     return;
   }
   document.getElementById('tab-prayer').innerHTML = `
@@ -82,10 +87,15 @@ async function requestLocation() {
       calcPrayerTimes(lat, lng);
     },
     (err) => {
+      const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+      const hint = isIOS
+        ? 'To enable: Settings → Safari → Location → Allow'
+        : 'To enable: tap the lock icon in your browser address bar → Allow Location';
       document.getElementById('tab-prayer').innerHTML = `
         <div class="prayer-hero" style="padding-top:calc(24px + env(safe-area-inset-top,0px))">
-          <div style="font-size:40px;margin-bottom:12px">⚠️</div>
-          <p style="color:white;margin-bottom:16px">Location access denied.<br>Please allow location access.</p>
+          <div style="font-size:40px;margin-bottom:12px">📍</div>
+          <p style="color:white;margin-bottom:8px;font-weight:700">Location access denied</p>
+          <p style="color:white;opacity:0.85;font-size:13px;margin-bottom:20px;padding:0 8px">${hint}</p>
           <button onclick="requestLocation()" style="background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.5);color:white;padding:12px 24px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">Try Again</button>
         </div>`;
     }

@@ -138,7 +138,7 @@ function shareProphetDua(index) {
   if (navigator.share) {
     navigator.share({ title: `Dua of ${dua.prophet}`, text }).catch(() => {});
   } else {
-    navigator.clipboard?.writeText(text).then(() => alert('Dua copied!')).catch(() => {});
+    navigator.clipboard?.writeText(text).then(() => showToast('Dua copied ✓')).catch(() => {});
   }
 }
 
@@ -187,6 +187,6 @@ function shareDua(index) {
   if (navigator.share) {
     navigator.share({ title: `Dua: ${cat}`, text }).catch(() => {});
   } else {
-    navigator.clipboard?.writeText(text).then(() => alert('Dua copied!')).catch(() => {});
+    navigator.clipboard?.writeText(text).then(() => showToast('Dua copied ✓')).catch(() => {});
   }
 }
