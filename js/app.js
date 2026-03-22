@@ -757,6 +757,53 @@ function _renderOfflineBanner() {
     </div>`;
 }
 
+async function downloadQuranOffline() {
+  if (_offlineDownloading) return;
+  _offlineDownloading = true;
+  _offlineCancelled = false;
+  _renderOfflineBanner();
+
+  const BATCH = 5;
+  let done = 0;
+
+  for (let i = 1; i <= 114; i += BATCH) {
+    if (_offlineCancelled) break;
+    const batch = [];
+    for (let j = i; j < i + BATCH && j <= 114; j++) {
+      batch.push(
+        Promise.all([
+          fetch(`https://api.alquran.cloud/v1/surah/${j}/quran-uthmani`),
+          fetch(`https://api.alquran.cloud/v1/surah/${j}/en.sahih`)
+        ]).then(([arRes, enRes]) => Promise.all([arRes.json(), enRes.json()]))
+          .then(([arJson, enJson]) => {
+            state.quran.cache[j] = { arData: arJson.data, enData: enJson.data };
+            done++;
+            const countEl = document.getElementById('offline-count');
+            const fillEl  = document.getElementById('offline-fill');
+            if (countEl) countEl.textContent = done;
+            if (fillEl)  fillEl.style.width = `${Math.round(done / 114 * 100)}%`;
+          })
+          .catch(() => { done++; }) // silent per-surah fail — SW will cache on next open
+      );
+    }
+    await Promise.all(batch);
+  }
+
+  _offlineDownloading = false;
+  if (!_offlineCancelled) {
+    localStorage.setItem('huda_quran_offline', '1');
+  }
+  _renderOfflineBanner();
+}
+
+function cancelQuranDownload() {
+  _offlineCancelled = true;
+  _offlineDownloading = false;
+  // In-flight batch promises continue but DOM updates are null-guarded
+  // and huda_quran_offline is NOT set since _offlineCancelled=true.
+  _renderOfflineBanner();
+}
+
 function renderSurahList(list) {
   document.getElementById('surah-list').innerHTML = list.map(s => `
     <div class="surah-item" onclick="openSurah(${s[0]})">
