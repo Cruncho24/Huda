@@ -241,6 +241,9 @@ function updateAccountBtn(user) {
 // Tracks which ayahs have tafsir expanded; cleared on each renderSurahContent
 const _openTafsir = new Set(); // "surah:ayah" strings
 let _searchDebounce = null;
+let _offlineDownloading = false;
+let _offlineCancelled   = false;
+let _pendingShareText   = '';
 
 // ── Init ─────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -679,6 +682,7 @@ function renderQuranList() {
       <div class="search-bar">
         <input class="search-input" id="surah-search" placeholder="🔍 Search by name or number..." oninput="filterSurahs(this.value)">
       </div>
+      <div id="offline-banner"></div>
       <div id="surah-list"></div>
     </div>
     <div id="quran-reader" style="display:none">
@@ -716,6 +720,88 @@ function renderQuranList() {
     </div>
   `;
   renderSurahList(SURAHS);
+  _renderOfflineBanner();
+}
+
+function _renderOfflineBanner() {
+  const el = document.getElementById('offline-banner');
+  if (!el) return;
+
+  if (localStorage.getItem('huda_quran_offline') === '1') {
+    el.innerHTML = `<div class="offline-banner offline-banner-done">✅ Full Quran available offline</div>`;
+    return;
+  }
+
+  if (_offlineDownloading) {
+    el.innerHTML = `
+      <div class="offline-banner">
+        <div class="offline-banner-progress-wrap">
+          <div class="offline-banner-title">Downloading… <span id="offline-count">0</span> / 114</div>
+          <div class="offline-progress-bar"><div class="offline-progress-fill" id="offline-fill" style="width:0%"></div></div>
+        </div>
+        <button class="offline-banner-btn offline-cancel-btn" onclick="cancelQuranDownload()">Cancel</button>
+      </div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div class="offline-banner">
+      <div class="offline-banner-text">
+        <span class="offline-banner-icon">📥</span>
+        <div>
+          <div class="offline-banner-title">Download for offline reading</div>
+          <div class="offline-banner-sub">Save all 114 surahs to your device</div>
+        </div>
+      </div>
+      <button class="offline-banner-btn" onclick="downloadQuranOffline()">Download</button>
+    </div>`;
+}
+
+async function downloadQuranOffline() {
+  if (_offlineDownloading) return;
+  _offlineDownloading = true;
+  _offlineCancelled = false;
+  _renderOfflineBanner();
+
+  const BATCH = 5;
+  let done = 0;
+
+  for (let i = 1; i <= 114; i += BATCH) {
+    if (_offlineCancelled) break;
+    const batch = [];
+    for (let j = i; j < i + BATCH && j <= 114; j++) {
+      batch.push(
+        Promise.all([
+          fetch(`https://api.alquran.cloud/v1/surah/${j}/quran-uthmani`),
+          fetch(`https://api.alquran.cloud/v1/surah/${j}/en.sahih`)
+        ]).then(([arRes, enRes]) => Promise.all([arRes.json(), enRes.json()]))
+          .then(([arJson, enJson]) => {
+            state.quran.cache[j] = { arData: arJson.data, enData: enJson.data };
+            done++;
+            const countEl = document.getElementById('offline-count');
+            const fillEl  = document.getElementById('offline-fill');
+            if (countEl) countEl.textContent = done;
+            if (fillEl)  fillEl.style.width = `${Math.round(done / 114 * 100)}%`;
+          })
+          .catch(() => { done++; }) // silent per-surah fail — SW will cache on next open
+      );
+    }
+    await Promise.all(batch);
+  }
+
+  _offlineDownloading = false;
+  if (!_offlineCancelled) {
+    localStorage.setItem('huda_quran_offline', '1');
+  }
+  _renderOfflineBanner();
+}
+
+function cancelQuranDownload() {
+  _offlineCancelled = true;
+  _offlineDownloading = false;
+  // In-flight batch promises continue but DOM updates are null-guarded
+  // and huda_quran_offline is NOT set since _offlineCancelled=true.
+  _renderOfflineBanner();
 }
 
 function renderSurahList(list) {
@@ -1328,11 +1414,94 @@ function renderSurahContent(n, arData, enData) {
         </button>
         <button class="ayah-btn tafsir-btn" id="tafsir-btn-${n}-${a.numberInSurah}"
           onclick="toggleTafsir(${n},${a.numberInSurah})">Tafsir ›</button>
+        <button class="ayah-btn" onclick="shareAyah(${n},${a.numberInSurah})" aria-label="Share ayah">📤</button>
       </div>
       <div class="tafsir-box" id="tafsir-box-${n}-${a.numberInSurah}" style="display:none"></div>
     </div>`;
   }).join('');
   content.innerHTML = bismillah + ayahs;
+}
+
+function shareAyah(surahNum, ayahNum) {
+  const cached = state.quran.cache[surahNum];
+  if (!cached) return;
+  const ar = cached.arData.ayahs[ayahNum - 1].text;
+  const en = cached.enData.ayahs[ayahNum - 1].text;
+  const surahName = SURAHS[surahNum - 1][2]; // index 2 = English name e.g. "Al-Fatiha"
+  const ref = `Surah ${surahName} (${surahNum}:${ayahNum})`;
+  _pendingShareText = `${ar}\n\n${en}\n\n— ${ref}`;
+  openShareSheet(ref);
+}
+
+function openShareSheet(title) {
+  let overlay = document.getElementById('share-sheet-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'share-sheet-overlay';
+    document.body.appendChild(overlay);
+  }
+  overlay.innerHTML = `
+    <div class="share-sheet-backdrop" onclick="closeShareSheet()"></div>
+    <div class="share-sheet">
+      <div class="share-sheet-handle"></div>
+      <div class="share-sheet-text">${esc(_pendingShareText)}</div>
+      <div class="share-sheet-actions">
+        <button class="share-action-btn" onclick="copyShareText()">📋 Copy</button>
+        ${navigator.share ? `<button class="share-action-btn share-action-primary" onclick="nativeShare()">📤 Share</button>` : ''}
+      </div>
+      <button class="share-close-btn" onclick="closeShareSheet()">Close</button>
+    </div>
+  `;
+  overlay.style.display = 'flex';
+  requestAnimationFrame(() => {
+    const sheet = overlay.querySelector('.share-sheet');
+    if (sheet) sheet.classList.add('open');
+  });
+}
+
+function closeShareSheet() {
+  const overlay = document.getElementById('share-sheet-overlay');
+  if (!overlay) return;
+  const sheet = overlay.querySelector('.share-sheet');
+  if (sheet) sheet.classList.remove('open');
+  setTimeout(() => { overlay.style.display = 'none'; }, 250);
+}
+
+async function copyShareText() {
+  try {
+    await navigator.clipboard.writeText(_pendingShareText);
+  } catch(e) {
+    const ta = document.createElement('textarea');
+    ta.value = _pendingShareText;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+  showCopyToast();
+}
+
+async function nativeShare() {
+  try {
+    await navigator.share({ text: _pendingShareText });
+  } catch(e) {
+    // User cancelled or share not supported — silent
+  }
+}
+
+function showCopyToast() {
+  let toast = document.getElementById('copy-toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.id = 'copy-toast';
+    toast.className = 'copy-toast';
+    toast.textContent = 'Copied!';
+    document.body.appendChild(toast);
+  }
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
 }
 
 // ── Long-press mushaf ayah to play from that point ───────────
