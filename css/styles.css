@@ -2621,3 +2621,41 @@ html.dark .help-section { background: #1e293b; border-color: #334155; }
 html.dark .help-section-title { color: #f1f5f9; }
 html.dark .help-list li { color: #94a3b8; }
 html.dark .help-intro { color: #94a3b8; }
+/* ── Notification Banner ───────────────────────────────────── */
+.notif-banner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin: 12px 16px 0;
+}
+.notif-banner-text {
+  flex: 1;
+  font-size: 13px;
+  color: #065f46;
+  font-weight: 500;
+}
+.notif-banner-btn {
+  background: #059669;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.notif-banner-dismiss {
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+html.dark .notif-banner { background: #064e3b; border-color: #065f46; }
+html.dark .notif-banner-text { color: #6ee7b7; }
+html.dark .notif-banner-dismiss { color: #94a3b8; }
