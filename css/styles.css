@@ -2540,6 +2540,7 @@ html.dark .share-close-btn { border-color: #334155; color: #94a3b8; }
   align-items: center;
   gap: 12px;
   padding: 16px;
+  padding-top: calc(16px + env(safe-area-inset-top, 0px));
   border-bottom: 1px solid #e2e8f0;
   position: sticky;
   top: 0;
