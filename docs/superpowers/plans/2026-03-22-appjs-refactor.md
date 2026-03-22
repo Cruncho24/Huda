@@ -18,7 +18,7 @@
 | `js/home.js` | Create | `_hijriCacheMem` var + Hijri Date + HOME TAB (app.js lines 431–668) |
 | `js/quran.js` | Create | Module vars (lines 241–246) + QURAN TAB + all audio sections (lines 669–1624) + Quran Search + Tafsir (lines 2366–2526) |
 | `js/prayer.js` | Create | PRAYER TIMES TAB + Qibla Compass (lines 1625–2138) |
-| `js/dhikr.js` | Create | DHIKR TAB + Tasbeeh + Calendar (lines 2139–2365) + `saveDhikr()` (lines 2527–2530) |
+| `js/dhikr.js` | Create | DHIKR TAB + Tasbeeh + Calendar (lines 2139–2365) + `saveDhikr()` + blank line (lines 2527–2531) |
 | `js/duas.js` | Create | DUAS TAB + Prophet list (lines 2532–2708) + Share Dua (lines 3166–3176) |
 | `js/learn.js` | Create | LEARN TAB + all subsections (lines 2709–3114) |
 | `index.html` | Modify | Add 6 `<script>` tags, bump `?v=95` → `?v=96` |
@@ -135,13 +135,13 @@ git commit -m "refactor: extract js/prayer.js (prayer times + qibla)"
 
 Two non-contiguous ranges from `js/app.js`:
 - Lines 2139–2365: `// ── DHIKR TAB` + `// ── Tasbeeh Counter` + `// ── Islamic Calendar`
-- Lines 2527–2530: `saveDhikr()` function (sits between Tafsir and DUAS TAB in app.js)
+- Lines 2527–2531: `saveDhikr()` function + the blank line that follows it (sits between Tafsir and DUAS TAB in app.js)
 
 - [ ] **Step 1: Read both ranges**
 
 ```bash
 sed -n '2139,2365p' js/app.js | head -3   # should start with DHIKR TAB header
-sed -n '2527,2530p' js/app.js             # should be the saveDhikr function
+sed -n '2527,2531p' js/app.js             # should be the saveDhikr function + trailing blank line
 ```
 
 Expected at 2527: `function saveDhikr()` or similar.
@@ -155,7 +155,7 @@ Expected at 2527: `function saveDhikr()` or similar.
 
 [verbatim content of app.js lines 2139–2365]
 
-[verbatim content of app.js lines 2527–2530]
+[verbatim content of app.js lines 2527–2531]
 ```
 
 - [ ] **Step 3: Verify**
@@ -355,14 +355,20 @@ Do NOT include:
 - Lines 1625–2138 (moved to prayer.js)
 - Lines 2139–2365 (moved to dhikr.js)
 - Lines 2366–2526 (moved to quran.js)
-- Lines 2527–2530 (moved to dhikr.js)
+- Lines 2527–2531 (moved to dhikr.js)
 - Lines 2532–2708 (moved to duas.js)
 - Lines 2709–3114 (moved to learn.js)
 - Lines 3166–3176 (moved to duas.js)
 
 - [ ] **Step 1: Write new app.js**
 
-Construct the new file as: content of lines 1–240, then content of lines 247–430, then content of lines 3115–3165 (adjust for showToast as noted above). Keep the existing `/* HUDA PWA — App Logic */` file header at the top (it's within lines 1–240).
+Construct the new file by concatenating exactly three ranges. Run:
+
+```bash
+{ sed -n '1,240p' js/app.js; sed -n '247,430p' js/app.js; sed -n '3115,3165p' js/app.js; } > js/app_new.js && mv js/app_new.js js/app.js
+```
+
+If Task 5 determined `showToast` (line 3107) should stay in app.js, adjust the last range to `3107,3165` instead of `3115,3165`.
 
 - [ ] **Step 2: Verify line count**
 
