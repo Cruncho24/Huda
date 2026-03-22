@@ -82,7 +82,6 @@ const state = {
     filteredSurahs: [...SURAHS],
     viewMode: 'verse',
     currentPage: 0,
-    showTranslation: false,
     timings: {},
     searchOpen: false,
     searchQuery: '',
@@ -240,9 +239,7 @@ function togglePassVisibility() {
 function updateAccountBtn(user) {
   const btn = document.getElementById('account-btn');
   if (!btn) return;
-  btn.textContent = user ? '👤' : '🔑';
-  btn.classList.toggle('signed-in', !!user);
-  btn.title = user ? `Signed in as ${user.email}` : 'Sign in / Create account';
+  btn.title = user ? `Signed in as ${user.email}` : 'Settings';
 }
 
 
@@ -295,7 +292,6 @@ function toggleDarkMode() {
   localStorage.setItem('huda_dark', state.darkMode ? '1' : '0');
   applyDarkMode();
   haptic();
-  renderHome();
   debouncedPush();
 }
 
