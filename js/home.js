@@ -93,6 +93,7 @@ function renderHome() {
 
   document.getElementById('tab-home').innerHTML = `
     <div class="hero fade-in" style="position:relative">
+      <button class="help-btn" onclick="openHelpScreen()" aria-label="Help">?</button>
       <button class="account-btn" id="account-btn" onclick="openAuthModal()" title="Account">🔑</button>
       <div class="hero-arabic">السَّلَامُ عَلَيْكُمْ</div>
       <div class="hero-sub">Peace be upon you</div>
@@ -238,5 +239,85 @@ function rotateHadith() {
     card.style.opacity = '1';
     card.style.transition = 'opacity 0.5s';
   }, 400);
+}
+
+function openHelpScreen() {
+  document.getElementById('tab-home').innerHTML = `
+    <div class="help-screen">
+      <div class="help-header">
+        <button class="help-back-btn" onclick="closeHelpScreen()">← Back</button>
+        <div class="help-title">About Huda</div>
+      </div>
+      <div class="help-body">
+        <p class="help-intro">Huda is your all-in-one Islamic companion. Here's what's inside.</p>
+
+        <div class="help-section">
+          <div class="help-section-title">📖 Quran</div>
+          <ul class="help-list">
+            <li>Browse all 114 surahs</li>
+            <li>Verse view or Mushaf (page) view</li>
+            <li>Audio playback with 5 reciters</li>
+            <li>Bookmarks — save ayahs and surahs</li>
+            <li>Tafsir — tap any ayah for commentary</li>
+            <li>Share any ayah (Arabic + translation)</li>
+            <li>Download all surahs for offline reading</li>
+            <li>Search the Quran by English keyword</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <div class="help-section-title">🕌 Prayer Times</div>
+          <ul class="help-list">
+            <li>GPS-based prayer times for your location</li>
+            <li>Live countdown to the next prayer</li>
+            <li>Qibla compass with live needle</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <div class="help-section-title">📿 Dhikr</div>
+          <ul class="help-list">
+            <li>Daily dhikr cards with tap counter</li>
+            <li>Tasbeeh counter</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <div class="help-section-title">🤲 Duas</div>
+          <ul class="help-list">
+            <li>Categorised duas for everyday situations</li>
+            <li>Duas from the Prophets</li>
+            <li>Share any dua</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <div class="help-section-title">📚 Learn</div>
+          <ul class="help-list">
+            <li>New Muslim Guide — essentials of Islam</li>
+            <li>Children's Quran — Arabic alphabet + short surahs</li>
+            <li>99 Names of Allah (Asmaul Husna)</li>
+            <li>Hajj & Umrah Guide — step-by-step rituals</li>
+            <li>Zakat Calculator</li>
+            <li>Islamic (Hijri) calendar</li>
+          </ul>
+        </div>
+
+        <div class="help-section">
+          <div class="help-section-title">🏠 Home</div>
+          <ul class="help-list">
+            <li>Continue reading — picks up where you left off</li>
+            <li>Bookmarked ayahs and saved surahs</li>
+            <li>Hadith of the Day</li>
+            <li>Ayatul Kursi with audio playback</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function closeHelpScreen() {
+  renderHome();
 }
 
