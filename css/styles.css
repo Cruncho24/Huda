@@ -2440,3 +2440,91 @@ html.dark .offline-banner { background: #1e293b; border-color: #334155; }
 html.dark .offline-banner-title { color: #f1f5f9; }
 html.dark .offline-banner-sub { color: #94a3b8; }
 html.dark .offline-progress-bar { background: #334155; }
+
+/* ── Share Sheet ──────────────────────────────────────────── */
+#share-sheet-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  display: none; align-items: flex-end; justify-content: center;
+}
+.share-sheet-backdrop {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,0.4);
+}
+.share-sheet {
+  position: relative;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  padding: 12px 20px 32px;
+  width: 100%;
+  max-width: 540px;
+  transform: translateY(100%);
+  transition: transform 0.25s ease;
+}
+.share-sheet.open { transform: translateY(0); }
+.share-sheet-handle {
+  width: 36px; height: 4px;
+  background: #e2e8f0;
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.share-sheet-text {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #0f172a;
+  white-space: pre-wrap;
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 14px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.share-sheet-actions { display: flex; gap: 10px; margin-bottom: 10px; }
+.share-action-btn {
+  flex: 1; padding: 11px;
+  border: 1.5px solid #e2e8f0;
+  background: #fff;
+  border-radius: 10px;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; color: #0f172a;
+}
+.share-action-primary {
+  background: #059669;
+  border-color: #059669;
+  color: #fff;
+}
+.share-close-btn {
+  width: 100%; padding: 11px;
+  background: none;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer; color: #64748b;
+}
+html.dark .share-sheet { background: #1e293b; }
+html.dark .share-sheet-handle { background: #334155; }
+html.dark .share-sheet-text { background: #0f172a; color: #f1f5f9; }
+html.dark .share-action-btn { background: #1e293b; border-color: #334155; color: #f1f5f9; }
+html.dark .share-close-btn { border-color: #334155; color: #94a3b8; }
+
+/* ── Copy Toast ───────────────────────────────────────────── */
+.copy-toast {
+  position: fixed;
+  bottom: 90px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: #1e293b;
+  color: #fff;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  pointer-events: none;
+  z-index: 1100;
+}
+.copy-toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
