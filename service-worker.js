@@ -2,7 +2,7 @@
 // HUDA PWA — Service Worker
 // ============================================================
 
-const CACHE_NAME = 'huda-v97';
+const CACHE_NAME = 'huda-v98';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -77,6 +77,21 @@ self.addEventListener('fetch', event => {
 
   // App shell (HTML, CSS, JS, icons) — network first, offline fallback
   event.respondWith(networkFirst(event.request));
+});
+
+// ── Notification Click ─────────────────────────────────────────
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      if (list.length > 0) {
+        list[0].focus();
+        list[0].postMessage({ type: 'OPEN_TAB', tab: 'prayer' });
+      } else {
+        clients.openWindow('/?tab=prayer');
+      }
+    })
+  );
 });
 
 // Network first, cache fallback (ignores query strings when matching cache)
