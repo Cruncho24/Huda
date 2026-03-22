@@ -4,6 +4,7 @@
 
 // Tracks which ayahs have tafsir expanded; cleared on each renderSurahContent
 const _openTafsir = new Set(); // "surah:ayah" strings
+let _ayahObserver = null; // IntersectionObserver for reading position tracking
 let _searchDebounce = null;
 let _offlineDownloading = false;
 let _offlineCancelled   = false;
@@ -221,7 +222,11 @@ async function openSurah(n, targetAyah = null) {
     if (targetAyah) {
       requestAnimationFrame(() => {
         setTimeout(() => {
-          document.getElementById(`ayah-${targetAyah}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const el = document.getElementById(`ayah-${targetAyah}`);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            setTimeout(() => flashAyah(el), 400);
+          }
         }, 0);
       });
     }
@@ -765,6 +770,22 @@ function renderSurahContent(n, arData, enData) {
     </div>`;
   }).join('');
   content.innerHTML = bismillah + ayahs;
+
+  // Track reading position — update huda_last_read.ayah as user scrolls
+  if (_ayahObserver) _ayahObserver.disconnect();
+  _ayahObserver = new IntersectionObserver(entries => {
+    const visible = entries
+      .filter(e => e.isIntersecting)
+      .map(e => parseInt(e.target.dataset.ayah, 10))
+      .filter(n => !isNaN(n));
+    if (!visible.length) return;
+    const firstVisible = Math.min(...visible);
+    try {
+      const lr = JSON.parse(localStorage.getItem('huda_last_read') || 'null');
+      if (lr) { lr.ayah = firstVisible; localStorage.setItem('huda_last_read', JSON.stringify(lr)); }
+    } catch(e) {}
+  }, { threshold: 0.5 });
+  content.querySelectorAll('.ayah').forEach(el => _ayahObserver.observe(el));
 }
 
 function shareAyah(surahNum, ayahNum) {
