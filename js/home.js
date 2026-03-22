@@ -446,8 +446,8 @@ function onboardingEnableLocation(btn) {
         const data = await res.json();
         state.prayer.city = data.address?.city || data.address?.town || data.address?.state || 'Your Location';
       } catch(e) { state.prayer.city = 'Your Location'; }
-      calcPrayerTimes(lat, lng);
       dismissOnboarding();
+      calcPrayerTimes(lat, lng);
     },
     () => dismissOnboarding(),
     { timeout: 10000 }
