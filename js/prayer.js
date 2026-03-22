@@ -227,6 +227,13 @@ function renderPrayerTimes() {
   }
   if (!nextPrayer) { nextPrayer = PRAYER_NAMES[0]; nextTime = new Date(times.fajr); }
 
+  const notifBanner = ('Notification' in window && Notification.permission === 'default') ? `
+    <div class="notif-banner" id="notif-banner">
+      <span class="notif-banner-text">🔔 Get notified at each prayer time</span>
+      <button class="notif-banner-btn" onclick="requestNotifPermission()">Enable</button>
+      <button class="notif-banner-dismiss" onclick="dismissNotifBanner()" aria-label="Dismiss">✕</button>
+    </div>` : '';
+
   const tab = document.getElementById('tab-prayer');
   tab.innerHTML = `
     <div class="prayer-hero" style="padding-top:calc(24px + env(safe-area-inset-top,0px))">
@@ -238,6 +245,7 @@ function renderPrayerTimes() {
       <div class="countdown" id="prayer-countdown">00:00:00</div>
       <div class="location-label">📍 ${esc(state.prayer.city)}</div>
     </div>
+    ${notifBanner}
     <div class="prayer-list">
       ${PRAYER_NAMES.map(p => {
         const t = new Date(times[p.key]);
@@ -313,6 +321,11 @@ function renderPrayerTimes() {
   if (state.prayer.countdownInterval) clearInterval(state.prayer.countdownInterval);
   state.prayer.countdownInterval = setInterval(() => updateCountdown(nextTime), 1000);
   updateCountdown(nextTime);
+
+  // Schedule background notifications if permission already granted
+  if ('Notification' in window && Notification.permission === 'granted') {
+    schedulePrayerNotifications(state.prayer.times);
+  }
 
   // If the compass was open before this re-render, restore it without re-requesting permission
   if (state.prayer.compassOpen) {
@@ -514,5 +527,50 @@ function stopQiblaCompass() {
   const btn = document.getElementById('qibla-open-btn');
   if (wrap) wrap.style.display = 'none';
   if (btn) btn.style.display = '';
+}
+
+// ── Prayer Notifications ───────────────────────────────────────
+async function requestNotifPermission() {
+  const permission = await Notification.requestPermission();
+  if (permission === 'granted') {
+    schedulePrayerNotifications(state.prayer.times);
+  }
+  renderPrayerTimes(); // re-render to hide banner
+}
+
+function dismissNotifBanner() {
+  const el = document.getElementById('notif-banner');
+  if (el) el.remove();
+}
+
+async function schedulePrayerNotifications(times) {
+  if (!times || Notification.permission !== 'granted') return;
+  if (!('serviceWorker' in navigator)) return;
+
+  const reg = await navigator.serviceWorker.ready;
+
+  // Notification Triggers API — not supported everywhere; foreground fallback covers the rest
+  if (!('showTrigger' in Notification.prototype)) return;
+
+  const now = Date.now();
+  const prayers = [
+    { key: 'fajr',    en: 'Fajr',    ar: 'الفَجْر'   },
+    { key: 'dhuhr',   en: 'Dhuhr',   ar: 'الظُّهْر'  },
+    { key: 'asr',     en: 'Asr',     ar: 'العَصْر'   },
+    { key: 'maghrib', en: 'Maghrib', ar: 'المَغْرِب' },
+    { key: 'isha',    en: 'Isha',    ar: 'العِشَاء'  },
+  ];
+
+  for (const p of prayers) {
+    const ms = new Date(times[p.key]).getTime();
+    if (ms <= now) continue; // already past, skip
+    reg.showNotification(p.en, {
+      body: `${p.ar} — Time to pray`,
+      tag: `prayer-${p.key}`,
+      icon: '/icons/icon-192.png',
+      badge: '/icons/icon-96.png',
+      showTrigger: new TimestampTrigger(ms),
+    });
+  }
 }
 
