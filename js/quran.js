@@ -181,7 +181,9 @@ async function openSurah(n, targetAyah = null) {
   state.quran.currentSurah = n;
   state.quran.currentPage = 0;
   const s = SURAHS[n - 1];
-  localStorage.setItem('huda_last_read', JSON.stringify({ surah: n, name: s[2], arabic: s[1] }));
+  const _prevLr = (() => { try { return JSON.parse(localStorage.getItem('huda_last_read') || 'null'); } catch(e) { return null; } })();
+  const _lrAyah = (_prevLr?.surah === n && _prevLr?.ayah) ? _prevLr.ayah : undefined;
+  localStorage.setItem('huda_last_read', JSON.stringify({ surah: n, name: s[2], arabic: s[1], ...(_lrAyah ? { ayah: _lrAyah } : {}) }));
   debouncedPush();
   document.getElementById('reader-title').textContent = `${s[2]} — ${s[1]}`;
   document.getElementById('reader-meta').textContent = `${s[5]} · ${s[4]} verses · ${s[3]}`;
@@ -645,6 +647,7 @@ function mushafStop() {
   _surahBadge = null;
   _surahTiming = null;
   state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+  if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
   updateMushafPlayBtn(false);
   updateMushafPlayerBar();
 }
@@ -771,21 +774,26 @@ function renderSurahContent(n, arData, enData) {
   }).join('');
   content.innerHTML = bismillah + ayahs;
 
-  // Track reading position — update huda_last_read.ayah as user scrolls
+  // Track reading position — delayed to skip the initial-render intersection fire
+  // so the scroll-restore has time to settle before we start recording position
   if (_ayahObserver) _ayahObserver.disconnect();
-  _ayahObserver = new IntersectionObserver(entries => {
-    const visible = entries
-      .filter(e => e.isIntersecting)
-      .map(e => parseInt(e.target.dataset.ayah, 10))
-      .filter(n => !isNaN(n));
-    if (!visible.length) return;
-    const firstVisible = Math.min(...visible);
-    try {
-      const lr = JSON.parse(localStorage.getItem('huda_last_read') || 'null');
-      if (lr) { lr.ayah = firstVisible; localStorage.setItem('huda_last_read', JSON.stringify(lr)); }
-    } catch(e) {}
-  }, { threshold: 0.5 });
-  content.querySelectorAll('.ayah').forEach(el => _ayahObserver.observe(el));
+  _ayahObserver = null;
+  setTimeout(() => {
+    if (!content.isConnected) return; // reader was closed before timer fired
+    _ayahObserver = new IntersectionObserver(entries => {
+      const visible = entries
+        .filter(e => e.isIntersecting)
+        .map(e => parseInt(e.target.dataset.ayah, 10))
+        .filter(a => !isNaN(a));
+      if (!visible.length) return;
+      const firstVisible = visible.reduce((a, b) => a < b ? a : b);
+      try {
+        const lr = JSON.parse(localStorage.getItem('huda_last_read') || 'null');
+        if (lr) { lr.ayah = firstVisible; localStorage.setItem('huda_last_read', JSON.stringify(lr)); }
+      } catch(e) { console.warn('[huda] failed to save reading position', e); }
+    }, { threshold: 0.5 });
+    content.querySelectorAll('.ayah').forEach(el => _ayahObserver.observe(el));
+  }, 650);
 }
 
 function shareAyah(surahNum, ayahNum) {
@@ -983,6 +991,7 @@ function flashAyah(el) {
 
 function closeQuranReader() {
   mushafStop();
+  if (_ayahObserver) { _ayahObserver.disconnect(); _ayahObserver = null; }
   document.getElementById('quran-reader').style.display = 'none';
   document.getElementById('quran-list-view').style.display = 'block';
   state.quran.currentSurah = null;

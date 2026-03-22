@@ -116,7 +116,7 @@ function renderHome() {
     ${jumuahCard}
 
     ${lastRead ? `
-    <div class="continue-card" onclick="switchTab('quran');setTimeout(()=>openSurah(${lastRead.surah},${lastRead.ayah||null}),100)">
+    <div class="continue-card" onclick="switchTab('quran');setTimeout(()=>openSurah(${lastRead.surah}${lastRead.ayah ? `,${lastRead.ayah}` : ''}),100)">
       <div class="continue-icon">📖</div>
       <div class="continue-info">
         <div class="continue-label">Continue Reading</div>
