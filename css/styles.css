@@ -2715,6 +2715,8 @@ html.dark .notif-banner-dismiss { color: #94a3b8; }
   cursor: pointer;
   text-align: right;
   max-width: 160px;
+  -webkit-appearance: none;
+  appearance: none;
 }
 .settings-font-row { display: flex; align-items: center; gap: 12px; }
 .settings-font-btn {
@@ -2762,6 +2764,8 @@ html.dark .settings-select { color: #34d399; }
 html.dark .settings-font-btn { color: #34d399; }
 html.dark .settings-value-on { color: #34d399; }
 html.dark .settings-enable-btn { background: #059669; }
+html.dark .settings-value { color: #94a3b8; }
+html.dark .settings-value-off { color: #f87171; }
 
 /* ── Onboarding ──────────────────────────────────────────────── */
 .onboarding {
