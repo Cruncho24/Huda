@@ -2648,6 +2648,7 @@ html.dark .help-intro { color: #94a3b8; }
   font-weight: 600;
   cursor: pointer;
 }
+.notif-banner-btn:active { background: #047857; }
 .notif-banner-dismiss {
   background: none;
   border: none;
