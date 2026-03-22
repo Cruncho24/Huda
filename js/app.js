@@ -17,7 +17,10 @@ function esc(str) {
 // ── Reciters ──────────────────────────────────────────────────
 const RECITERS = [
   { id: 'ar.alafasy',        name: 'Mishary Alafasy',      qurancdnId: 7 },
-  { id: 'ar.mahermuaiqly', name: 'Maher Al-Muqaili' },
+  {
+    id: 'ar.mahermuaiqly', name: 'Maher Al-Muqaili',
+    surahUrl: n => `https://server8.mp3quran.net/maher/${String(n).padStart(3,'0')}.mp3`,
+  },
   {
     id: 'ar.abdullahbasfar', name: 'Abdullah Basfar',
     // cdn.islamic.network returns 403 for this reciter's per-ayah files
