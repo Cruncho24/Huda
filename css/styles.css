@@ -2223,7 +2223,7 @@ html.dark .qs-snippet { color: var(--gray-300); }
   justify-content: center;
   color: #fff;
 }
-.account-btn.signed-in { background: rgba(255,255,255,0.25); }
+
 
 /* ── Auth Modal ───────────────────────────────────────────── */
 .auth-modal-overlay {
