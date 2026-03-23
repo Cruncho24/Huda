@@ -167,11 +167,12 @@ function renderPrayerTimes() {
     }
     const tab = document.getElementById('tab-prayer');
     tab.innerHTML = `
-      <div class="prayer-hero" style="padding-top:calc(24px + env(safe-area-inset-top,0px))">
-        <div class="next-prayer-label">Updating prayer times…</div>
-        <div class="next-prayer-name" style="font-size:18px;opacity:0.85">Please wait</div>
-        <div class="countdown" style="font-size:24px">—</div>
-        <div class="location-label">📍 ${esc(state.prayer.city || 'Your Location')}</div>
+      <div class="prayer-hero" style="padding-top:calc(22px + env(safe-area-inset-top,0px));text-align:center;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.05)"></div>
+        <div class="prayer-hero-city">${esc(state.prayer.city || 'Your Location')}</div>
+        <div class="prayer-hero-name">Updating…</div>
+        <div class="prayer-hero-time">Please wait</div>
+        <div class="prayer-countdown-pill">—</div>
       </div>
       <div class="prayer-list">
         ${PRAYER_NAMES.map(p => {
@@ -179,27 +180,24 @@ function renderPrayerTimes() {
           return `
             <div class="prayer-item past-prayer">
               <div class="prayer-icon">${p.icon}</div>
-              <div>
+              <div style="flex:1">
                 <div class="prayer-name">${p.en}</div>
-                <div class="prayer-arabic-name">${p.ar}</div>
               </div>
-              <div style="margin-left:auto">
-                <div class="prayer-time-text">${fmt(t)}</div>
-              </div>
+              <div class="prayer-time-text">${fmt(t)}</div>
             </div>`;
         }).join('')}
       </div>
       ${state.prayer.qibla !== null ? `
-      <div class="qibla-card" id="qibla-section">
-        <div class="qibla-top">
-          <div class="qibla-icon-wrap">🕋</div>
-          <div class="qibla-info">
-            <h4>Qibla Direction</h4>
-            <p>${Math.round(state.prayer.qibla)}° from North</p>
-          </div>
-          <button class="qibla-btn" id="qibla-open-btn" onclick="openQiblaCompass()">Find Qibla</button>
+      <div class="qibla-tappable" id="qibla-open-btn" onclick="openQiblaCompass()">
+        <div class="qibla-icon-well">🧭</div>
+        <div style="flex:1">
+          <div class="qibla-dir-label">Qibla Direction</div>
+          <div class="qibla-dir-value">${Math.round(state.prayer.qibla)}° from North</div>
         </div>
-        <div class="qibla-compass-wrap" id="qibla-compass-wrap" style="display:none">
+        <span class="qibla-arrow-icon">›</span>
+      </div>
+      <div class="qibla-card" id="qibla-section" style="display:none">
+        <div class="qibla-compass-wrap" id="qibla-compass-wrap">
           <div class="compass-outer">
             <svg viewBox="0 0 240 240" width="240" height="240">
               <circle cx="120" cy="120" r="116" fill="none" stroke="rgba(5,150,105,0.15)" stroke-width="1.5"/>
@@ -246,14 +244,12 @@ function renderPrayerTimes() {
 
   const tab = document.getElementById('tab-prayer');
   tab.innerHTML = `
-    <div class="prayer-hero" style="padding-top:calc(24px + env(safe-area-inset-top,0px))">
-      <div class="next-prayer-label">Next Prayer</div>
-      <div class="next-prayer-name">${nextPrayer.en}</div>
-      <div class="next-prayer-arabic">${nextPrayer.ar}</div>
-      <div class="next-prayer-time">${fmt(nextTime)}</div>
-      <div class="countdown-label">Time Remaining</div>
-      <div class="countdown" id="prayer-countdown">00:00:00</div>
-      <div class="location-label">📍 ${esc(state.prayer.city)}</div>
+    <div class="prayer-hero" style="padding-top:calc(22px + env(safe-area-inset-top,0px));text-align:center;position:relative;overflow:hidden">
+      <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.05)"></div>
+      <div class="prayer-hero-city">${esc(state.prayer.city)}</div>
+      <div class="prayer-hero-name">${nextPrayer.en}</div>
+      <div class="prayer-hero-time">${fmt(nextTime)}</div>
+      <div class="prayer-countdown-pill" id="prayer-countdown">—</div>
     </div>
     ${notifBanner}
     <div class="prayer-list">
@@ -264,28 +260,25 @@ function renderPrayerTimes() {
         return `
           <div class="prayer-item ${isNext ? 'next-prayer' : ''} ${isPast && !isNext ? 'past-prayer' : ''}">
             <div class="prayer-icon">${p.icon}</div>
-            <div>
+            <div style="flex:1">
               <div class="prayer-name">${p.en}</div>
-              <div class="prayer-arabic-name">${p.ar}</div>
+              ${isNext ? '<div class="prayer-next-badge">NEXT</div>' : ''}
             </div>
-            <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
-              <div class="prayer-time-text">${fmt(t)}</div>
-              ${isPast && !isNext ? '<div class="past-check">✓</div>' : ''}
-            </div>
+            <div class="prayer-time-text">${fmt(t)}</div>
           </div>`;
       }).join('')}
     </div>
     ${state.prayer.qibla !== null ? `
-    <div class="qibla-card" id="qibla-section">
-      <div class="qibla-top">
-        <div class="qibla-icon-wrap">🕋</div>
-        <div class="qibla-info">
-          <h4>Qibla Direction</h4>
-          <p>${Math.round(state.prayer.qibla)}° from North</p>
-        </div>
-        <button class="qibla-btn" id="qibla-open-btn" onclick="openQiblaCompass()">Find Qibla</button>
+    <div class="qibla-tappable" id="qibla-open-btn" onclick="openQiblaCompass()">
+      <div class="qibla-icon-well">🧭</div>
+      <div style="flex:1">
+        <div class="qibla-dir-label">Qibla Direction</div>
+        <div class="qibla-dir-value">${Math.round(state.prayer.qibla)}° from North</div>
       </div>
-      <div class="qibla-compass-wrap" id="qibla-compass-wrap" style="display:none">
+      <span class="qibla-arrow-icon">›</span>
+    </div>
+    <div class="qibla-card" id="qibla-section" style="display:none">
+      <div class="qibla-compass-wrap" id="qibla-compass-wrap">
         <div class="compass-outer">
           <svg viewBox="0 0 240 240" width="240" height="240">
             <!-- Fixed outer ring -->
@@ -340,8 +333,14 @@ function renderPrayerTimes() {
   // If the compass was open before this re-render, restore it without re-requesting permission
   if (state.prayer.compassOpen) {
     const wrap = document.getElementById('qibla-compass-wrap');
+    const section = document.getElementById('qibla-section');
     const btn = document.getElementById('qibla-open-btn');
-    if (wrap) { wrap.style.display = 'block'; if (btn) btn.style.display = 'none'; _startQiblaListener(); }
+    if (wrap) {
+      wrap.style.display = 'block';
+      if (section) section.style.display = 'block';
+      if (btn) btn.style.display = 'none';
+      _startQiblaListener();
+    }
   }
 }
 
@@ -407,7 +406,10 @@ function openQiblaCompass() {
   const start = () => {
     state.prayer.compassOpen = true;
     wrap.style.display = 'block';
-    if (btn) btn.style.display = 'none';
+    const section = document.getElementById('qibla-section');
+    if (section) section.style.display = 'block';
+    const openBtn = document.getElementById('qibla-open-btn');
+    if (openBtn) openBtn.style.display = 'none';
     _startQiblaListener();
   };
 
@@ -419,6 +421,8 @@ function openQiblaCompass() {
         const st = document.getElementById('qibla-status');
         if (st) { st.textContent = 'Permission denied — check iOS Settings → Safari → Motion & Orientation'; st.className = 'qibla-status qibla-off'; }
         wrap.style.display = 'block';
+        const section = document.getElementById('qibla-section');
+        if (section) section.style.display = 'block';
         if (btn) btn.style.display = 'none';
       }
     }).catch(() => start());
@@ -553,9 +557,11 @@ function stopQiblaCompass() {
     _qiblaListener = null;
   }
   const wrap = document.getElementById('qibla-compass-wrap');
-  const btn = document.getElementById('qibla-open-btn');
   if (wrap) wrap.style.display = 'none';
-  if (btn) btn.style.display = '';
+  const section = document.getElementById('qibla-section');
+  if (section) section.style.display = 'none';
+  const openBtn = document.getElementById('qibla-open-btn');
+  if (openBtn) openBtn.style.display = '';
 }
 
 // ── Prayer Notifications ───────────────────────────────────────
