@@ -320,7 +320,10 @@ function toggleBookmark(surahNum, ayahNum, arText) {
   debouncedPush();
   // refresh bookmark btn
   const btn = document.getElementById(`bm-${surahNum}-${ayahNum}`);
-  if (btn) btn.textContent = isBookmarked(surahNum, ayahNum) ? '🔖' : '🏷️';
+  if (btn) {
+    btn.textContent = isBookmarked(surahNum, ayahNum) ? '🔖' : '🏷️';
+    btn.classList.toggle('bookmarked', isBookmarked(surahNum, ayahNum));
+  }
 }
 function isBookmarked(s, a) { return state.bookmarks.some(b => b.s === s && b.a === a); }
 function removeBookmark(s, a) {
@@ -370,6 +373,8 @@ function playAyah(globalNum, surahNum, ayahNum) {
     state.audio.player.pause();
     const prev = document.getElementById(`aud-${state.audio.playingId}`);
     if (prev) { prev.textContent = '▶'; prev.classList.remove('playing'); }
+    const prevCard = document.getElementById(`ayah-${state.audio.playingAyah}`);
+    if (prevCard) prevCard.classList.remove('maud-playing-card');
     if (state.audio.playingId === globalNum) {
       state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
       return;
@@ -379,13 +384,17 @@ function playAyah(globalNum, surahNum, ayahNum) {
   state.audio = { player: audio, playingId: globalNum, playingSurah: surahNum, playingAyah: ayahNum, paused: false };
   const btn = document.getElementById(btnId);
   if (btn) { btn.textContent = '⏸'; btn.classList.add('playing'); }
+  const card = document.getElementById(`ayah-${ayahNum}`);
+  if (card) card.classList.add('maud-playing-card');
   audio.play().catch(() => {
     if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
+    if (card) card.classList.remove('maud-playing-card');
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
     showToast('Audio unavailable — check connection');
   });
   audio.onended = () => {
     if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
+    if (card) card.classList.remove('maud-playing-card');
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
     const nextBtn = document.getElementById(`aud-${globalNum + 1}`);
     if (nextBtn) nextBtn.click();
@@ -393,6 +402,7 @@ function playAyah(globalNum, surahNum, ayahNum) {
   };
   audio.onerror = () => {
     if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
+    if (card) card.classList.remove('maud-playing-card');
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
     // Skip broken ayah and advance
     const nextBtn = document.getElementById(`aud-${globalNum + 1}`);
