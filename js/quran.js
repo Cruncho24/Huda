@@ -16,15 +16,15 @@ function renderQuranList() {
   const tab = document.getElementById('tab-quran');
   tab.innerHTML = `
     <div id="quran-list-view">
-      <div style="background:var(--emerald);padding:16px 20px;padding-top:calc(16px + env(safe-area-inset-top,0px));color:white;display:flex;align-items:flex-start;justify-content:space-between">
-        <div>
-          <h1 style="font-size:22px;font-weight:800;margin-bottom:2px">القُرْآن الكَرِيم</h1>
-          <p style="font-size:13px;opacity:0.8">The Noble Quran · 114 Surahs</p>
+      <div style="background:linear-gradient(160deg,#047857,#065f46);padding:20px 16px calc(16px + env(safe-area-inset-top,0px));color:white;padding-top:calc(20px + env(safe-area-inset-top,0px))">
+        <div style="font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Holy Quran</div>
+        <div style="font-size:22px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px">القُرْآن الكَرِيم</div>
+        <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px">
+          <span style="opacity:0.6;font-size:14px">🔍</span>
+          <input id="surah-search" placeholder="Search surah..." oninput="filterSurahs(this.value)"
+            style="background:none;border:none;outline:none;color:white;font-size:13px;flex:1;caret-color:white;"
+            autocomplete="off">
         </div>
-        <button onclick="openQuranSearch()" style="background:rgba(255,255,255,0.2);border:none;color:white;border-radius:8px;padding:6px 10px;font-size:18px;cursor:pointer;margin-top:2px" title="Search Quran">🔍</button>
-      </div>
-      <div class="search-bar">
-        <input class="search-input" id="surah-search" placeholder="🔍 Search by name or number..." oninput="filterSurahs(this.value)">
       </div>
       <div id="offline-banner"></div>
       <div id="surah-list"></div>
@@ -149,15 +149,18 @@ function cancelQuranDownload() {
 }
 
 function renderSurahList(list) {
+  const readingSurah = state.quran.currentSurah;
   document.getElementById('surah-list').innerHTML = list.map(s => `
-    <div class="surah-item" onclick="openSurah(${s[0]})">
-      <div class="surah-num">${s[0]}</div>
+    <div class="surah-item ${s[0] === readingSurah ? 'surah-item-reading' : ''}" onclick="openSurah(${s[0]})">
+      <div class="surah-num ${s[0] === readingSurah ? 'surah-num-reading' : ''}">${s[0]}</div>
       <div class="surah-info">
-        <div class="surah-english">${s[2]} <span style="color:var(--gray-400);font-weight:400">— ${s[3]}</span></div>
-        <div class="surah-meta">${s[5]} · ${s[4]} verses</div>
+        <div class="surah-english">${s[2]}</div>
+        <div class="surah-meta">${s[3]} · ${s[4]} verses</div>
       </div>
-      <div class="surah-arabic-name">${s[1]}</div>
-      <button class="surah-bm-btn" id="sbm-${s[0]}" onclick="event.stopPropagation();toggleSurahBookmark(${s[0]})" title="Bookmark surah">${isSurahBookmarked(s[0]) ? '🔖' : '🏷️'}</button>
+      <div style="text-align:right;flex-shrink:0">
+        <div class="surah-arabic-name">${s[1]}</div>
+        ${s[0] === readingSurah ? '<div class="surah-reading-pill">READING</div>' : ''}
+      </div>
     </div>
   `).join('');
 }
@@ -786,21 +789,24 @@ function renderSurahContent(n, arData, enData) {
   const ayahs = arData.ayahs.map((a, i) => {
     const displayText = (hasBism && a.numberInSurah === 1) ? stripBismillah(a.text) : a.text;
     return `
-    <div class="ayah" id="ayah-${a.numberInSurah}" data-global="${a.number}" data-surah="${n}" data-ayah="${a.numberInSurah}">
-      <div class="ayah-arabic"><span class="ayah-num-badge">${a.numberInSurah}</span> ${esc(displayText)}</div>
-      <div class="ayah-english">${esc(enData.ayahs[i]?.text ?? '')}</div>
-      <div class="ayah-actions">
-        <button class="ayah-btn" id="aud-${a.number}" onclick="playAyah(${a.number},${n},${a.numberInSurah})" title="Play">▶</button>
-        <button class="ayah-btn ${isBookmarked(n, a.numberInSurah) ? 'bookmarked' : ''}" id="bm-${n}-${a.numberInSurah}"
+  <div class="ayah ayah-card" id="ayah-${a.numberInSurah}" data-global="${a.number}" data-surah="${n}" data-ayah="${a.numberInSurah}">
+    <div class="ayah-card-header">
+      <div class="ayah-num-badge-card">${a.numberInSurah}</div>
+      <div class="ayah-card-actions">
+        <button class="ayah-card-btn" id="aud-${a.number}" onclick="playAyah(${a.number},${n},${a.numberInSurah})" title="Play" data-play>▶</button>
+        <button class="ayah-card-btn ${isBookmarked(n, a.numberInSurah) ? 'bookmarked' : ''}" id="bm-${n}-${a.numberInSurah}"
           onclick="toggleBookmark(${n},${a.numberInSurah},'${a.text.replace(/'/g,"\\'").slice(0,60)}')" title="Bookmark">
           ${isBookmarked(n, a.numberInSurah) ? '🔖' : '🏷️'}
         </button>
-        <button class="ayah-btn tafsir-btn" id="tafsir-btn-${n}-${a.numberInSurah}"
-          onclick="toggleTafsir(${n},${a.numberInSurah})">Tafsir ›</button>
-        <button class="ayah-btn" onclick="shareAyah(${n},${a.numberInSurah})" aria-label="Share ayah">📤</button>
+        <button class="ayah-card-btn tafsir-btn" id="tafsir-btn-${n}-${a.numberInSurah}"
+          onclick="toggleTafsir(${n},${a.numberInSurah})">Tafsir</button>
+        <button class="ayah-card-btn" onclick="shareAyah(${n},${a.numberInSurah})" aria-label="Share">📤</button>
       </div>
-      <div class="tafsir-box" id="tafsir-box-${n}-${a.numberInSurah}" style="display:none"></div>
-    </div>`;
+    </div>
+    <div class="ayah-arabic-card">${esc(displayText)}</div>
+    <div class="ayah-english-card">${esc(enData.ayahs[i]?.text ?? '')}</div>
+    <div class="tafsir-box" id="tafsir-box-${n}-${a.numberInSurah}" style="display:none"></div>
+  </div>`;
   }).join('');
   content.innerHTML = bismillah + ayahs;
 
