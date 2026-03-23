@@ -3,27 +3,48 @@
    ============================================================ */
 
 // ── DHIKR TAB ─────────────────────────────────────────────────
+let _dhikrTab = 0; // 0=Tasbih, 1=Tahmid, 2=Takbir
+
 function renderDhikr() {
-  checkDhikrReset(); // reset counts if day has rolled over since last render
-  const total = Object.values(state.dhikrCounts).reduce((a, b) => a + b, 0);
+  checkDhikrReset();
   const tab = document.getElementById('tab-dhikr');
+  const d = DHIKRS[_dhikrTab];
+  const count = state.dhikrCounts[_dhikrTab] || 0;
+  const pct = Math.min((count / d.target) * 100, 100);
+  const tabNames = ['Tasbih', 'Tahmid', 'Takbir'];
+
   tab.innerHTML = `
-    <div class="dhikr-header" style="padding-top:calc(14px + env(safe-area-inset-top,0px))">
-      <div>
-        <div style="font-size:18px;font-weight:800;color:white">📿 Daily Dhikr</div>
-        <div class="dhikr-total">Total today: ${total}</div>
+    <div class="dhikr-header-new">
+      <div class="dhikr-header-label">Daily Dhikr</div>
+      <div class="dhikr-header-arabic">التَّسْبِيح</div>
+    </div>
+    <div class="dhikr-counter-area">
+      <div class="dhikr-counter-text">${d.arabic}</div>
+      <div class="dhikr-counter-transliteration">${d.transliteration} · ${d.meaning}</div>
+      <div class="dhikr-counter-number" id="dhikr-count-display">${count}</div>
+      <div class="dhikr-counter-of">of ${d.target}</div>
+      <div class="dhikr-progress-bar">
+        <div class="dhikr-progress-fill" id="dhikr-prog" style="width:${pct}%"></div>
       </div>
-      <button class="reset-all-btn" onclick="resetAllDhikr()">Reset All</button>
+      <button class="dhikr-tap-btn" onclick="tapActiveDhikr()">✦</button>
+      <div class="dhikr-hint">Tap to count · Hold to reset</div>
     </div>
-    <div class="tasbeeh-card" onclick="tapTasbeeh()">
-      <div class="tasbeeh-label">Tasbeeh Counter</div>
-      <div class="tasbeeh-count" id="tasbeeh-count">${state.tasbeeh}</div>
-      <button class="tasbeeh-reset" onclick="event.stopPropagation();resetTasbeeh()" title="Reset">↺</button>
-    </div>
-    <div class="dhikr-list">
-      ${DHIKRS.map((d, i) => renderDhikrCard(d, i)).join('')}
+    <div class="dhikr-tabs-bar">
+      ${tabNames.map((name, i) => `
+        <button class="dhikr-tab-btn ${i === _dhikrTab ? 'active' : ''}"
+          onclick="switchDhikrTab(${i})">${name}</button>
+      `).join('')}
     </div>
   `;
+
+  // Long-press reset on tap button
+  let _holdTimer = null;
+  const tapBtn = tab.querySelector('.dhikr-tap-btn');
+  tapBtn.addEventListener('pointerdown', () => {
+    _holdTimer = setTimeout(() => { resetDhikr(_dhikrTab); renderDhikr(); }, 700);
+  });
+  tapBtn.addEventListener('pointerup', () => clearTimeout(_holdTimer));
+  tapBtn.addEventListener('pointerleave', () => clearTimeout(_holdTimer));
 }
 
 function renderDhikrCard(d, i) {
@@ -67,6 +88,28 @@ function resetDhikr(i) {
   state.dhikrCounts[i] = 0;
   saveDhikr();
   updateDhikrCard(i);
+}
+
+function tapActiveDhikr() {
+  const d = DHIKRS[_dhikrTab];
+  const cur = state.dhikrCounts[_dhikrTab] || 0;
+  if (cur >= d.target) { renderDhikr(); return; } // complete — show done state
+  state.dhikrCounts[_dhikrTab] = cur + 1;
+  haptic();
+  saveDhikr();
+  // Update display without full re-render
+  const countEl = document.getElementById('dhikr-count-display');
+  const progEl = document.getElementById('dhikr-prog');
+  const newCount = state.dhikrCounts[_dhikrTab];
+  const pct = Math.min((newCount / d.target) * 100, 100);
+  if (countEl) countEl.textContent = newCount;
+  if (progEl) progEl.style.width = pct + '%';
+  if (newCount >= d.target) renderDhikr(); // show complete state
+}
+
+function switchDhikrTab(i) {
+  _dhikrTab = i;
+  renderDhikr();
 }
 
 // ── Tasbeeh Counter ───────────────────────────────────────────
