@@ -1651,6 +1651,7 @@ html.dark .surah-item:active { background: #334155; }
 html.dark .search-input { background: #334155; color: #f1f5f9; border-color: #475569; }
 html.dark .search-input:focus { background: #1e293b; }
 html.dark .prayer-item { background: #1e293b; }
+html.dark .prayer-item.next-prayer { background: #0f2d1e; border-left-color: #059669; }
 html.dark .dhikr-card { background: #1e293b; }
 html.dark .dua-card { background: #1e293b; }
 html.dark .category-card { background: #1e293b; border-color: #334155; }
