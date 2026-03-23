@@ -255,6 +255,7 @@ function rotateHadith() {
   card.style.opacity = '0';
   setTimeout(() => {
     card.innerHTML = `
+      <div class="card-section-label">Hadith of the Day</div>
       <p class="hadith-text">"${h.text}"</p>
       <div class="hadith-source">
         <span class="badge badge-emerald">${h.source}</span>
