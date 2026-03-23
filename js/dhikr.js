@@ -29,6 +29,8 @@ function renderDhikr() {
       </div>
       <button class="dhikr-tap-btn" onclick="tapActiveDhikr()">✦</button>
       <div class="dhikr-hint">Tap to count · Hold to reset</div>
+      ${d.reward ? `<div class="dhikr-reward" style="margin-top:16px;text-align:left">🌟 ${d.reward}</div>` : ''}
+      <div class="dhikr-source" style="margin-top:6px;text-align:left">${d.source}</div>
     </div>
     <div class="dhikr-tabs-bar" style="overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;">
       ${tabNames.map((name, i) => `
