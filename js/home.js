@@ -43,7 +43,6 @@ function renderHome() {
   }
 
   const now = new Date();
-  const dateStr = now.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
   const hijri = getHijriSync(now);
   const hijriStr = `${hijri.day} ${hijri.monthName} ${hijri.year} AH`;
   const isRamadan = hijri.month === 9;
@@ -67,7 +66,7 @@ function renderHome() {
     const _fmt = _nextTime.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12: true });
     const _diff = _nextTime - _now;
     const _hh = Math.floor(_diff / 3600000), _mm = Math.floor((_diff % 3600000) / 60000);
-    const _cd = _hh > 0 ? `in ${_hh}h ${_mm}m` : `in ${_mm}m`;
+    const _cd = _diff <= 0 ? 'Soon' : (_hh > 0 ? `in ${_hh}h ${_mm}m` : `in ${_mm}m`);
     _pillHtml = `
     <div class="hero-prayer-pill">
       <div>
