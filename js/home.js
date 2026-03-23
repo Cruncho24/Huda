@@ -50,6 +50,37 @@ function renderHome() {
   const h = HADITHS[state.hadithIndex % HADITHS.length];
   const lastRead = (() => { try { return JSON.parse(localStorage.getItem('huda_last_read') || 'null'); } catch(e) { return null; } })();
 
+  // Compute next prayer for hero pill
+  let _pillHtml;
+  if (!state.prayer.times) {
+    _pillHtml = `<div class="hero-prayer-pill-empty">Prayer times loading...</div>`;
+  } else {
+    const PILL_KEYS = ['fajr', 'dhuhr', 'asr', 'maghrib', 'isha'];
+    const _now = Date.now();
+    let _nextKey = null, _nextTime = null;
+    for (const k of PILL_KEYS) {
+      const t = new Date(state.prayer.times[k]);
+      if (t > _now) { _nextKey = k; _nextTime = t; break; }
+    }
+    if (!_nextKey) { _nextKey = 'fajr'; _nextTime = new Date(state.prayer.times.fajr); }
+    const _name = _nextKey.charAt(0).toUpperCase() + _nextKey.slice(1);
+    const _fmt = _nextTime.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12: true });
+    const _diff = _nextTime - _now;
+    const _hh = Math.floor(_diff / 3600000), _mm = Math.floor((_diff % 3600000) / 60000);
+    const _cd = _hh > 0 ? `in ${_hh}h ${_mm}m` : `in ${_mm}m`;
+    _pillHtml = `
+    <div class="hero-prayer-pill">
+      <div>
+        <div class="hero-pill-label">Next Prayer</div>
+        <div class="hero-pill-name">${_name}</div>
+      </div>
+      <div class="hero-pill-right">
+        <div class="hero-pill-time">${_fmt}</div>
+        <div class="hero-pill-countdown">${_cd}</div>
+      </div>
+    </div>`;
+  }
+
   // Ramadan countdown (to Iftar = Maghrib, or Suhoor = Fajr)
   let ramadanCard = '';
   if (isRamadan && state.prayer.times) {
@@ -100,10 +131,10 @@ function renderHome() {
     <div class="hero fade-in" style="position:relative">
       <button class="help-btn" onclick="openHelpScreen()" aria-label="Help">?</button>
       <button class="account-btn" id="account-btn" onclick="openSettings()" title="Settings">⚙️</button>
+      <div class="hero-date-combined">${now.toLocaleDateString('en-US', { weekday:'long' })} · ${hijriStr}${isRamadan ? ' 🌙' : ''}</div>
       <div class="hero-arabic">السَّلَامُ عَلَيْكُمْ</div>
       <div class="hero-sub">Peace be upon you</div>
-      <div class="hero-date">${dateStr}</div>
-      <div class="hero-hijri">${hijriStr}${isRamadan ? ' · 🌙 Ramadan Mubarak' : ''}</div>
+      ${_pillHtml}
     </div>
 
     ${ramadanCard}
@@ -112,12 +143,12 @@ function renderHome() {
 
     ${lastRead ? `
     <div class="continue-card" onclick="switchTab('quran');setTimeout(()=>openSurah(${lastRead.surah}${lastRead.ayah ? `,${lastRead.ayah}` : ''}),100)">
-      <div class="continue-icon">📖</div>
-      <div class="continue-info">
-        <div class="continue-label">Continue Reading</div>
-        <div class="continue-name">${esc(lastRead.arabic)} — ${esc(lastRead.name)}</div>
+      <div>
+        <div class="card-section-label">Continue Reading</div>
+        <div style="font-size:15px;font-weight:700;color:#0f172a">${esc(lastRead.name)}</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:1px">${esc(lastRead.arabic)}${lastRead.ayah ? ` · Ayah ${lastRead.ayah}` : ''}</div>
       </div>
-      <div style="color:var(--gray-300);font-size:20px">›</div>
+      <div class="continue-icon-well">📖</div>
     </div>` : ''}
 
     ${state.bookmarks.length ? `
@@ -159,10 +190,8 @@ function renderHome() {
       }).join('')}
     </div>` : ''}
 
-    <div style="padding:16px 16px 0">
-      <div class="section-title">📖 Hadith of the Day</div>
-    </div>
     <div class="hadith-card" id="hadith-card">
+      <div class="card-section-label">Hadith of the Day</div>
       <p class="hadith-text">"${h.text}"</p>
       <div class="hadith-source">
         <span class="badge badge-emerald">${h.source}</span>
