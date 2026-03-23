@@ -32,12 +32,18 @@ function renderDhikr() {
       ${d.reward ? `<div class="dhikr-reward" style="margin-top:16px;text-align:left">🌟 ${d.reward}</div>` : ''}
       <div class="dhikr-source" style="margin-top:6px;text-align:left">${d.source}</div>
     </div>
-    <div class="dhikr-tabs-bar" style="overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;">
-      ${tabNames.map((name, i) => `
-        <button class="dhikr-tab-btn ${i === _dhikrTab ? 'active' : ''}"
-          style="white-space:nowrap;flex-shrink:0;"
-          onclick="switchDhikrTab(${i})">${name}</button>
-      `).join('')}
+    <div style="display:flex;align-items:center;gap:6px;padding:0 12px 4px">
+      <button onclick="switchDhikrTab(${_dhikrTab - 1})" ${_dhikrTab === 0 ? 'disabled' : ''}
+        style="flex-shrink:0;width:32px;height:32px;border-radius:50%;border:1px solid #e2e8f0;background:white;font-size:16px;cursor:pointer;color:${_dhikrTab === 0 ? '#cbd5e1' : '#059669'};display:flex;align-items:center;justify-content:center">‹</button>
+      <div class="dhikr-tabs-bar" style="overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;flex:1;margin:0;padding:6px 0">
+        ${tabNames.map((name, i) => `
+          <button class="dhikr-tab-btn ${i === _dhikrTab ? 'active' : ''}"
+            style="white-space:nowrap;flex-shrink:0;"
+            onclick="switchDhikrTab(${i})">${name}</button>
+        `).join('')}
+      </div>
+      <button onclick="switchDhikrTab(${_dhikrTab + 1})" ${_dhikrTab === DHIKRS.length - 1 ? 'disabled' : ''}
+        style="flex-shrink:0;width:32px;height:32px;border-radius:50%;border:1px solid #e2e8f0;background:white;font-size:16px;cursor:pointer;color:${_dhikrTab === DHIKRS.length - 1 ? '#cbd5e1' : '#059669'};display:flex;align-items:center;justify-content:center">›</button>
     </div>
   `;
 
