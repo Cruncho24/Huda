@@ -316,6 +316,7 @@ function toggleBookmark(surahNum, ayahNum, arText) {
   if (idx >= 0) state.bookmarks.splice(idx, 1);
   else state.bookmarks.unshift({ s: surahNum, a: ayahNum, ar: arText.slice(0, 80) });
   localStorage.setItem('huda_bookmarks', JSON.stringify(state.bookmarks));
+  localStorage.setItem('_sync_ts_huda_bookmarks', String(Date.now())); // prevent pull overwrite during debounce
   haptic();
   debouncedPush();
   // refresh bookmark btn
@@ -329,6 +330,7 @@ function isBookmarked(s, a) { return state.bookmarks.some(b => b.s === s && b.a 
 function removeBookmark(s, a) {
   state.bookmarks = state.bookmarks.filter(b => !(b.s === s && b.a === a));
   localStorage.setItem('huda_bookmarks', JSON.stringify(state.bookmarks));
+  localStorage.setItem('_sync_ts_huda_bookmarks', String(Date.now())); // prevent pull overwrite during debounce
   haptic();
   debouncedPush();
   renderHome();

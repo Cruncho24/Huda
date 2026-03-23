@@ -1201,7 +1201,7 @@ async function toggleTafsir(surah, ayah) {
     if (cache[ayah]) {
       text = cache[ayah];
     } else {
-      const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/en.kathir`);
+      const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/en.maududi`);
       if (!res.ok) throw new Error(res.status);
       const json = await res.json();
       text = json.data?.text;
