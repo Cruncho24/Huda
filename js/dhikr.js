@@ -3,7 +3,7 @@
    ============================================================ */
 
 // ── DHIKR TAB ─────────────────────────────────────────────────
-let _dhikrTab = 0; // 0=Tasbih, 1=Tahmid, 2=Takbir
+let _dhikrTab = 0; // 0=Tasbih, 1=Tahmid, 2=Takbir, 3=Tahlil, 4=Istighfar, 5=Tasbih+, 6=Hawqala
 
 function renderDhikr() {
   checkDhikrReset();
@@ -11,27 +11,29 @@ function renderDhikr() {
   const d = DHIKRS[_dhikrTab];
   const count = state.dhikrCounts[_dhikrTab] || 0;
   const pct = Math.min((count / d.target) * 100, 100);
-  const tabNames = ['Tasbih', 'Tahmid', 'Takbir'];
+  const tabNames = ['Tasbih', 'Tahmid', 'Takbir', 'Tahlil', 'Istighfar', 'Tasbih+', 'Hawqala'];
+  const isComplete = count >= d.target;
 
   tab.innerHTML = `
     <div class="dhikr-header-new">
       <div class="dhikr-header-label">Daily Dhikr</div>
       <div class="dhikr-header-arabic">${d.arabic}</div>
     </div>
-    <div class="dhikr-counter-area">
+    <div class="dhikr-counter-area${isComplete ? ' dhikr-complete' : ''}">
       <div class="dhikr-counter-text">${d.arabic}</div>
       <div class="dhikr-counter-transliteration">${d.transliteration} · ${d.meaning}</div>
       <div class="dhikr-counter-number" id="dhikr-count-display">${count}</div>
-      <div class="dhikr-counter-of">of ${d.target}</div>
+      <div class="dhikr-counter-of">of ${d.target}${isComplete ? ' ✓' : ''}</div>
       <div class="dhikr-progress-bar">
         <div class="dhikr-progress-fill" id="dhikr-prog" style="width:${pct}%"></div>
       </div>
       <button class="dhikr-tap-btn" onclick="tapActiveDhikr()">✦</button>
       <div class="dhikr-hint">Tap to count · Hold to reset</div>
     </div>
-    <div class="dhikr-tabs-bar">
+    <div class="dhikr-tabs-bar" style="overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;">
       ${tabNames.map((name, i) => `
         <button class="dhikr-tab-btn ${i === _dhikrTab ? 'active' : ''}"
+          style="white-space:nowrap;flex-shrink:0;"
           onclick="switchDhikrTab(${i})">${name}</button>
       `).join('')}
     </div>
@@ -108,7 +110,7 @@ function tapActiveDhikr() {
 }
 
 function switchDhikrTab(i) {
-  _dhikrTab = i;
+  _dhikrTab = Math.max(0, Math.min(i, DHIKRS.length - 1));
   renderDhikr();
 }
 
