@@ -158,7 +158,7 @@ function renderHome() {
       ${state.bookmarks.slice(0, 5).map(b => {
         const s = SURAHS[b.s - 1];
         return `
-        <div class="bookmark-row" onclick="switchTab('quran');setTimeout(()=>openSurah(${b.s}),100)">
+        <div class="bookmark-row" onclick="switchTab('quran');setTimeout(()=>{openSurah(${b.s},${b.a});flashAyah(${b.a});},200)">
           <div class="bookmark-badge">${b.s}:${b.a}</div>
           <div class="bookmark-info">
             <div class="bookmark-surah">${s ? s[1] + ' — ' + s[2] : 'Surah ' + b.s}</div>
