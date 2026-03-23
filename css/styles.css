@@ -60,7 +60,7 @@ body {
 /* On wide screens, cap content width and centre it */
 @media (min-width: 600px) {
   #app { max-width: 600px; margin: 0 auto; box-shadow: 0 0 40px rgba(0,0,0,0.12); }
-  #bottom-nav { max-width: 600px !important; }
+  #bottom-nav { max-width: 576px !important; }
   #install-banner { max-width: 580px !important; }
 }
 
@@ -254,7 +254,6 @@ body {
   opacity: 0.65;
   margin-bottom: 16px;
 }
-.hero-date { font-size: 12px; opacity: 0.7; }
 
 /* ── Cards ──────────────────────────────────────────────────── */
 .card {
@@ -1693,6 +1692,9 @@ html.dark .install-banner { background: #0f172a; }
 html.dark .continue-card { background: #1e293b; border-color: #334155; box-shadow: none; }
 html.dark .ayatul-kursi-card { background: #1e293b; border-color: #064e3b; }
 html.dark .ramadan-card { background: linear-gradient(135deg, #1a0a2e, #0d0518); }
+html.dark .qibla-dir-value { color: #f1f5f9; }
+html.dark .surah-num-reading { background: #064e3b; }
+html.dark .surah-item-reading { background: #0f2d1e; }
 
 /* ── Theme bar ──────────────────────────────────────────────── */
 /* ── Home Live Cards (next prayer / next reminder) ───────────── */
