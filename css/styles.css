@@ -41,6 +41,7 @@ body {
   color: var(--gray-900);
   min-height: 100vh;
   overflow-x: hidden;
+  touch-action: manipulation; /* prevents double-tap zoom on iOS */
 }
 
 /* ── Scrollbar ──────────────────────────────────────────────── */
