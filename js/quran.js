@@ -266,12 +266,30 @@ function setQuranView(mode) {
     document.getElementById('reader-content').style.display = 'none';
     document.getElementById('mushaf-page').style.display = 'block';
     renderMushafPage(n, arData, enData);
-    document.getElementById('mushaf-page').scrollTop = 0;
+    if (_mushafFromAyah) {
+      const _target = _mushafFromAyah;
+      _mushafFromAyah = null; // clear after restoring
+      setTimeout(() => {
+        const mp = document.getElementById('mushaf-page');
+        const wrap = mp?.querySelector(`.mushaf-ayah-wrap[data-ayah="${_target}"]`);
+        if (wrap) wrap.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    } else {
+      document.getElementById('mushaf-page').scrollTop = 0;
+    }
   } else {
     document.getElementById('mushaf-page').style.display = 'none';
     document.getElementById('reader-content').style.display = 'block';
     renderSurahContent(n, arData, enData);
-    document.getElementById('reader-content').scrollTop = 0;
+    if (_mushafFromAyah) {
+      const _target = _mushafFromAyah;
+      setTimeout(() => {
+        const el = document.getElementById(`ayah-${_target}`);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    } else {
+      document.getElementById('reader-content').scrollTop = 0;
+    }
   }
   document.getElementById('quran-reader').scrollTop = 0;
 }
@@ -299,7 +317,7 @@ function renderMushafPage(n, arData, enData) {
   const pagesHtml = pages.map((page, pg) => {
     const arabicText = page.ar.map(a => {
       const rawText = (hasBismillah && a.numberInSurah === 1) ? stripBismillah(a.text) : a.text;
-      return `<span class="mushaf-ayah-wrap" data-global="${a.number}" data-surah="${n}" data-ayah="${a.numberInSurah}">${rawText} <span class="mushaf-anum" id="maud-${a.number}" title="Hold to play from ayah ${a.numberInSurah}">&#xFD3F;${toArabicNumerals(a.numberInSurah)}&#xFD3E;</span></span>`;
+      return `<span class="mushaf-ayah-wrap" data-global="${a.number}" data-surah="${n}" data-ayah="${a.numberInSurah}">${rawText} <span class="mushaf-anum" id="maud-${a.number}" title="Tap for translation · Hold to play">&#xFD3F;${toArabicNumerals(a.numberInSurah)}&#xFD3E;</span></span>`;
     }).join(' ');
 
     return `
@@ -318,7 +336,7 @@ function renderMushafPage(n, arData, enData) {
         <button class="mushaf-audio-btn" id="mushaf-play-btn" onclick="mushafPlayToggle(${n})" title="Play / Pause">▶</button>
       </div>
     </div>
-    <div class="mushaf-hint">Hold an ayah number to play from there</div>
+    <div class="mushaf-hint">Tap a number to view translation · Hold to play</div>
     <div class="mushaf-scroll-body">${pagesHtml}</div>
   `;
   setupAyahLongPress(el);
@@ -917,7 +935,9 @@ function showCopyToast() {
 // ── Long-press mushaf ayah to play from that point ───────────
 let _lpTimer = null;
 let _lpStartX = 0, _lpStartY = 0;
+let _lpFired = false;      // true if the touch became a long-press (suppress click)
 let _pendingPlay = null;
+let _mushafFromAyah = null; // ayah numberInSurah to restore when returning to mushaf
 
 // ── Preloaded audio pool for minimal-gap playback ────────────
 // Two Audio elements alternate: while one plays, the other preloads the next.
@@ -942,11 +962,13 @@ function _poolPreload(globalNum) {
 function setupAyahLongPress(container) {
   // Touch: hold the ayah number badge to show the play popup
   container.addEventListener('touchstart', e => {
+    _lpFired = false;
     const anum = e.target.closest('.mushaf-anum');
     if (!anum) return;
     _lpStartX = e.touches[0].clientX;
     _lpStartY = e.touches[0].clientY;
     _lpTimer = setTimeout(() => {
+      _lpFired = true;
       _lpTimer = null;
       haptic(60);
       const wrap = anum.closest('.mushaf-ayah-wrap');
@@ -971,6 +993,21 @@ function setupAyahLongPress(container) {
     flashAyah(wrap);
     showAyahPopup(g, +wrap.dataset.surah, +wrap.dataset.ayah, anum);
   });
+
+  // Short tap on ayah number → switch to study view at that ayah
+  container.addEventListener('click', e => {
+    if (_lpFired) { _lpFired = false; return; } // was a long-press, skip
+    const anum = e.target.closest('.mushaf-anum');
+    if (!anum) return;
+    const wrap = anum.closest('.mushaf-ayah-wrap');
+    if (!wrap) return;
+    switchToStudyAtAyah(+wrap.dataset.surah, +wrap.dataset.ayah);
+  });
+}
+
+function switchToStudyAtAyah(surahNum, ayahNum) {
+  _mushafFromAyah = ayahNum; // remember position for round-trip
+  setQuranView('verse');
 }
 
 function showAyahPopup(globalNum, surahNum, ayahNum, anchorEl) {
