@@ -144,7 +144,7 @@ function renderHome() {
     <div class="continue-card" onclick="switchTab('quran');setTimeout(()=>openSurah(${lastRead.surah}${lastRead.ayah ? `,${lastRead.ayah}` : ''}),100)">
       <div>
         <div class="card-section-label">Continue Reading</div>
-        <div style="font-size:15px;font-weight:700;color:#0f172a">${esc(lastRead.name)}</div>
+        <div style="font-size:15px;font-weight:700;color:#065f46">${esc(lastRead.name)}</div>
         <div style="font-size:12px;color:#94a3b8;margin-top:1px">${esc(lastRead.arabic)}${lastRead.ayah ? ` · Ayah ${lastRead.ayah}` : ''}</div>
       </div>
       <div class="continue-icon-well">📖</div>

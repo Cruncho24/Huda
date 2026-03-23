@@ -330,11 +330,12 @@ body {
   margin: 0 12px 10px;
 }
 .hadith-text {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
-  color: #334155;
+  color: #1e293b;
   font-style: italic;
 }
+html.dark .hadith-text { color: #e2e8f0; }
 .hadith-source {
   display: flex;
   align-items: center;
@@ -466,8 +467,8 @@ body {
   font-size: 11px; font-weight: 700; flex-shrink: 0;
 }
 .saved-surah-info { flex: 1; }
-.saved-surah-name { font-size: 14px; font-weight: 600; color: var(--gray-900); }
-.saved-surah-arabic { font-size: 14px; color: var(--emerald); font-family: 'Noto Naskh Arabic', serif; }
+.saved-surah-name { font-size: 16px; font-weight: 600; color: var(--gray-900); }
+.saved-surah-arabic { font-size: 16px; color: var(--emerald); font-family: 'Noto Naskh Arabic', serif; }
 .saved-surah-meta { font-size: 11px; color: var(--gray-400); white-space: nowrap; }
 html.dark .saved-surah-row { background: #1e293b; border-color: #334155; }
 html.dark .saved-surah-name { color: var(--gray-100); }
@@ -1387,6 +1388,16 @@ html.dark .ri-btn.active { background: #064e3b; border-color: var(--emerald); co
   100% { background: transparent; }
 }
 .ayah-flash { animation: ayahFlash 0.6s ease forwards; }
+
+@keyframes ayahCardFlash {
+  0%   { box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.04); }
+  25%  { box-shadow: 0 0 0 3px rgba(5,150,105,0.4); border-color: #059669; }
+  60%  { box-shadow: 0 0 0 3px rgba(5,150,105,0.2); border-color: #059669; }
+  100% { box-shadow: 0 2px 10px rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.04); }
+}
+.ayah-card.flashing {
+  animation: ayahCardFlash 1.2s ease forwards;
+}
 
 /* ── Animations ─────────────────────────────────────────────── */
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
@@ -3165,3 +3176,17 @@ html.dark .dhikr-counter-number { color: #f1f5f9; }
 html.dark .dhikr-tabs-bar { background: #111827; border-color: #1f2937; }
 html.dark .dhikr-tab-btn { background: #1e293b; border-color: #334155; color: #64748b; }
 html.dark .dhikr-progress-bar { background: #334155; }
+
+/* Dhikr complete state */
+.dhikr-counter-area.dhikr-complete .dhikr-counter-number { color: #D97706; }
+.dhikr-counter-area.dhikr-complete .dhikr-counter-of { color: #D97706; }
+.dhikr-counter-area.dhikr-complete .dhikr-progress-fill {
+  background: linear-gradient(90deg, #F59E0B, #D97706);
+}
+.dhikr-counter-area.dhikr-complete .dhikr-tap-btn {
+  background: linear-gradient(160deg, #F59E0B, #D97706);
+  box-shadow: 0 8px 24px rgba(245,158,11,0.35);
+}
+/* dark mode */
+html.dark .dhikr-counter-area.dhikr-complete .dhikr-counter-number { color: #FCD34D; }
+html.dark .dhikr-counter-area.dhikr-complete .dhikr-counter-of { color: #FCD34D; }
