@@ -16,7 +16,7 @@ function renderDhikr() {
   tab.innerHTML = `
     <div class="dhikr-header-new">
       <div class="dhikr-header-label">Daily Dhikr</div>
-      <div class="dhikr-header-arabic">التَّسْبِيح</div>
+      <div class="dhikr-header-arabic">${d.arabic}</div>
     </div>
     <div class="dhikr-counter-area">
       <div class="dhikr-counter-text">${d.arabic}</div>
