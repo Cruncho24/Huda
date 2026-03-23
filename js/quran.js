@@ -234,7 +234,7 @@ async function openSurah(n, targetAyah = null) {
             const el = document.getElementById(`ayah-${targetAyah}`);
             if (el) {
               el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-              setTimeout(() => flashAyah(el), 400);
+              setTimeout(() => flashAyahEl(el), 400);
             }
           }
         }, 0);
@@ -972,7 +972,7 @@ function setupAyahLongPress(container) {
       _lpTimer = null;
       haptic(60);
       const wrap = anum.closest('.mushaf-ayah-wrap');
-      flashAyah(wrap);
+      flashAyahEl(wrap);
       const g = +anum.id.replace('maud-', '');
       showAyahPopup(g, +wrap.dataset.surah, +wrap.dataset.ayah, anum);
     }, 500);
@@ -990,7 +990,7 @@ function setupAyahLongPress(container) {
     e.preventDefault();
     const wrap = anum.closest('.mushaf-ayah-wrap');
     const g = +anum.id.replace('maud-', '');
-    flashAyah(wrap);
+    flashAyahEl(wrap);
     showAyahPopup(g, +wrap.dataset.surah, +wrap.dataset.ayah, anum);
   });
 
@@ -1057,9 +1057,23 @@ function confirmPlayMushafAyah() {
   playMushafAyah(globalNum, surahNum, ayahNum);
 }
 
-function flashAyah(el) {
+function flashAyahEl(el) {
   el.classList.add('ayah-flash');
   setTimeout(() => el.classList.remove('ayah-flash'), 600);
+}
+
+function flashAyah(ayahNum) {
+  // Small delay to ensure DOM is rendered and scroll has settled
+  setTimeout(() => {
+    const el = document.getElementById(`ayah-${ayahNum}`);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Add flash class after scroll starts
+    setTimeout(() => {
+      el.classList.add('flashing');
+      el.addEventListener('animationend', () => el.classList.remove('flashing'), { once: true });
+    }, 400);
+  }, 300);
 }
 
 function closeQuranReader() {
@@ -1183,17 +1197,17 @@ async function toggleTafsir(surah, ayah) {
   // Check cache first
   let text;
   try {
-    const cache = JSON.parse(localStorage.getItem(`huda_tafsir_${surah}`) || '{}');
+    const cache = JSON.parse(localStorage.getItem(`huda_tafsir_k_${surah}`) || '{}');
     if (cache[ayah]) {
       text = cache[ayah];
     } else {
-      const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/en.maududi`);
+      const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/en.kathir`);
       if (!res.ok) throw new Error(res.status);
       const json = await res.json();
       text = json.data?.text;
       if (text) {
         cache[ayah] = text;
-        try { localStorage.setItem(`huda_tafsir_${surah}`, JSON.stringify(cache)); } catch(e) {}
+        try { localStorage.setItem(`huda_tafsir_k_${surah}`, JSON.stringify(cache)); } catch(e) {}
       }
     }
   } catch(e) {
