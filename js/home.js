@@ -36,8 +36,8 @@ async function fetchAndCacheHijri(date) {
 }
 
 function clearLastRead() {
-  localStorage.removeItem('huda_last_read');
-  localStorage.setItem('_sync_ts_huda_last_read', String(Date.now())); // prevent cloud from restoring it
+  localStorage.setItem('huda_last_read', 'null'); // 'null' (not removed) so pushSync pushes it to Supabase
+  localStorage.setItem('_sync_ts_huda_last_read', String(Date.now())); // prevent pull from restoring it
   debouncedPush();
   renderHome();
 }
@@ -148,16 +148,16 @@ function renderHome() {
     ${jumuahCard}
 
     ${lastRead ? `
-    <div class="continue-card" onclick="switchTab('quran');setTimeout(()=>openSurah(${lastRead.surah}${lastRead.ayah ? `,${lastRead.ayah}` : ''}),100)" style="position:relative">
-      <div>
-        <div class="card-section-label">Continue Reading</div>
-        <div style="font-size:15px;font-weight:700;color:#065f46">${esc(lastRead.name)}</div>
-        <div style="font-size:12px;color:#94a3b8;margin-top:1px">${esc(lastRead.arabic)}${lastRead.ayah ? ` · Ayah ${lastRead.ayah}` : ''}</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:8px">
+    <div style="position:relative;margin:0 12px 10px">
+      <div class="continue-card" onclick="switchTab('quran');setTimeout(()=>openSurah(${lastRead.surah}${lastRead.ayah ? `,${lastRead.ayah}` : ''}),100)" style="margin:0">
+        <div>
+          <div class="card-section-label">Continue Reading</div>
+          <div style="font-size:15px;font-weight:700;color:#065f46">${esc(lastRead.name)}</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:1px">${esc(lastRead.arabic)}${lastRead.ayah ? ` · Ayah ${lastRead.ayah}` : ''}</div>
+        </div>
         <div class="continue-icon-well">📖</div>
-        <button onclick="event.stopPropagation();clearLastRead()" style="background:none;border:none;color:#94a3b8;font-size:18px;cursor:pointer;padding:4px;line-height:1" title="Dismiss">×</button>
       </div>
+      <button onclick="clearLastRead()" style="position:absolute;top:8px;right:8px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;padding:4px;line-height:1;z-index:1" title="Dismiss">×</button>
     </div>` : ''}
 
     ${state.bookmarks.length ? `
@@ -441,7 +441,7 @@ function openSettings() {
           </div>
           <div class="settings-row">
             <span class="settings-label" style="color:#6b7280">Version</span>
-            <span class="settings-value" style="color:#9ca3af">v112</span>
+            <span class="settings-value" style="color:#9ca3af">v113</span>
           </div>
         </div>
 
