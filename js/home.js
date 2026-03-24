@@ -147,7 +147,7 @@ function renderHome() {
 
     ${jumuahCard}
 
-    ${lastRead ? `
+    ${lastRead?.view === 'page' ? `
     <div style="position:relative;margin:0 12px 10px">
       <div class="continue-card" onclick="switchTab('quran');setTimeout(()=>openSurah(${lastRead.surah}${lastRead.ayah ? `,${lastRead.ayah}` : ''}),100)" style="margin:0">
         <div>
@@ -201,10 +201,10 @@ function renderHome() {
 
     <div class="hadith-card" id="hadith-card">
       <div class="card-section-label">Hadith of the Day</div>
-      <p class="hadith-text">"${h.text}"</p>
+      <p class="hadith-text">"${esc(h.text)}"</p>
       <div class="hadith-source">
-        <span class="badge badge-emerald">${h.source}</span>
-        <span class="badge badge-gold">${h.grade}</span>
+        <span class="badge badge-emerald">${esc(h.source)}</span>
+        <span class="badge badge-gold">${esc(h.grade)}</span>
       </div>
     </div>
 
@@ -265,10 +265,10 @@ function rotateHadith() {
   setTimeout(() => {
     card.innerHTML = `
       <div class="card-section-label">Hadith of the Day</div>
-      <p class="hadith-text">"${h.text}"</p>
+      <p class="hadith-text">"${esc(h.text)}"</p>
       <div class="hadith-source">
-        <span class="badge badge-emerald">${h.source}</span>
-        <span class="badge badge-gold">${h.grade}</span>
+        <span class="badge badge-emerald">${esc(h.source)}</span>
+        <span class="badge badge-gold">${esc(h.grade)}</span>
       </div>`;
     card.style.opacity = '1';
     card.style.transition = 'opacity 0.5s';
@@ -441,7 +441,7 @@ function openSettings() {
           </div>
           <div class="settings-row">
             <span class="settings-label" style="color:#6b7280">Version</span>
-            <span class="settings-value" style="color:#9ca3af">v115</span>
+            <span class="settings-value" style="color:#9ca3af">v131</span>
           </div>
         </div>
 

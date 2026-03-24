@@ -44,7 +44,24 @@ const RECITERS = [
     surahUrl: n => `https://server11.mp3quran.net/sds/${String(n).padStart(3,'0')}.mp3`,
     perAyahUrl: (s, a) => `https://everyayah.com/data/Abdurrahmaan_As-Sudais_192kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
   },
+  {
+    id: 'ar.shuraim', name: 'Saud Al-Shuraim',
+    surahUrl: n => `https://server7.mp3quran.net/shur/${String(n).padStart(3,'0')}.mp3`,
+    perAyahUrl: (s, a) => `https://everyayah.com/data/Saood_ash-Shuraym_128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
+  },
+  {
+    id: 'ar.juhany', name: 'Abdullah Al-Juhani',
+    surahUrl: n => `https://download.quranicaudio.com/quran/abdullaah_3awwaad_al-juhaynee/${String(n).padStart(3,'0')}.mp3`,
+    perAyahUrl: (s, a) => `https://everyayah.com/data/Abdullaah_3awwaad_Al-Juhaynee_128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
+  },
 ];
+
+// Compute global ayah number (1-6236) from surah + ayah-in-surah
+function globalAyahNum(surahNum, ayahNum) {
+  let n = 0;
+  for (let i = 0; i < surahNum - 1; i++) n += SURAHS[i][4];
+  return n + ayahNum;
+}
 
 // Returns the per-ayah audio URL for the active reciter
 function getAyahUrl(globalNum, surahNum, ayahNum) {
@@ -64,7 +81,7 @@ function getSurahAudioUrl(surahNum) {
 const state = {
   activeTab: 'home',
   dhikrCounts: (() => { try { return JSON.parse(localStorage.getItem('huda_dhikr') || '{}'); } catch(e) { return {}; } })(),
-  hadithIndex: 0,
+  hadithIndex: (() => { const d = new Date(); return (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate()) % (typeof HADITHS !== 'undefined' ? HADITHS.length : 40); })(),
   darkMode: localStorage.getItem('huda_dark') === '1',
   fontSize: parseInt(localStorage.getItem('huda_fontsize') || '24') || 24,
   bookmarks: (() => { try { return JSON.parse(localStorage.getItem('huda_bookmarks') || '[]'); } catch(e) { return []; } })(),
@@ -117,7 +134,7 @@ function renderAuthModalBody(mode = 'signin', user = null) {
   if (mode === 'account' && user) {
     el.innerHTML = `
       <div class="auth-modal-title">👤 Account</div>
-      <div class="auth-user-email">${user.email}</div>
+      <div class="auth-user-email">${esc(user.email)}</div>
       <div class="sync-status">✓ Synced across devices</div>
       <br>
       <button class="auth-btn-secondary" onclick="handleSignOut()">Sign out</button>
@@ -255,7 +272,6 @@ document.addEventListener('DOMContentLoaded', () => {
   fetchAndCacheHijri(new Date());
   registerSW();
   setupInstallPrompt();
-  setInterval(rotateHadith, 12000);
 
   // Handle notification tap — open to specific tab
   const _notifTab = new URLSearchParams(location.search).get('tab');
@@ -311,10 +327,17 @@ function checkDhikrReset() {
 }
 
 // ── Bookmarks ─────────────────────────────────────────────────
-function toggleBookmark(surahNum, ayahNum, arText) {
+function toggleBookmark(surahNum, ayahNum) {
   const idx = state.bookmarks.findIndex(b => b.s === surahNum && b.a === ayahNum);
-  if (idx >= 0) state.bookmarks.splice(idx, 1);
-  else state.bookmarks.unshift({ s: surahNum, a: ayahNum, ar: arText.slice(0, 80) });
+  if (idx >= 0) {
+    state.bookmarks.splice(idx, 1);
+  } else {
+    // Look up Arabic text from in-memory cache (always populated when reader is open)
+    const cached = state.quran.cache[surahNum];
+    const ayahData = cached?.quran?.ayahs?.find(a => a.numberInSurah === ayahNum);
+    const arText = ayahData?.text?.slice(0, 80) || '';
+    state.bookmarks.unshift({ s: surahNum, a: ayahNum, ar: arText });
+  }
   localStorage.setItem('huda_bookmarks', JSON.stringify(state.bookmarks));
   localStorage.setItem('_sync_ts_huda_bookmarks', String(Date.now())); // prevent pull overwrite during debounce
   haptic();
@@ -413,6 +436,38 @@ function playAyah(globalNum, surahNum, ayahNum) {
   };
 }
 
+// Play a single ayah from the category view — no chaining when done
+function playCatAyah(globalNum, surahNum, ayahNum) {
+  const btnId = `cv-aud-${globalNum}`;
+  if (state.audio.player) {
+    state.audio.player.pause();
+    // Reset whichever button is active (study or category view)
+    const prevStudy = document.getElementById(`aud-${state.audio.playingId}`);
+    if (prevStudy) { prevStudy.textContent = '▶'; prevStudy.classList.remove('playing'); }
+    const prevCat = document.getElementById(`cv-aud-${state.audio.playingId}`);
+    if (prevCat) { prevCat.textContent = '▶'; prevCat.classList.remove('cv-playing'); }
+    if (state.audio.playingId === globalNum) {
+      state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+      return;
+    }
+  }
+  const audio = new Audio(getAyahUrl(globalNum, surahNum, ayahNum));
+  state.audio = { player: audio, playingId: globalNum, playingSurah: surahNum, playingAyah: ayahNum, paused: false };
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.textContent = '⏸'; btn.classList.add('cv-playing'); }
+  audio.play().catch(() => {
+    if (btn) { btn.textContent = '▶'; btn.classList.remove('cv-playing'); }
+    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+    showToast('Audio unavailable — check connection');
+  });
+  const reset = () => {
+    if (btn) { btn.textContent = '▶'; btn.classList.remove('cv-playing'); }
+    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+  };
+  audio.onended = reset;
+  audio.onerror = reset;
+}
+
 // ── Navigation ────────────────────────────────────────────────
 function setupNav() {
   document.querySelectorAll('.nav-item').forEach(btn => {
@@ -420,6 +475,48 @@ function setupNav() {
       const tab = btn.dataset.tab;
       switchTab(tab);
     });
+  });
+
+  // Full keyboard support
+  document.addEventListener('keydown', e => {
+    if (e.metaKey || e.ctrlKey || e.altKey) return; // let browser shortcuts through
+    const inInput = ['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName);
+
+    // 1–6: switch tabs
+    const TAB_KEYS = { '1':'home','2':'quran','3':'prayer','4':'dhikr','5':'duas','6':'learn' };
+    if (!inInput && TAB_KEYS[e.key]) { e.preventDefault(); switchTab(TAB_KEYS[e.key]); return; }
+
+    if (inInput) return; // everything below requires no active input
+
+    // Escape: go back from any open view
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      if (state.quran?.searchOpen)                                                    { closeQuranSearch(); return; }
+      if (document.getElementById('quran-category-view')?.style.display === 'flex')  { closeCategoryView(); return; }
+      if (document.getElementById('quran-reader')?.style.display !== 'none')         { closeQuranReader(); return; }
+      return;
+    }
+
+    // ── Quran reader ──
+    if (state.activeTab === 'quran' && document.getElementById('quran-reader')?.style.display !== 'none') {
+      if (e.key === 'ArrowRight') { e.preventDefault(); navigateSurah(1); return; }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); navigateSurah(-1); return; }
+      if (e.key === ' ') {
+        e.preventDefault();
+        if (state.audio.player) {
+          if (state.audio.player.paused) { state.audio.player.play(); }
+          else { state.audio.player.pause(); }
+        }
+        return;
+      }
+    }
+
+    // ── Dhikr tab ──
+    if (state.activeTab === 'dhikr') {
+      if (e.key === 'ArrowRight') { e.preventDefault(); switchDhikrTab(_dhikrTab + 1); }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); switchDhikrTab(_dhikrTab - 1); }
+      if (e.key === ' ')          { e.preventDefault(); tapActiveDhikr(); }
+    }
   });
 }
 
