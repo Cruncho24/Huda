@@ -326,9 +326,9 @@ async function fetchZakatPrices() {
     if (statusEl) statusEl.textContent = `✓ Live prices loaded · Gold: $${zakatPrices.gold.toFixed(2)}/g · Silver: $${zakatPrices.silver.toFixed(4)}/g`;
   } catch(e) {
     // Fallback prices (approximate)
-    zakatPrices.gold = 95;
-    zakatPrices.silver = 0.85;
-    zakatPrices.rates = { USD:1, GBP:0.79, EUR:0.92, AED:3.67 };
+    zakatPrices.gold = 146;
+    zakatPrices.silver = 2.34;
+    zakatPrices.rates = { USD:1, GBP:0.75, EUR:0.92, AED:3.67 };
     if (statusEl) statusEl.textContent = '⚠️ Using approximate prices (offline)';
   }
 }
