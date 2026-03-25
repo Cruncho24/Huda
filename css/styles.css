@@ -180,9 +180,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   cursor: pointer;
-  padding: 4px 2px;
+  padding: 6px 2px;
   transition: transform 0.15s;
   -webkit-tap-highlight-color: transparent;
   border: none;
@@ -191,12 +191,12 @@ body {
 .nav-item:active { transform: scale(0.92); }
 
 .nav-icon {
-  width: 26px;
-  height: 26px;
+  width: 28px;
+  height: 28px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px;
+  font-size: 22px;
   transition: color 0.2s;
 }
 
@@ -209,9 +209,9 @@ body {
 }
 
 .nav-item.active .nav-icon { color: var(--emerald); }
-.nav-item.active .nav-label { color: #059669; font-weight: 700 !important; font-size: 9px; }
+.nav-item.active .nav-label { color: #059669; font-weight: 700 !important; font-size: 10px; }
 .nav-item:not(.active) .nav-icon { color: var(--gray-400); }
-.nav-item:not(.active) .nav-label { color: #94a3b8; font-weight: 500; font-size: 9px; }
+.nav-item:not(.active) .nav-label { color: #94a3b8; font-weight: 500; font-size: 10px; }
 
 /* ── Hero Banner ────────────────────────────────────────────── */
 .hero {
@@ -1640,8 +1640,24 @@ html.dark .ak-reciter-select { border-color: rgba(255,255,255,0.15); }
   -webkit-tap-highlight-color: transparent;
 }
 .ayah-popup-play:active { background: var(--emerald-dark); }
+.ayah-popup-study {
+  background: transparent;
+  color: var(--gray-600);
+  border: 1.5px solid var(--gray-200);
+  border-radius: 10px;
+  padding: 9px 0;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 8px;
+  -webkit-tap-highlight-color: transparent;
+}
+.ayah-popup-study:active { background: var(--gray-100); }
 html.dark #ayah-popup { background: #1e293b; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
 html.dark .ayah-popup-label { color: #64748b; }
+html.dark .ayah-popup-study { color: #94a3b8; border-color: #334155; }
+html.dark .ayah-popup-study:active { background: #0f172a; }
 
 /* ── Dark Mode ──────────────────────────────────────────────── */
 html.dark {
@@ -2279,6 +2295,112 @@ html.dark .qs-snippet { color: var(--gray-300); }
   padding: 12px 16px;
   font-style: italic;
 }
+
+/* ── Quran Category Tiles ─────────────────────────────────── */
+.qcat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.qcat-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 6px;
+  border-radius: 12px;
+  border: 1.5px solid #e2e8f0;
+  background: #f8fafc;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.qcat-tile:active { transform: scale(0.94); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+.qcat-icon { font-size: 22px; line-height: 1; }
+.qcat-label { font-size: 10px; font-weight: 600; color: var(--cat-color); text-align: center; line-height: 1.2; }
+html.dark .qcat-tile { background: #1e293b; border-color: #334155; }
+html.dark .qcat-tile:active { background: #0f172a; }
+
+/* ── Quran Category Verse View ───────────────────────────── */
+#quran-category-view { display: none; background: var(--white); }
+.cv-skeleton {
+  height: 100px;
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: cvShimmer 1.4s infinite;
+  border-radius: 12px;
+  margin-bottom: 10px;
+}
+@keyframes cvShimmer { 0% { background-position: 200% 0 } 100% { background-position: -200% 0 } }
+.cv-verse-card {
+  background: var(--white);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.cv-ref {
+  font-size: 11px;
+  font-weight: 700;
+  color: #059669;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.cv-play-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  background: #059669;
+  color: white;
+  font-size: 11px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: background 0.15s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.cv-play-btn:active { transform: scale(0.9); }
+.cv-play-btn.cv-playing { background: #047857; }
+html.dark .cv-play-btn { background: #059669; }
+html.dark .cv-play-btn.cv-playing { background: #047857; }
+
+/* Reciter dropdown in green page headers */
+.hdr-reciter-select {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 8px;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 8px;
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+}
+.hdr-reciter-select option { background: #065f46; color: white; }
+
+.cv-arabic {
+  font-family: UthmanicHafs, 'Noto Naskh Arabic', serif;
+  font-size: 20px;
+  line-height: 1.9;
+  color: #1e293b;
+  text-align: right;
+  direction: rtl;
+  margin-bottom: 10px;
+}
+.cv-english {
+  font-size: 13px;
+  line-height: 1.65;
+  color: #475569;
+}
+html.dark .cv-verse-card { background: #1e293b; border-color: #334155; }
+html.dark .cv-arabic { color: #f1f5f9; }
+html.dark .cv-english { color: #94a3b8; }
+html.dark .cv-skeleton { background: linear-gradient(90deg, #1e293b 25%, #334155 50%, #1e293b 75%); background-size: 200% 100%; }
 
 /* ── Account Button ───────────────────────────────────────── */
 .account-btn {

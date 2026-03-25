@@ -17,16 +17,26 @@ function renderQuranList() {
   tab.innerHTML = `
     <div id="quran-list-view">
       <div style="background:linear-gradient(160deg,#047857,#065f46);padding:20px 16px calc(16px + env(safe-area-inset-top,0px));color:white;padding-top:calc(20px + env(safe-area-inset-top,0px))">
-        <div style="font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px">Holy Quran</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div style="font-size:11px;opacity:0.6;text-transform:uppercase;letter-spacing:0.05em">Holy Quran</div>
+          <span id="offline-pill"></span>
+        </div>
         <div style="font-size:22px;font-weight:700;letter-spacing:0.5px;margin-bottom:12px">القُرْآن الكَرِيم</div>
-        <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px">
-          <span style="opacity:0.6;font-size:14px">🔍</span>
-          <input id="surah-search" placeholder="Search surah..." oninput="filterSurahs(this.value)"
-            style="background:none;border:none;outline:none;color:white;font-size:13px;flex:1;caret-color:white;"
-            autocomplete="off">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:8px 12px;display:flex;align-items:center;gap:8px;flex:1">
+            <span style="opacity:0.6;font-size:14px">🔍</span>
+            <input id="surah-search" placeholder="Search surah..." oninput="filterSurahs(this.value)"
+              style="background:none;border:none;outline:none;color:white;font-size:13px;flex:1;caret-color:white;"
+              autocomplete="off">
+          </div>
+          <button onclick="openQuranSearch()" title="Search by verse"
+            style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:8px 12px;color:white;font-size:14px;cursor:pointer;white-space:nowrap;flex-shrink:0">
+            Search verse
+          </button>
         </div>
       </div>
       <div id="offline-banner"></div>
+      <div id="quran-themes-section"></div>
       <div id="surah-list"></div>
     </div>
     <div id="quran-reader" style="display:none">
@@ -65,6 +75,7 @@ function renderQuranList() {
   `;
   renderSurahList(SURAHS);
   _renderOfflineBanner();
+  _renderQuranThemes();
 }
 
 function _renderOfflineBanner() {
@@ -72,7 +83,9 @@ function _renderOfflineBanner() {
   if (!el) return;
 
   if (localStorage.getItem('huda_quran_offline') === '1') {
-    el.innerHTML = `<div class="offline-banner offline-banner-done">✅ Full Quran available offline</div>`;
+    el.innerHTML = '';
+    const pill = document.getElementById('offline-pill');
+    if (pill) pill.innerHTML = `<span style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:20px;padding:2px 8px;font-size:10px;color:rgba(255,255,255,0.85);font-weight:600">✓ Offline</span>`;
     return;
   }
 
@@ -255,6 +268,11 @@ function setQuranView(mode) {
   state.quran.viewMode = mode;
   state.quran.currentPage = 0;
   mushafStop();
+  // Track which view was last used so Continue Reading only shows for mushaf
+  try {
+    const lr = JSON.parse(localStorage.getItem('huda_last_read') || 'null');
+    if (lr) { lr.view = mode; localStorage.setItem('huda_last_read', JSON.stringify(lr)); }
+  } catch(e) {}
   document.getElementById('btn-verse')?.classList.toggle('active', mode === 'verse');
   document.getElementById('btn-page')?.classList.toggle('active', mode === 'page');
   const fontCtrl = document.getElementById('font-ctrl');
@@ -283,6 +301,7 @@ function setQuranView(mode) {
     renderSurahContent(n, arData, enData);
     if (_mushafFromAyah) {
       const _target = _mushafFromAyah;
+      _mushafFromAyah = null;
       setTimeout(() => {
         const el = document.getElementById(`ayah-${_target}`);
         if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -648,6 +667,17 @@ function setReciter(id) {
   debouncedPush();
 }
 
+function setCatReciter(id) {
+  // Stop any playing category ayah audio
+  if (state.audio.player) {
+    state.audio.player.pause();
+    const prevBtn = document.getElementById(`cv-aud-${state.audio.playingId}`);
+    if (prevBtn) { prevBtn.textContent = '▶'; prevBtn.classList.remove('cv-playing'); }
+    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+  }
+  setReciter(id);
+}
+
 async function navigateSurah(dir) {
   const next = (state.quran.currentSurah || 1) + dir;
   if (next < 1 || next > 114) return;
@@ -813,7 +843,7 @@ function renderSurahContent(n, arData, enData) {
       <div class="ayah-card-actions">
         <button class="ayah-card-btn" id="aud-${a.number}" onclick="playAyah(${a.number},${n},${a.numberInSurah})" title="Play" data-play>▶</button>
         <button class="ayah-card-btn ${isBookmarked(n, a.numberInSurah) ? 'bookmarked' : ''}" id="bm-${n}-${a.numberInSurah}"
-          onclick="toggleBookmark(${n},${a.numberInSurah},'${a.text.replace(/'/g,"\\'").slice(0,60)}')" title="Bookmark">
+          onclick="toggleBookmark(${n},${a.numberInSurah})" title="Bookmark">
           ${isBookmarked(n, a.numberInSurah) ? '🔖' : '🏷️'}
         </button>
         <button class="ayah-card-btn tafsir-btn" id="tafsir-btn-${n}-${a.numberInSurah}"
@@ -1021,10 +1051,11 @@ function showAyahPopup(globalNum, surahNum, ayahNum, anchorEl) {
   popup.innerHTML = `
     <div class="ayah-popup-label">Ayah ${ayahNum}</div>
     <button class="ayah-popup-play" onclick="confirmPlayMushafAyah()">▶&nbsp; Play from here</button>
+    <button class="ayah-popup-study" onclick="confirmViewMushafAyah()">☰&nbsp; View translation</button>
   `;
   popup.style.display = 'block';
   const rect = anchorEl.getBoundingClientRect();
-  const pw = 170, ph = 80;
+  const pw = 180, ph = 110;
   let top = rect.top - ph - 10;
   let left = rect.left + rect.width / 2 - pw / 2;
   if (top < 8) top = rect.bottom + 10;
@@ -1057,6 +1088,13 @@ function confirmPlayMushafAyah() {
   playMushafAyah(globalNum, surahNum, ayahNum);
 }
 
+function confirmViewMushafAyah() {
+  if (!_pendingPlay) return;
+  const { surahNum, ayahNum } = _pendingPlay;
+  hideAyahPopup();
+  switchToStudyAtAyah(surahNum, ayahNum);
+}
+
 function flashAyahEl(el) {
   el.classList.add('ayah-flash');
   setTimeout(() => el.classList.remove('ayah-flash'), 600);
@@ -1084,6 +1122,106 @@ function closeQuranReader() {
   state.quran.currentSurah = null;
 }
 
+
+// ── Quran Thematic Categories ─────────────────────────────────
+function _renderQuranThemes() {
+  const el = document.getElementById('quran-themes-section');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="padding:14px 16px 6px">
+      <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:10px">Browse by Theme</div>
+      <div class="qcat-grid">
+        ${QURAN_CATEGORIES.map(c => `
+          <button class="qcat-tile" onclick="openCategoryView('${c.id}')" style="--cat-color:${c.color}">
+            <span class="qcat-icon">${c.icon}</span>
+            <span class="qcat-label">${c.label}</span>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function openCategoryView(id) {
+  const cat = QURAN_CATEGORIES.find(c => c.id === id);
+  if (!cat) return;
+  const listView = document.getElementById('quran-list-view');
+  let cv = document.getElementById('quran-category-view');
+  if (!cv) {
+    cv = document.createElement('div');
+    cv.id = 'quran-category-view';
+    listView.parentNode.insertBefore(cv, listView);
+  }
+  listView.style.display = 'none';
+  cv.style.display = 'flex';
+  cv.style.flexDirection = 'column';
+  cv.style.height = '100%';
+  cv.innerHTML = `
+    <div class="page-header" style="flex-shrink:0">
+      <button class="back-btn" onclick="closeCategoryView()">←</button>
+      <div style="flex:1;min-width:0;overflow:hidden">
+        <h2 style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${cat.icon} ${cat.label}</h2>
+      </div>
+      <select class="hdr-reciter-select" onchange="setCatReciter(this.value)">
+        ${RECITERS.map(r => `<option value="${r.id}" ${state.reciter === r.id ? 'selected' : ''}>${r.name}</option>`).join('')}
+      </select>
+    </div>
+    <div id="cv-verse-list" style="overflow-y:auto;flex:1;padding:12px 16px 80px">
+      ${cat.verses.map(() => `<div class="cv-skeleton"></div>`).join('')}
+    </div>
+  `;
+  _loadCategoryVerses(cat);
+}
+
+function closeCategoryView() {
+  const cv = document.getElementById('quran-category-view');
+  if (cv) cv.style.display = 'none';
+  const listView = document.getElementById('quran-list-view');
+  if (listView) listView.style.display = 'block';
+}
+
+async function _loadCategoryVerses(cat) {
+  const container = document.getElementById('cv-verse-list');
+  if (!container) return;
+
+  const results = await Promise.all(cat.verses.map(async ({s, a}) => {
+    const cacheKey = `huda_cv_${s}_${a}`;
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) return JSON.parse(cached);
+      const res = await fetch(`https://api.alquran.cloud/v1/ayah/${s}:${a}/editions/quran-uthmani,en.sahih`);
+      const json = await res.json();
+      if (json.code !== 200) return null;
+      const [ar, en] = json.data;
+      const entry = { s, a, arabic: ar.text, english: en.text, surahName: ar.surah.englishName };
+      try { localStorage.setItem(cacheKey, JSON.stringify(entry)); } catch(e) {}
+      return entry;
+    } catch(e) { return null; }
+  }));
+
+  if (!document.getElementById('cv-verse-list')) return; // user navigated away
+
+  container.innerHTML = results.map(v => {
+    if (!v) return '';
+    const gn = globalAyahNum(v.s, v.a);
+    return `
+      <div class="cv-verse-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div class="cv-ref">${esc(v.surahName)} ${v.s}:${v.a}</div>
+          <button class="cv-play-btn" id="cv-aud-${gn}"
+            onclick="event.stopPropagation();playCatAyah(${gn},${v.s},${v.a})">▶</button>
+        </div>
+        <div class="cv-arabic">${esc(v.arabic)}</div>
+        <div class="cv-english">${esc(v.english)}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function openSurahFromCategory(s, a) {
+  closeCategoryView();
+  openSurah(s, a);
+}
 
 // ── Quran Search ──────────────────────────────────────────────
 function openQuranSearch() {
