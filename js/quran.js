@@ -304,7 +304,12 @@ function setQuranView(mode) {
       _mushafFromAyah = null;
       setTimeout(() => {
         const el = document.getElementById(`ayah-${_target}`);
-        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        if (!el) return;
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          el.classList.add('flashing');
+          el.addEventListener('animationend', () => el.classList.remove('flashing'), { once: true });
+        }, 400);
       }, 100);
     } else {
       document.getElementById('reader-content').scrollTop = 0;
