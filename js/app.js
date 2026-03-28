@@ -277,6 +277,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const _notifTab = new URLSearchParams(location.search).get('tab');
   if (_notifTab) switchTab(_notifTab);
 
+  // When user opens the app while audio is playing, jump to the current ayah
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState !== 'visible') return;
+    if (!state.audio.playingSurah) return;
+    if (state.activeTab !== 'quran') switchTab('quran');
+    setTimeout(() => {
+      if (state.quran.viewMode === 'page') {
+        const badge = document.getElementById(`maud-${state.audio.playingId}`);
+        if (badge) badge.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        const card = document.getElementById(`ayah-${state.audio.playingAyah}`);
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 300);
+  });
+
   // Auth — fires on sign-in, sign-out, and page reload with existing session
   authOnChange(async user => {
     updateAccountBtn(user);
