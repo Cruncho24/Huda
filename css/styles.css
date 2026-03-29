@@ -1673,6 +1673,7 @@ html.dark {
   --emerald-light: #064e3b;
 }
 html.dark body { background: #0f172a; color: #f1f5f9; }
+html.dark #app { background: #0f172a; }
 html.dark .hadith-card { background: #1e293b; border-color: #334155; box-shadow: none; }
 html.dark .feature-card { background: #1e293b; border-color: #334155; }
 html.dark .surah-item:active { background: #334155; }
