@@ -3314,3 +3314,198 @@ html.dark .dhikr-progress-bar { background: #334155; }
 /* dark mode */
 html.dark .dhikr-counter-area.dhikr-complete .dhikr-counter-number { color: #FCD34D; }
 html.dark .dhikr-counter-area.dhikr-complete .dhikr-counter-of { color: #FCD34D; }
+
+/* ═══════════════════════════════════════════════════════════════
+   LIGHT MODE POLISH
+   All rules below are light-mode-only (no html.dark prefix).
+   They override earlier defaults to give the app a professional,
+   layered look with proper elevation, hierarchy, and rhythm.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── 1. Background — distinct page vs surface layering ───────── */
+body, #app { background: #eef2f7; }
+
+/* ── 2. Bottom nav — pill active indicator ───────────────────── */
+#bottom-nav {
+  background: #ffffff;
+  border: none;
+  box-shadow: 0 -1px 0 rgba(0,0,0,0.04), 0 -4px 24px rgba(0,0,0,0.07);
+}
+.nav-icon { position: relative; }
+.nav-item.active .nav-icon {
+  background: rgba(5,150,105,0.10);
+  border-radius: 10px;
+  padding: 2px 8px;
+  color: #059669;
+}
+.nav-item.active .nav-label { color: #059669; font-weight: 700; }
+.nav-item:not(.active) .nav-icon { color: #94a3b8; }
+.nav-item:not(.active) .nav-label { color: #94a3b8; }
+
+/* ── 3. Elevated cards — consistent multi-layer shadow ────────── */
+.card,
+.hadith-card,
+.feature-card,
+.home-live-card,
+.continue-card,
+.ayatul-kursi-card,
+.bookmark-row,
+.saved-surah-row {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.07);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+.prayer-item {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 14px rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+.dhikr-card,
+.dua-card,
+.learn-card,
+.lesson-item,
+.prophet-row,
+.hajj-step,
+.tasbeeh-card,
+.zakat-result,
+.qibla-card {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.07);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+.category-card,
+.name-card,
+.letter-card,
+.zakat-field {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 3px 10px rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,0.05);
+}
+
+/* ── 4. Hero banners — richer gradient + tighter type ─────────── */
+.hero {
+  background: linear-gradient(150deg, #059669 0%, #047857 50%, #065f46 100%);
+  box-shadow: 0 4px 24px rgba(5,150,105,0.20);
+}
+.prayer-hero {
+  background: linear-gradient(150deg, #059669 0%, #047857 50%, #065f46 100%);
+  box-shadow: 0 4px 24px rgba(5,150,105,0.20);
+}
+.learn-hero {
+  background: linear-gradient(150deg, #059669 0%, #047857 50%, #065f46 100%);
+  box-shadow: 0 4px 20px rgba(5,150,105,0.18);
+}
+.page-header {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  box-shadow: 0 2px 12px rgba(5,150,105,0.20);
+}
+
+/* ── 5. Surah list — refined separators & number badge ─────────── */
+.surah-item {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.12s;
+}
+.surah-item:active { background: #f0fdf4; }
+.surah-num {
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid rgba(5,150,105,0.12);
+  font-weight: 700;
+}
+
+/* ── 6. Prayer items — stronger next-prayer highlight ─────────── */
+.prayer-item.next-prayer {
+  background: #f0fdf4;
+  border-left: 3px solid #059669;
+  box-shadow: 0 2px 8px rgba(5,150,105,0.12), 0 6px 20px rgba(5,150,105,0.08);
+}
+.prayer-item.past-prayer { opacity: 0.38; }
+
+/* ── 7. Section titles — stronger hierarchy ───────────────────── */
+.section-title {
+  font-size: 15px;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+
+/* ── 8. Hadith card — warmer border ───────────────────────────── */
+.hadith-card {
+  border-left: 3px solid #d1fae5;
+}
+
+/* ── 9. Feature cards — subtle green tint on icon area ─────────── */
+.feature-card {
+  border-radius: 16px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.feature-card:active {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+
+/* ── 10. Continue / bookmark rows ─────────────────────────────── */
+.continue-card { border-radius: 18px; }
+.bookmark-row { border-radius: 14px; }
+.saved-surah-row { border-radius: 14px; }
+
+/* ── 11. Ayah cards (study view) ─────────────────────────────── */
+.ayah.ayah-card {
+  border: 1px solid rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 3px 12px rgba(0,0,0,0.05);
+  border-radius: 16px;
+  margin: 6px 12px;
+}
+
+/* ── 12. Home live cards ──────────────────────────────────────── */
+.home-live-card { border-radius: 16px; }
+.home-live-label {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+/* ── 13. Bismillah — slightly more presence ─────────────────────── */
+.bismillah {
+  color: #065f46;
+  font-size: 22px;
+  border-bottom: 1px solid #d1fae5;
+  background: #f0fdf4;
+}
+
+/* ── 14. Dua cards & category grid ───────────────────────────── */
+.dua-card { border-radius: 18px; }
+.category-card { border-radius: 16px; }
+.category-name { font-size: 12px; font-weight: 700; color: #1e293b; }
+
+/* ── 15. Learn cards ──────────────────────────────────────────── */
+.learn-card { border-radius: 18px; }
+.learn-card-title { color: #0f172a; }
+
+/* ── 16. Scrollbar refinement ────────────────────────────────── */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+/* ── 17. Search input ────────────────────────────────────────── */
+.search-bar {
+  background: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.search-input {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+}
+.search-input:focus { background: #ffffff; border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,0.10); }
+
+/* ── 18. Qibla card ──────────────────────────────────────────── */
+.qibla-card { border-radius: 18px; }
+
+/* ── 19. Prophet rows ────────────────────────────────────────── */
+.prophet-row { border-radius: 16px; }
+
+/* ── 20. Dua nav buttons ─────────────────────────────────────── */
+.dua-nav-btn {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+.dua-nav-btn:active { background: #f0fdf4; border-color: #a7f3d0; }
