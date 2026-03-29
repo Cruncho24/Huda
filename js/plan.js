@@ -50,8 +50,8 @@ function _savePlan(plan) {
     localStorage.setItem('_sync_ts_huda_plan', String(Date.now()));
     debouncedPush();
   } else {
-    localStorage.removeItem('huda_plan');
-    localStorage.removeItem('_sync_ts_huda_plan');
+    localStorage.setItem('huda_plan', 'null');
+    localStorage.setItem('_sync_ts_huda_plan', String(Date.now()));
     debouncedPush();
   }
   state.plan = plan;
