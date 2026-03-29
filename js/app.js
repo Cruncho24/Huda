@@ -106,10 +106,11 @@ const state = {
   learn: {
     currentSection: null, currentLesson: null,
     currentDuaCategory: null, currentDuaIndex: 0,
-    currentNameIndex: null, hajjTab: 'umrah',
+    currentNameIndex: null, currentLetterIndex: null, hajjTab: 'umrah',
     zakat: { currency: 'USD', nisab: 'gold' },
   },
   tasbeeh: parseInt(localStorage.getItem('huda_tasbeeh') || '0') || 0,
+  plan: (() => { try { return JSON.parse(localStorage.getItem('huda_plan') || 'null'); } catch(e) { return null; } })(),
   calendar: { displayYear: null, displayMonth: null },
 };
 
@@ -277,10 +278,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const _notifTab = new URLSearchParams(location.search).get('tab');
   if (_notifTab) switchTab(_notifTab);
 
-  // When user opens the app while audio is playing, jump to the current ayah
+  // When user opens the app from the background while audio is actively playing,
+  // jump to the Quran tab and scroll to the current ayah.
+  // Guard: only act if audio is playing (not paused) and the app was hidden for
+  // at least 5 s — avoids interrupting the user when they briefly switch apps.
+  let _hiddenAt = 0;
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState !== 'visible') return;
-    if (!state.audio.playingSurah) return;
+    if (document.visibilityState === 'hidden') { _hiddenAt = Date.now(); return; }
+    if (!state.audio.playingSurah || state.audio.paused) return;
+    if (Date.now() - _hiddenAt < 5000) return; // brief switch, don't navigate
     if (state.activeTab !== 'quran') switchTab('quran');
     setTimeout(() => {
       if (state.quran.viewMode === 'page') {

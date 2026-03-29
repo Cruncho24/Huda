@@ -147,6 +147,10 @@ function renderHome() {
 
     ${jumuahCard}
 
+    <div style="padding:12px 12px 0" id="plan-card-wrap">
+      ${renderPlanCard()}
+    </div>
+
     ${lastRead?.view === 'page' ? `
     <div style="position:relative;margin:0 12px 10px">
       <div class="continue-card" onclick="switchTab('quran');setTimeout(()=>openSurah(${lastRead.surah}${lastRead.ayah ? `,${lastRead.ayah}` : ''}),100)" style="margin:0">
@@ -441,7 +445,7 @@ function openSettings() {
           </div>
           <div class="settings-row">
             <span class="settings-label" style="color:#6b7280">Version</span>
-            <span class="settings-value" style="color:#9ca3af">v137</span>
+            <span class="settings-value" style="color:#9ca3af">v138</span>
           </div>
         </div>
 

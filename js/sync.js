@@ -14,6 +14,7 @@ const SYNC_KEYS = [
   'huda_dark',
   'huda_fontsize',
   'huda_reciter',
+  'huda_plan',
 ];
 
 let _pushTimer = null;
@@ -90,6 +91,7 @@ function applySyncedState() {
   state.darkMode = localStorage.getItem('huda_dark') === '1';
   state.fontSize = parseInt(localStorage.getItem('huda_fontsize') || '24') || 24;
   state.reciter  = localStorage.getItem('huda_reciter') || 'ar.alafasy';
+  try { state.plan = JSON.parse(localStorage.getItem('huda_plan') || 'null'); } catch(e) {}
   // Apply dark mode immediately
   document.documentElement.classList.toggle('dark', state.darkMode);
   // Re-evaluate dhikr daily reset in case huda_dhikr_date changed across devices
