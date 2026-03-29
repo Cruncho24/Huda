@@ -2418,6 +2418,7 @@ html.dark .cv-skeleton { background: linear-gradient(90deg, #1e293b 25%, #334155
   align-items: center;
   justify-content: center;
   color: #fff;
+  z-index: 10;
 }
 
 
@@ -2809,6 +2810,7 @@ html.dark .share-close-btn { border-color: #334155; color: #94a3b8; }
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 10;
 }
 html.dark .help-header { background: #0f172a; border-color: #334155; }
 html.dark .help-title { color: #f1f5f9; }
