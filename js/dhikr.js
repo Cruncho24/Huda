@@ -45,6 +45,11 @@ function renderDhikr() {
       <button onclick="switchDhikrTab(${_dhikrTab + 1})" ${_dhikrTab === DHIKRS.length - 1 ? 'disabled' : ''}
         style="flex-shrink:0;width:32px;height:32px;border-radius:50%;border:1px solid #e2e8f0;background:white;font-size:16px;cursor:pointer;color:${_dhikrTab === DHIKRS.length - 1 ? '#cbd5e1' : '#059669'};display:flex;align-items:center;justify-content:center">›</button>
     </div>
+    <div style="display:flex;justify-content:center;align-items:center;gap:6px;padding:0 12px 10px">
+      ${tabNames.map((_, i) => `
+        <div onclick="switchDhikrTab(${i})" style="cursor:pointer;width:${i === _dhikrTab ? 20 : 6}px;height:6px;border-radius:3px;background:${i === _dhikrTab ? '#059669' : '#cbd5e1'};transition:all 0.25s ease"></div>
+      `).join('')}
+    </div>
   `;
 
   // Long-press reset on tap button
@@ -55,6 +60,21 @@ function renderDhikr() {
   });
   tapBtn.addEventListener('pointerup', () => clearTimeout(_holdTimer));
   tapBtn.addEventListener('pointerleave', () => clearTimeout(_holdTimer));
+
+  // Swipe left/right on counter area to navigate dhikrs
+  const counterArea = tab.querySelector('.dhikr-counter-area');
+  let _swipeStartX = 0, _swipeStartY = 0;
+  counterArea.addEventListener('touchstart', e => {
+    _swipeStartX = e.touches[0].clientX;
+    _swipeStartY = e.touches[0].clientY;
+  }, { passive: true });
+  counterArea.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - _swipeStartX;
+    const dy = e.changedTouches[0].clientY - _swipeStartY;
+    if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) {
+      switchDhikrTab(_dhikrTab + (dx < 0 ? 1 : -1));
+    }
+  }, { passive: true });
 }
 
 function renderDhikrCard(d, i) {

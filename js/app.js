@@ -533,6 +533,31 @@ function setupNav() {
       if (e.key === 'ArrowLeft')  { e.preventDefault(); switchDhikrTab(_dhikrTab - 1); }
       if (e.key === ' ')          { e.preventDefault(); tapActiveDhikr(); }
     }
+
+    // ── Duas tab ──
+    if (state.activeTab === 'duas' && state.learn.currentDuaCategory) {
+      if (e.key === 'ArrowRight') { e.preventDefault(); changeDua(1); }
+      if (e.key === 'ArrowLeft')  { e.preventDefault(); changeDua(-1); }
+    }
+
+    // ── Learn tab — detail views ──
+    if (state.activeTab === 'learn') {
+      if (state.learn.currentSection === 'name') {
+        const max = (typeof NAMES_OF_ALLAH !== 'undefined' ? NAMES_OF_ALLAH.length : 99) - 1;
+        if (e.key === 'ArrowRight') { e.preventDefault(); openNameDetail(Math.min(max, state.learn.currentNameIndex + 1)); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); openNameDetail(Math.max(0, state.learn.currentNameIndex - 1)); }
+      }
+      if (state.learn.currentSection === 'lesson') {
+        const max = (typeof NEW_MUSLIM_LESSONS !== 'undefined' ? NEW_MUSLIM_LESSONS.length : 7) - 1;
+        if (e.key === 'ArrowRight') { e.preventDefault(); openLesson(Math.min(max, state.learn.currentLesson + 1)); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); openLesson(Math.max(0, state.learn.currentLesson - 1)); }
+      }
+      if (state.learn.currentSection === 'letter') {
+        const max = (typeof ARABIC_LETTERS !== 'undefined' ? ARABIC_LETTERS.length : 28) - 1;
+        if (e.key === 'ArrowRight') { e.preventDefault(); showLetterDetail(Math.min(max, state.learn.currentLetterIndex + 1)); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); showLetterDetail(Math.max(0, state.learn.currentLetterIndex - 1)); }
+      }
+    }
   });
 }
 

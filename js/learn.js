@@ -4,6 +4,7 @@
 
 // ── LEARN TAB ─────────────────────────────────────────────────
 function renderLearnHub() {
+  state.learn.currentSection = null;
   const tab = document.getElementById('tab-learn');
   tab.innerHTML = `
     <div class="learn-hero" style="padding-top:calc(24px + env(safe-area-inset-top,0px))">
@@ -58,6 +59,8 @@ function openNewMuslimGuide() {
 }
 
 function openLesson(i) {
+  state.learn.currentSection = 'lesson';
+  state.learn.currentLesson = i;
   const l = NEW_MUSLIM_LESSONS[i];
   const tab = document.getElementById('tab-learn');
   const body = l.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -129,6 +132,8 @@ function showCQTab(tab) {
 }
 
 function showLetterDetail(i) {
+  state.learn.currentSection = 'letter';
+  state.learn.currentLetterIndex = i;
   const l = ARABIC_LETTERS[i];
   const tab = document.getElementById('tab-learn');
   tab.innerHTML = `
@@ -195,6 +200,8 @@ function filterNames(q) {
 }
 
 function openNameDetail(i) {
+  state.learn.currentSection = 'name';
+  state.learn.currentNameIndex = i;
   const n = NAMES_OF_ALLAH[i];
   const tab = document.getElementById('tab-learn');
   tab.innerHTML = `

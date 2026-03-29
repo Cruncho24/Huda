@@ -3298,6 +3298,7 @@ html.dark .dhikr-counter-text { color: #6ee7b7; }
 html.dark .dhikr-counter-number { color: #f1f5f9; }
 html.dark .dhikr-tabs-bar { background: #111827; border-color: #1f2937; }
 html.dark .dhikr-tab-btn { background: #1e293b; border-color: #334155; color: #64748b; }
+html.dark .dhikr-tab-btn.active { background: #059669; color: white; border-color: #059669; }
 html.dark .dhikr-progress-bar { background: #334155; }
 
 /* Dhikr complete state */
