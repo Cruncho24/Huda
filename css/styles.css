@@ -1684,7 +1684,9 @@ html.dark .prayer-item.next-prayer { background: #0f2d1e; border-left-color: #05
 html.dark .dhikr-card { background: #1e293b; }
 html.dark .dua-card { background: #1e293b; }
 html.dark .category-card { background: #1e293b; border-color: #334155; }
+html.dark .category-name { color: #f1f5f9; }
 html.dark .learn-card { background: #1e293b; border-color: #334155; }
+html.dark .learn-card-title { color: #f1f5f9; }
 html.dark .name-card { background: #1e293b; }
 html.dark .lesson-item { background: #1e293b; }
 html.dark .hajj-step { background: #1e293b; }
