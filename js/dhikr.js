@@ -134,7 +134,14 @@ function tapActiveDhikr() {
   const pct = Math.min((newCount / d.target) * 100, 100);
   if (countEl) countEl.textContent = newCount;
   if (progEl) progEl.style.width = pct + '%';
-  if (newCount >= d.target) renderDhikr(); // show complete state
+  if (newCount >= d.target) {
+    haptic(150);
+    renderDhikr();
+    setTimeout(() => {
+      const el = document.getElementById('dhikr-count-display');
+      if (el) { el.classList.add('dhikr-pop'); setTimeout(() => el.classList.remove('dhikr-pop'), 500); }
+    }, 30);
+  }
 }
 
 function switchDhikrTab(i) {
@@ -160,6 +167,7 @@ function resetTasbeeh() {
 
 function saveTasbeeh() {
   localStorage.setItem('huda_tasbeeh', String(state.tasbeeh));
+  localStorage.setItem('_sync_ts_huda_tasbeeh', String(Date.now()));
   debouncedPush();
 }
 
@@ -304,7 +312,9 @@ function navigateCalendar(delta) {
 
 
 function saveDhikr() {
+  const now = String(Date.now());
   localStorage.setItem('huda_dhikr', JSON.stringify(state.dhikrCounts));
+  localStorage.setItem('_sync_ts_huda_dhikr', now);
   debouncedPush();
 }
 

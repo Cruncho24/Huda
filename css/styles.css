@@ -3699,3 +3699,47 @@ html.dark .plan-option { background: #0f172a; border-color: #334155; }
 html.dark .plan-option:active { background: #0f2d1e; border-color: #059669; }
 html.dark .plan-option-label { color: #f1f5f9; }
 html.dark .plan-next-label { color: #64748b; }
+html.dark .plan-cancel-box { background: #1e293b; }
+html.dark .plan-cancel-title { color: #f1f5f9; }
+html.dark .plan-cancel-sub { color: #64748b; }
+
+/* ── Dhikr counter pop animation ─────────────────────────── */
+@keyframes dhikr-pop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.35); color: #34d399; }
+  100% { transform: scale(1); }
+}
+.dhikr-pop { animation: dhikr-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+/* ── Plan cancel sheet ────────────────────────────────────── */
+#plan-cancel-sheet { display: none; position: fixed; inset: 0; z-index: 999; }
+.plan-cancel-box {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  background: #ffffff;
+  border-radius: 24px 24px 0 0;
+  padding: 28px 20px calc(28px + env(safe-area-inset-bottom, 0px));
+  max-width: 600px;
+  margin: 0 auto;
+}
+.plan-cancel-title { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+.plan-cancel-sub { font-size: 13px; color: #64748b; }
+.plan-cancel-confirm-btn {
+  width: 100%;
+  padding: 14px;
+  background: #fef2f2;
+  border: 1.5px solid #fecaca;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #dc2626;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.plan-cancel-confirm-btn:active { background: #fee2e2; }
+
+/* ── Plan empty card — stronger tap affordance ────────────── */
+.plan-card-empty {
+  border: 1.5px solid rgba(5, 150, 105, 0.2);
+}
+.plan-card-empty:hover { border-color: rgba(5, 150, 105, 0.4); }

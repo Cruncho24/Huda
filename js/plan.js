@@ -112,16 +112,43 @@ function startPlan(type) {
 function markPlanDone() {
   const plan = _loadPlan();
   if (!plan || isPlanTodayDone(plan)) return;
+  const btn = document.querySelector('.plan-done-btn');
+  if (btn) { btn.textContent = '✓'; btn.disabled = true; btn.style.opacity = '0.7'; }
   const range = getPlanTodayRange(plan);
   plan.completedThrough = range.toGlobal;
   plan.log[_todayStr()] = true;
   _savePlan(plan);
-  haptic(40);
-  renderHome();
+  haptic(80);
+  setTimeout(renderHome, 350);
 }
 
 function cancelPlan() {
-  if (!confirm('Remove your reading plan? Your progress will be lost.')) return;
+  let sheet = document.getElementById('plan-cancel-sheet');
+  if (!sheet) {
+    sheet = document.createElement('div');
+    sheet.id = 'plan-cancel-sheet';
+    document.body.appendChild(sheet);
+  }
+  sheet.innerHTML = `
+    <div class="plan-setup-overlay" onclick="closePlanCancelSheet()"></div>
+    <div class="plan-cancel-box">
+      <div class="plan-cancel-title">Remove Reading Plan?</div>
+      <div class="plan-cancel-sub">Your streak and progress will be lost.</div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
+        <button class="plan-cancel-confirm-btn" onclick="confirmCancelPlan()">Yes, remove it</button>
+        <button class="plan-setup-cancel" onclick="closePlanCancelSheet()">Keep my plan</button>
+      </div>
+    </div>`;
+  sheet.style.display = 'block';
+}
+
+function closePlanCancelSheet() {
+  const sheet = document.getElementById('plan-cancel-sheet');
+  if (sheet) sheet.style.display = 'none';
+}
+
+function confirmCancelPlan() {
+  closePlanCancelSheet();
   _savePlan(null);
   renderHome();
 }
