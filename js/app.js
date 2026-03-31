@@ -295,9 +295,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Switch to Quran tab if needed
     if (state.activeTab !== 'quran') switchTab('quran');
 
-    // If we're on a different surah (or list view), open the playing surah
+    // If we're on a different surah (or list view), navigate there.
+    // openSurah calls mushafStop(), so capture playback state first and resume after.
     if (state.quran.currentSurah !== sn) {
-      openSurah(sn, an);
+      const wasPlayingAyah = state.audio.playingAyah;
+      const wasPlayingSurah = sn;
+      const wasPageMode = state.quran.viewMode === 'page';
+      openSurah(sn, an).then(() => {
+        const cache = state.quran.cache[wasPlayingSurah];
+        if (!cache) return;
+        if (wasPageMode) {
+          mushafPlayAll(wasPlayingSurah);
+        } else {
+          const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === wasPlayingAyah) || cache.arData.ayahs[0];
+          playAyah(ayahObj.number, wasPlayingSurah, ayahObj.numberInSurah);
+        }
+      });
       return;
     }
 

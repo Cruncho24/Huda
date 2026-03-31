@@ -423,7 +423,17 @@ function _registerMediaSession() {
   navigator.mediaSession.setActionHandler('nexttrack', () => advanceToNextSurah());
   navigator.mediaSession.setActionHandler('previoustrack', () => {
     const prev = (state.quran.currentSurah || 1) - 1;
-    if (prev >= 1) openSurah(prev).then(() => mushafPlayAll(prev));
+    if (prev < 1) return;
+    const cache = state.quran.cache[prev];
+    openSurah(prev).then(() => {
+      if (state.quran.viewMode === 'page') {
+        mushafPlayAll(prev);
+      } else {
+        const first = cache ? cache.arData.ayahs[0] : state.quran.cache[prev]?.arData.ayahs[0];
+        if (first) playAyah(first.number, prev, first.numberInSurah);
+        else mushafPlayAll(prev); // fallback
+      }
+    });
   });
 }
 
@@ -595,11 +605,13 @@ function _mushafSetupOnEnded(audio, globalNum, surahNum, ayahNum) {
       state.audio.paused = true;
       if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
       updateMushafPlayBtn(false);
+      updateMushafPlayerBar();
     };
     nextAudio.onplay = () => {
       if (state.audio.player !== nextAudio) return;
       state.audio.paused = false;
       updateMushafPlayBtn(true);
+      updateMushafPlayerBar();
       _registerMediaSession(); // reclaim lock screen after interruption
     };
 
@@ -654,18 +666,20 @@ function playMushafAyah(globalNum, surahNum, ayahNum) {
     state.audio.paused = true;
     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
     updateMushafPlayBtn(false);
+    updateMushafPlayerBar();
   };
   audio.onplay = () => {
     if (state.audio.player !== audio) return;
     state.audio.paused = false;
     updateMushafPlayBtn(true);
+    updateMushafPlayerBar();
     _registerMediaSession(); // reclaim lock screen after interruption
   };
 
-  // Play first, state/DOM after
+  // Set state before play() so onplay handler reads the correct surah/ayah
+  state.audio = { player: audio, playingId: globalNum, playingSurah: surahNum, playingAyah: ayahNum, paused: false };
   audio.play().catch(() => { mushafStop(); });
 
-  state.audio = { player: audio, playingId: globalNum, playingSurah: surahNum, playingAyah: ayahNum, paused: false };
   const badge = document.getElementById(`maud-${globalNum}`);
   if (badge) badge.classList.add('maud-playing');
   updateMushafPlayBtn(true);
@@ -695,11 +709,13 @@ function mushafPlayAll(surahNum) {
     state.audio.paused = true;
     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
     updateMushafPlayBtn(false);
+    updateMushafPlayerBar();
   };
   _surahAudio.onplay = () => {
     if (!_surahAudio) return;
     state.audio.paused = false;
     updateMushafPlayBtn(true);
+    updateMushafPlayerBar();
     _registerMediaSession(); // reclaim lock screen after interruption
   };
   _surahAudio.onerror = () => {
@@ -831,18 +847,9 @@ function toggleMushafPlayback() {
   const player = _surahAudio || state.audio.player;
   if (!player) return;
   if (state.audio.paused) {
-    player.play().then(() => {
-      state.audio.paused = false;
-      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
-      updateMushafPlayBtn(true);
-      updateMushafPlayerBar();
-    }).catch(() => {});
+    player.play().catch(() => {}); // onplay handler updates state + MediaSession
   } else {
-    player.pause();
-    state.audio.paused = true;
-    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
-    updateMushafPlayBtn(false);
-    updateMushafPlayerBar();
+    player.pause(); // onpause handler updates state + MediaSession
   }
 }
 
@@ -862,8 +869,6 @@ function updateMushafPlayerBar() {
 
     const btn = document.getElementById('mpb-pause-btn');
     if (btn) btn.textContent = state.audio.paused ? '▶' : '⏸';
-
-    _registerMediaSession();
   } else {
     // Clear media session when stopped
     if ('mediaSession' in navigator) {
