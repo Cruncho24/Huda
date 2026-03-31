@@ -280,20 +280,34 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // When user opens the app from the background while audio is actively playing,
   // jump to the Quran tab and scroll to the current ayah.
-  // Guard: only act if audio is playing (not paused) and the app was hidden for
-  // at least 5 s — avoids interrupting the user when they briefly switch apps.
+  // When returning to the app while Quran is playing (or paused mid-surah),
+  // navigate to the exact ayah so user can see + control what's playing.
+  // Guard: only navigate after 5s hidden to avoid interrupting quick app switches.
   let _hiddenAt = 0;
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') { _hiddenAt = Date.now(); return; }
-    if (!state.audio.playingSurah || state.audio.paused) return;
-    if (Date.now() - _hiddenAt < 5000) return; // brief switch, don't navigate
+    if (!state.audio.playingSurah) return;
+    if (Date.now() - _hiddenAt < 5000) return; // brief switch — don't navigate
+
+    const sn = state.audio.playingSurah;
+    const an = state.audio.playingAyah || 1;
+
+    // Switch to Quran tab if needed
     if (state.activeTab !== 'quran') switchTab('quran');
+
+    // If we're on a different surah (or list view), open the playing surah
+    if (state.quran.currentSurah !== sn) {
+      openSurah(sn, an);
+      return;
+    }
+
+    // Already on the right surah — just scroll to the current ayah
     setTimeout(() => {
       if (state.quran.viewMode === 'page') {
         const badge = document.getElementById(`maud-${state.audio.playingId}`);
         if (badge) badge.scrollIntoView({ behavior: 'smooth', block: 'center' });
       } else {
-        const card = document.getElementById(`ayah-${state.audio.playingAyah}`);
+        const card = document.getElementById(`ayah-${an}`);
         if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 300);
@@ -433,6 +447,22 @@ function playAyah(globalNum, surahNum, ayahNum) {
   if (btn) { btn.textContent = '⏸'; btn.classList.add('playing'); }
   const card = document.getElementById(`ayah-${ayahNum}`);
   if (card) card.classList.add('maud-playing-card');
+
+  // Sync state with system-level interruptions (calls, Bluetooth, Siri)
+  audio.onpause = () => {
+    if (state.audio.player !== audio) return;
+    state.audio.paused = true;
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+  };
+  audio.onplay = () => {
+    if (state.audio.player !== audio) return;
+    state.audio.paused = false;
+    _registerMediaSession(); // reclaim lock screen after another app interrupts
+  };
+
+  // Lock screen / AirPods controls
+  _registerMediaSession();
+
   audio.play().catch(() => {
     if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
     if (card) card.classList.remove('maud-playing-card');
@@ -451,7 +481,6 @@ function playAyah(globalNum, surahNum, ayahNum) {
     if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
     if (card) card.classList.remove('maud-playing-card');
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
-    // Skip broken ayah and advance
     const nextBtn = document.getElementById(`aud-${globalNum + 1}`);
     if (nextBtn) nextBtn.click();
     else advanceToNextSurah();

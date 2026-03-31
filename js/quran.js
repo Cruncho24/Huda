@@ -396,6 +396,37 @@ let _surahAudio   = null; // the full-surah Audio element when active
 let _surahBadge   = null; // currently highlighted ayah badge
 let _surahTiming  = null; // { [verse_key]: { from, to } }
 
+// Register (or re-register) MediaSession metadata + action handlers.
+// Called on every play event so lock screen reclaims focus after interruptions.
+function _registerMediaSession() {
+  if (!('mediaSession' in navigator)) return;
+  const sn = state.audio.playingSurah;
+  if (!sn) return;
+  const s = SURAHS[sn - 1];
+  const ayahLabel = state.audio.playingAyah ? ` · Ayah ${state.audio.playingAyah}` : '';
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: s ? s[1] : '',
+    artist: s ? `${s[2]}${ayahLabel}` : '',
+    album: 'Quran — Huda',
+    artwork: [{ src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }],
+  });
+  navigator.mediaSession.playbackState = state.audio.paused ? 'paused' : 'playing';
+  navigator.mediaSession.setActionHandler('play', () => {
+    const p = _surahAudio || state.audio.player;
+    if (p) p.play().catch(() => {});
+  });
+  navigator.mediaSession.setActionHandler('pause', () => {
+    const p = _surahAudio || state.audio.player;
+    if (p) p.pause();
+  });
+  navigator.mediaSession.setActionHandler('stop', () => mushafStop());
+  navigator.mediaSession.setActionHandler('nexttrack', () => advanceToNextSurah());
+  navigator.mediaSession.setActionHandler('previoustrack', () => {
+    const prev = (state.quran.currentSurah || 1) - 1;
+    if (prev >= 1) openSurah(prev).then(() => mushafPlayAll(prev));
+  });
+}
+
 // Fetch ayah-level timestamps for badge tracking (reciters with qurancdnId only)
 async function fetchSurahTimings(surahNum) {
   const r = RECITERS.find(r => r.id === state.reciter);
@@ -557,6 +588,21 @@ function _mushafSetupOnEnded(audio, globalNum, surahNum, ayahNum) {
     state.audio = { player: nextAudio, playingId: globalNum + 1, playingSurah: ns, playingAyah: na, paused: false };
     const nextBadge = document.getElementById(`maud-${globalNum + 1}`);
     if (nextBadge) nextBadge.classList.add('maud-playing');
+
+    // Wire interruption-sync handlers for the new pool slot
+    nextAudio.onpause = () => {
+      if (state.audio.player !== nextAudio) return;
+      state.audio.paused = true;
+      if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+      updateMushafPlayBtn(false);
+    };
+    nextAudio.onplay = () => {
+      if (state.audio.player !== nextAudio) return;
+      state.audio.paused = false;
+      updateMushafPlayBtn(true);
+      _registerMediaSession(); // reclaim lock screen after interruption
+    };
+
     updateMushafPlayerBar();
 
     // ── Preload two ahead ─────────────────────────────────────
@@ -612,8 +658,8 @@ function playMushafAyah(globalNum, surahNum, ayahNum) {
   audio.onplay = () => {
     if (state.audio.player !== audio) return;
     state.audio.paused = false;
-    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
     updateMushafPlayBtn(true);
+    _registerMediaSession(); // reclaim lock screen after interruption
   };
 
   // Play first, state/DOM after
@@ -653,8 +699,8 @@ function mushafPlayAll(surahNum) {
   _surahAudio.onplay = () => {
     if (!_surahAudio) return;
     state.audio.paused = false;
-    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'playing';
     updateMushafPlayBtn(true);
+    _registerMediaSession(); // reclaim lock screen after interruption
   };
   _surahAudio.onerror = () => {
     // Fall back to per-ayah from the ayah we were on (not always restart from 1)
@@ -730,14 +776,14 @@ async function advanceToNextSurah() {
   const next = (state.quran.currentSurah || 0) + 1;
   if (next > 114) { mushafStop(); return; }
   await openSurah(next);
+  const cache = state.quran.cache[next];
+  if (!cache) return;
   if (state.quran.viewMode === 'page') {
     mushafPlayAll(next);
   } else {
-    const cache = state.quran.cache[next];
-    if (cache) {
-      const firstBtn = document.getElementById(`aud-${cache.arData.ayahs[0].number}`);
-      if (firstBtn) firstBtn.click();
-    }
+    // Directly invoke playAyah — avoids fragile click() and wires MediaSession
+    const first = cache.arData.ayahs[0];
+    playAyah(first.number, next, first.numberInSurah);
   }
 }
 
@@ -817,27 +863,12 @@ function updateMushafPlayerBar() {
     const btn = document.getElementById('mpb-pause-btn');
     if (btn) btn.textContent = state.audio.paused ? '▶' : '⏸';
 
-    // ── Media Session (lock screen / car display) ──────────────
-    if ('mediaSession' in navigator) {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: surahName,
-        artist: surahEn,
-        album: 'Quran — Huda',
-        artwork: [{ src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png' }],
-      });
-      navigator.mediaSession.setActionHandler('play',          () => { toggleMushafPlayback(); });
-      navigator.mediaSession.setActionHandler('pause',         () => { toggleMushafPlayback(); });
-      navigator.mediaSession.setActionHandler('stop',          () => { toggleMushafPlayback(); });
-      navigator.mediaSession.setActionHandler('nexttrack',     () => { advanceToNextSurah(); });
-      navigator.mediaSession.setActionHandler('previoustrack', () => {
-        const prev = (state.quran.currentSurah || 1) - 1;
-        if (prev >= 1) { openSurah(prev).then(() => mushafPlayAll(prev)); }
-      });
-    }
+    _registerMediaSession();
   } else {
     // Clear media session when stopped
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = null;
+      navigator.mediaSession.playbackState = 'none';
       ['play','pause','stop','nexttrack','previoustrack'].forEach(a => {
         try { navigator.mediaSession.setActionHandler(a, null); } catch(_) {}
       });
