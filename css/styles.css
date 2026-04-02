@@ -3746,4 +3746,4 @@ html.dark .plan-cancel-sub { color: #64748b; }
 
 /* ── Sleep timer button — active state ───────────────────── */
 #mpb-sleep-btn { font-size: 12px; min-width: 32px; letter-spacing: -0.3px; }
-#mpb-sleep-btn[title*="cancel"] { color: #fbbf24; }
+#mpb-sleep-btn.sleep-active { color: #fbbf24; }

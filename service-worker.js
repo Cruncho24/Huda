@@ -2,7 +2,7 @@
 // HUDA PWA — Service Worker
 // ============================================================
 
-const CACHE_NAME = 'huda-v145';
+const CACHE_NAME = 'huda-v146';
 const STATIC_ASSETS = [
   '/',
   '/index.html',

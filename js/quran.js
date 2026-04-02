@@ -401,8 +401,7 @@ function setSleepTimer(minutes) {
   if (!minutes) return;
   _sleepEndsAt = Date.now() + minutes * 60 * 1000;
   _sleepTimer = setTimeout(() => {
-    mushafStop();
-    clearSleepTimer();
+    mushafStop(); // mushafStop() calls clearSleepTimer() unconditionally
     showToast('Sleep timer ended');
   }, minutes * 60 * 1000);
   // Tick every second to update the button label
@@ -420,10 +419,17 @@ function clearSleepTimer() {
 function _updateSleepBtn() {
   const btn = document.getElementById('mpb-sleep-btn');
   if (!btn) return;
-  if (!_sleepEndsAt) { btn.textContent = '🌙'; btn.title = 'Sleep timer'; return; }
-  const rem = Math.max(0, Math.ceil((_sleepEndsAt - Date.now()) / 60000));
-  btn.textContent = `🌙${rem}m`;
-  btn.title = `Sleep timer: ${rem} min remaining — tap to cancel`;
+  if (!_sleepEndsAt) {
+    btn.textContent = '🌙';
+    btn.title = 'Sleep timer';
+    btn.classList.remove('sleep-active');
+    return;
+  }
+  const remMs = _sleepEndsAt - Date.now();
+  const remMin = Math.ceil(remMs / 60000);
+  btn.textContent = remMs < 60000 ? `🌙${Math.max(0, Math.ceil(remMs / 1000))}s` : `🌙${remMin}m`;
+  btn.title = `Sleep timer active — tap to cancel`;
+  btn.classList.add('sleep-active');
 }
 
 function openSleepTimerPicker() {
@@ -888,8 +894,7 @@ function mushafStop() {
   _surahBadge = null;
   _surahTiming = null;
   state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
-  // Cancel sleep timer when audio is stopped manually
-  if (_sleepEndsAt) clearSleepTimer();
+  clearSleepTimer(); // always cancel sleep timer on stop (idempotent)
   if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
   updateMushafPlayBtn(false);
   updateMushafPlayerBar();
