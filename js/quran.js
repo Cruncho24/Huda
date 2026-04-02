@@ -53,6 +53,7 @@ function renderQuranList() {
         </div>
         <div id="mushaf-header-controls" style="display:none;align-items:center;gap:6px;flex-shrink:0">
           <span id="mpb-info" style="font-size:11px;opacity:0.9;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+          <button id="mpb-sleep-btn" class="mhdr-btn" onclick="openSleepTimerPicker()" title="Sleep timer">🌙</button>
           <button id="mpb-pause-btn" class="mhdr-btn" onclick="toggleMushafPlayback()">⏸</button>
           <button class="mhdr-btn" title="Next surah" onclick="advanceToNextSurah()">⏭</button>
           <button class="mhdr-btn" onclick="mushafStop()">■</button>
@@ -388,6 +389,67 @@ function renderMushafPage(n, arData, enData) {
     }, { threshold: 0.3 });
     el.querySelectorAll('.mushaf-page-block').forEach(block => _ayahObserver.observe(block));
   }, 650);
+}
+
+// ── Sleep Timer ───────────────────────────────────────────────
+let _sleepTimer      = null; // setTimeout handle
+let _sleepEndsAt     = 0;   // epoch ms when timer fires
+let _sleepTickTimer  = null; // setInterval for countdown display
+
+function setSleepTimer(minutes) {
+  clearSleepTimer();
+  if (!minutes) return;
+  _sleepEndsAt = Date.now() + minutes * 60 * 1000;
+  _sleepTimer = setTimeout(() => {
+    mushafStop();
+    clearSleepTimer();
+    showToast('Sleep timer ended');
+  }, minutes * 60 * 1000);
+  // Tick every second to update the button label
+  _sleepTickTimer = setInterval(_updateSleepBtn, 1000);
+  _updateSleepBtn();
+}
+
+function clearSleepTimer() {
+  clearTimeout(_sleepTimer);
+  clearInterval(_sleepTickTimer);
+  _sleepTimer = null; _sleepEndsAt = 0; _sleepTickTimer = null;
+  _updateSleepBtn();
+}
+
+function _updateSleepBtn() {
+  const btn = document.getElementById('mpb-sleep-btn');
+  if (!btn) return;
+  if (!_sleepEndsAt) { btn.textContent = '🌙'; btn.title = 'Sleep timer'; return; }
+  const rem = Math.max(0, Math.ceil((_sleepEndsAt - Date.now()) / 60000));
+  btn.textContent = `🌙${rem}m`;
+  btn.title = `Sleep timer: ${rem} min remaining — tap to cancel`;
+}
+
+function openSleepTimerPicker() {
+  // If timer is active, cancel it
+  if (_sleepEndsAt) { clearSleepTimer(); showToast('Sleep timer cancelled'); return; }
+  let sheet = document.getElementById('sleep-timer-sheet');
+  if (!sheet) { sheet = document.createElement('div'); sheet.id = 'sleep-timer-sheet'; document.body.appendChild(sheet); }
+  sheet.innerHTML = `
+    <div class="plan-setup-overlay" onclick="closeSleepTimerSheet()"></div>
+    <div class="plan-setup-box">
+      <div class="plan-setup-title">🌙 Sleep Timer</div>
+      <div class="plan-setup-sub">Audio will stop automatically</div>
+      <div class="plan-setup-options" style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${[15,30,45,60].map(m => `
+          <div class="plan-option" style="text-align:center" onclick="setSleepTimer(${m});closeSleepTimerSheet();showToast('Stops in ${m} min')">
+            <div class="plan-option-label">${m} min</div>
+          </div>`).join('')}
+      </div>
+      <button class="plan-setup-cancel" onclick="closeSleepTimerSheet()">Cancel</button>
+    </div>`;
+  sheet.style.display = 'block';
+}
+
+function closeSleepTimerSheet() {
+  const s = document.getElementById('sleep-timer-sheet');
+  if (s) s.style.display = 'none';
 }
 
 // ── Surah-level audio (gapless) ───────────────────────────────
@@ -826,6 +888,8 @@ function mushafStop() {
   _surahBadge = null;
   _surahTiming = null;
   state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+  // Cancel sleep timer when audio is stopped manually
+  if (_sleepEndsAt) clearSleepTimer();
   if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
   updateMushafPlayBtn(false);
   updateMushafPlayerBar();

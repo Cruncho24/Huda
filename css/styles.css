@@ -3743,3 +3743,7 @@ html.dark .plan-cancel-sub { color: #64748b; }
   border: 1.5px solid rgba(5, 150, 105, 0.2);
 }
 .plan-card-empty:hover { border-color: rgba(5, 150, 105, 0.4); }
+
+/* ── Sleep timer button — active state ───────────────────── */
+#mpb-sleep-btn { font-size: 12px; min-width: 32px; letter-spacing: -0.3px; }
+#mpb-sleep-btn[title*="cancel"] { color: #fbbf24; }
