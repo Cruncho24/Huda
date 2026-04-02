@@ -274,9 +274,9 @@ document.addEventListener('DOMContentLoaded', () => {
   registerSW();
   setupInstallPrompt();
 
-  // Handle notification tap — open to specific tab
+  // Handle notification tap — open to specific tab (whitelist to prevent invalid state)
   const _notifTab = new URLSearchParams(location.search).get('tab');
-  if (_notifTab) switchTab(_notifTab);
+  if (_notifTab && ['home','quran','prayer','dhikr','duas','learn'].includes(_notifTab)) switchTab(_notifTab);
 
   // When user opens the app from the background while audio is actively playing,
   // jump to the Quran tab and scroll to the current ayah.
@@ -641,7 +641,7 @@ function registerSW() {
   navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
   // Handle notification tap when app is already open
   navigator.serviceWorker.addEventListener('message', e => {
-    if (e.data?.type === 'OPEN_TAB') switchTab(e.data.tab);
+    if (e.data?.type === 'OPEN_TAB' && ['home','quran','prayer','dhikr','duas','learn'].includes(e.data.tab)) switchTab(e.data.tab);
   });
 }
 
