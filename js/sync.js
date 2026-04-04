@@ -15,6 +15,7 @@ const SYNC_KEYS = [
   'huda_fontsize',
   'huda_reciter',
   'huda_plan',
+  'huda_dhikr_history',
 ];
 
 let _pushTimer = null;
@@ -92,6 +93,7 @@ function applySyncedState() {
   state.fontSize = parseInt(localStorage.getItem('huda_fontsize') || '24') || 24;
   state.reciter  = localStorage.getItem('huda_reciter') || 'ar.alafasy';
   try { state.plan = JSON.parse(localStorage.getItem('huda_plan') || 'null'); } catch(e) {}
+  // dhikr_history is read directly from localStorage by getDhikrHistory() — no state field needed
   // Apply dark mode immediately
   document.documentElement.classList.toggle('dark', state.darkMode);
   // Re-evaluate dhikr daily reset in case huda_dhikr_date changed across devices

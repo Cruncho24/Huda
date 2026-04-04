@@ -41,3 +41,7 @@ yarn-error.*
 /android
 .vercel
 .worktrees
+
+# Dev artifacts not for production
+generate-icons.html
+App.js

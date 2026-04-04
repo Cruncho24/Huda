@@ -8,6 +8,7 @@ let _sb = null;
 let _cachedUser = null; // avoids async gap in renderAuthModalBody
 
 function _getClient() {
+  if (typeof supabase === 'undefined') throw new Error('Supabase SDK unavailable');
   if (!_sb) _sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   return _sb;
 }

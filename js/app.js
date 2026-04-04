@@ -26,7 +26,7 @@ const RECITERS = [
   { id: 'ar.alafasy',        name: 'Mishary Alafasy',      qurancdnId: 7 },
   {
     id: 'ar.mahermuaiqly', name: 'Maher Al-Muqaili',
-    surahUrl: n => `https://server8.mp3quran.net/maher/${String(n).padStart(3,'0')}.mp3`,
+    surahUrl: n => `https://download.quranicaudio.com/quran/maher_256/${String(n).padStart(3,'0')}.mp3`,
   },
   {
     id: 'ar.abdullahbasfar', name: 'Abdullah Basfar',
@@ -369,6 +369,22 @@ function haptic(ms = 30) {
 function checkDhikrReset() {
   const today = new Date().toDateString();
   if (localStorage.getItem('huda_dhikr_date') !== today) {
+    // Save yesterday's counts to history before clearing
+    const savedDate = localStorage.getItem('huda_dhikr_date');
+    if (savedDate && Object.keys(state.dhikrCounts).some(k => state.dhikrCounts[k] > 0)) {
+      const d = new Date(savedDate);
+      d.setHours(12, 0, 0, 0); // force local noon to avoid DST/UTC-offset edge cases
+      if (!isNaN(d.getTime())) {
+        const histKey = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        try {
+          const history = JSON.parse(localStorage.getItem('huda_dhikr_history') || '{}');
+          history[histKey] = { ...state.dhikrCounts };
+          localStorage.setItem('huda_dhikr_history', JSON.stringify(history));
+          localStorage.setItem('_sync_ts_huda_dhikr_history', String(Date.now()));
+          _invalidateHistoryCache();
+        } catch(e) {}
+      }
+    }
     state.dhikrCounts = {};
     localStorage.setItem('huda_dhikr', '{}');
     localStorage.setItem('huda_dhikr_date', today);

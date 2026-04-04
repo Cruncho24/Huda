@@ -578,34 +578,8 @@ function dismissNotifBanner() {
   if (el) el.remove();
 }
 
-async function schedulePrayerNotifications(times) {
-  if (!times || Notification.permission !== 'granted') return;
-  if (!('serviceWorker' in navigator)) return;
-
-  const reg = await navigator.serviceWorker.ready;
-
-  // Notification Triggers API — not supported everywhere; foreground fallback covers the rest
-  if (!('showTrigger' in Notification.prototype)) return;
-
-  const now = Date.now();
-  const prayers = [
-    { key: 'fajr',    en: 'Fajr',    ar: 'الفَجْر'   },
-    { key: 'dhuhr',   en: 'Dhuhr',   ar: 'الظُّهْر'  },
-    { key: 'asr',     en: 'Asr',     ar: 'العَصْر'   },
-    { key: 'maghrib', en: 'Maghrib', ar: 'المَغْرِب' },
-    { key: 'isha',    en: 'Isha',    ar: 'العِشَاء'  },
-  ];
-
-  for (const p of prayers) {
-    const ms = new Date(times[p.key]).getTime();
-    if (ms <= now) continue; // already past, skip
-    reg.showNotification(p.en, {
-      body: `${p.ar} — Time to pray`,
-      tag: `prayer-${p.key}`,
-      icon: '/icons/icon-192.png',
-      badge: '/icons/icon-96.png',
-      showTrigger: new TimestampTrigger(ms),
-    });
-  }
+async function schedulePrayerNotifications(_times) {
+  // Notification Triggers API (showTrigger/TimestampTrigger) was removed from browsers.
+  // Foreground countdown notifications in renderPrayerTimes() cover this use case.
 }
 

@@ -3711,6 +3711,245 @@ html.dark .plan-cancel-sub { color: #64748b; }
 }
 .dhikr-pop { animation: dhikr-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
+/* ── Dhikr Stats Button (in header) ──────────────────────── */
+.dhikr-stats-btn {
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.28);
+  color: white;
+  border-radius: 20px;
+  padding: 4px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.dhikr-stats-btn:active { opacity: 0.75; }
+
+/* ── Dhikr Stats Screen ──────────────────────────────────── */
+.dhikr-stats-header {
+  background: linear-gradient(160deg, #047857 0%, #065f46 100%);
+  padding: calc(20px + env(safe-area-inset-top,0px)) 18px 20px;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.dhikr-stats-back {
+  background: rgba(255,255,255,0.18);
+  border: 1px solid rgba(255,255,255,0.28);
+  color: white;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.dhikr-stats-back:active { opacity: 0.75; }
+.dhikr-stats-title { font-size: 18px; font-weight: 700; }
+.dhikr-stats-sub { font-size: 11px; opacity: 0.65; margin-top: 1px; }
+
+.dhikr-stat-cards {
+  display: flex;
+  gap: 10px;
+  padding: 16px;
+}
+.dhikr-stat-card {
+  flex: 1;
+  background: white;
+  border-radius: 16px;
+  padding: 14px 10px;
+  text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+.dhikr-stat-num {
+  font-size: 30px;
+  font-weight: 800;
+  color: #059669;
+  line-height: 1;
+}
+.dhikr-stat-icon { font-size: 18px; margin-bottom: 2px; }
+.dhikr-stat-label {
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.dhikr-stat-sub {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+/* Calendar */
+.dhikr-section-card {
+  background: white;
+  border-radius: 16px;
+  margin: 0 16px 14px;
+  padding: 16px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+.dhikr-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 12px;
+  letter-spacing: 0.01em;
+}
+.dhikr-cal-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.dhikr-cal-month { font-weight: 700; font-size: 15px; color: #0f172a; }
+.dhikr-cal-nav-btn {
+  background: #f1f5f9;
+  border: none;
+  border-radius: 8px;
+  width: 30px; height: 30px;
+  font-size: 16px;
+  cursor: pointer;
+  color: #059669;
+  display: flex; align-items: center; justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+.dhikr-cal-nav-btn:active { background: #e2e8f0; }
+.dhikr-cal-nav-btn:disabled { color: #cbd5e1; cursor: default; }
+.dhikr-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+.dhikr-cal-header-cell {
+  text-align: center;
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 700;
+  padding: 2px 0 6px;
+}
+.dhikr-cal-day {
+  aspect-ratio: 1;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  position: relative;
+}
+.dhikr-cal-day.lv0 { background: #f1f5f9; color: #cbd5e1; }
+.dhikr-cal-day.lv1 { background: #d1fae5; color: #065f46; }
+.dhikr-cal-day.lv2 { background: #6ee7b7; color: #065f46; }
+.dhikr-cal-day.lv3 { background: #059669; color: white; }
+.dhikr-cal-day.future { background: transparent; color: #e2e8f0; }
+.dhikr-cal-day.empty { background: transparent; }
+.dhikr-cal-day.is-today { outline: 2px solid #059669; outline-offset: 1px; }
+.dhikr-cal-legend {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.dhikr-cal-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: #64748b;
+}
+.dhikr-cal-legend-dot {
+  width: 10px; height: 10px;
+  border-radius: 3px;
+}
+
+/* Lifetime bars */
+.dhikr-lifetime-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 11px;
+}
+.dhikr-lifetime-row:last-child { margin-bottom: 0; }
+.dhikr-lifetime-name {
+  font-size: 11px;
+  color: #475569;
+  width: 82px;
+  flex-shrink: 0;
+  line-height: 1.3;
+}
+.dhikr-lifetime-bar-wrap {
+  flex: 1;
+  height: 7px;
+  background: #f1f5f9;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.dhikr-lifetime-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #059669, #047857);
+  border-radius: 4px;
+}
+.dhikr-lifetime-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: #059669;
+  width: 44px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Week view */
+.dhikr-week-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 6px;
+}
+.dhikr-week-col { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.dhikr-week-day-label { font-size: 9px; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
+.dhikr-week-dot {
+  width: 28px; height: 28px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+}
+.dhikr-week-dot.lv0 { background: #f1f5f9; }
+.dhikr-week-dot.lv1 { background: #d1fae5; }
+.dhikr-week-dot.lv2 { background: #6ee7b7; }
+.dhikr-week-dot.lv3 { background: #059669; }
+.dhikr-week-count { font-size: 10px; color: #94a3b8; font-weight: 600; }
+.dhikr-week-col.today .dhikr-week-dot { outline: 2px solid #059669; outline-offset: 1px; }
+.dhikr-week-col.today .dhikr-week-day-label { color: #059669; }
+
+/* Dark mode */
+html.dark .dhikr-stats-btn { background: rgba(255,255,255,0.15); }
+html.dark .dhikr-stat-card { background: #1e293b; box-shadow: none; }
+html.dark .dhikr-stat-num { color: #34d399; }
+html.dark .dhikr-stat-label { color: #94a3b8; }
+html.dark .dhikr-section-card { background: #1e293b; box-shadow: none; }
+html.dark .dhikr-section-title { color: #f1f5f9; }
+html.dark .dhikr-cal-month { color: #f1f5f9; }
+html.dark .dhikr-cal-nav-btn { background: #334155; color: #34d399; }
+html.dark .dhikr-cal-nav-btn:active { background: #475569; }
+html.dark .dhikr-cal-day.lv0 { background: #334155; color: #475569; }
+html.dark .dhikr-cal-day.future { background: transparent; color: #334155; }
+html.dark .dhikr-cal-header-cell { color: #64748b; }
+html.dark .dhikr-cal-legend-item { color: #94a3b8; }
+html.dark .dhikr-lifetime-name { color: #94a3b8; }
+html.dark .dhikr-lifetime-bar-wrap { background: #334155; }
+html.dark .dhikr-lifetime-count { color: #34d399; }
+html.dark .dhikr-week-dot.lv0 { background: #334155; }
+html.dark .dhikr-week-day-label { color: #64748b; }
+html.dark .dhikr-week-count { color: #64748b; }
+html.dark .dhikr-week-col.today .dhikr-week-day-label { color: #34d399; }
+html.dark .dhikr-week-col.today .dhikr-week-dot { outline-color: #34d399; }
+
 /* ── Plan cancel sheet ────────────────────────────────────── */
 #plan-cancel-sheet { display: none; position: fixed; inset: 0; z-index: 999; }
 .plan-cancel-box {

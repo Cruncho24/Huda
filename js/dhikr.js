@@ -13,11 +13,17 @@ function renderDhikr() {
   const pct = Math.min((count / d.target) * 100, 100);
   const tabNames = ['Tasbih', 'Tahmid', 'Takbir', 'Tahlil', 'Istighfar', 'Tasbih+', 'Hawqala'];
   const isComplete = count >= d.target;
+  const streak = computeStreak();
 
   tab.innerHTML = `
-    <div class="dhikr-header-new">
-      <div class="dhikr-header-label">Daily Dhikr</div>
-      <div class="dhikr-header-arabic">${d.arabic}</div>
+    <div class="dhikr-header-new" style="display:flex;justify-content:space-between;align-items:flex-start">
+      <div>
+        <div class="dhikr-header-label">Daily Dhikr</div>
+        <div class="dhikr-header-arabic">${d.arabic}</div>
+      </div>
+      <button class="dhikr-stats-btn" onclick="openDhikrStats()" style="margin-top:4px">
+        ${streak > 0 ? `🔥 ${streak}` : '📊'}
+      </button>
     </div>
     <div class="dhikr-counter-area${isComplete ? ' dhikr-complete' : ''}">
       <div class="dhikr-counter-text">${d.arabic}</div>
@@ -147,6 +153,240 @@ function tapActiveDhikr() {
 function switchDhikrTab(i) {
   _dhikrTab = Math.max(0, Math.min(i, DHIKRS.length - 1));
   renderDhikr();
+}
+
+// ── Dhikr History & Stats ─────────────────────────────────────
+function _dateToKey(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getTodayKey() { return _dateToKey(new Date()); }
+
+// Cache parsed history to avoid repeated JSON.parse on every tap
+let _historyCache = null;
+function getDhikrHistory() {
+  if (_historyCache) return _historyCache;
+  try { _historyCache = JSON.parse(localStorage.getItem('huda_dhikr_history') || '{}'); } catch(e) { _historyCache = {}; }
+  return _historyCache;
+}
+function _invalidateHistoryCache() { _historyCache = null; }
+
+function saveDhikrHistory() {
+  const history = getDhikrHistory();
+  const todayKey = getTodayKey();
+  // Use max values so a reset doesn't erase completed counts from today's history record
+  const existing = history[todayKey] || {};
+  const merged = { ...existing };
+  for (const [k, v] of Object.entries(state.dhikrCounts)) {
+    merged[k] = Math.max(merged[k] || 0, v);
+  }
+  history[todayKey] = merged;
+  _invalidateHistoryCache();
+  localStorage.setItem('huda_dhikr_history', JSON.stringify(history));
+  localStorage.setItem('_sync_ts_huda_dhikr_history', String(Date.now()));
+}
+
+function _getDayLevel(dayData) {
+  if (!dayData) return 0;
+  const completed = DHIKRS.filter((d, i) => (dayData[i] || 0) >= d.target).length;
+  if (completed === 0) return Object.values(dayData).some(v => v > 0) ? 1 : 0;
+  if (completed <= 2) return 1;
+  if (completed <= 5) return 2;
+  return 3;
+}
+
+function computeStreak() {
+  const history = getDhikrHistory();
+  const cursor = new Date();
+  // If today has no activity yet, don't break streak — start count from yesterday
+  const todayKey = _dateToKey(cursor);
+  if (!history[todayKey] || !Object.values(history[todayKey]).some(v => v > 0)) {
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  let streak = 0;
+  while (streak < 3650) {
+    const key = _dateToKey(cursor);
+    const dayData = history[key];
+    if (!dayData || !Object.values(dayData).some(v => v > 0)) break;
+    streak++;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
+
+function computeBestStreak() {
+  const history = getDhikrHistory();
+  const keys = Object.keys(history).filter(k => Object.values(history[k]).some(v => v > 0)).sort();
+  if (!keys.length) return 0;
+  let best = 0, cur = 0, prevKey = null;
+  for (const key of keys) {
+    if (!prevKey) { cur = 1; }
+    else {
+      // Parse as local noon to avoid ISO UTC-midnight shifting date in UTC- timezones
+      const prev = new Date(prevKey + 'T12:00:00'); prev.setDate(prev.getDate() + 1);
+      cur = _dateToKey(prev) === key ? cur + 1 : 1;
+    }
+    if (cur > best) best = cur;
+    prevKey = key;
+  }
+  return best;
+}
+
+function getTotalActiveDays() {
+  const history = getDhikrHistory();
+  return Object.values(history).filter(d => Object.values(d).some(v => v > 0)).length;
+}
+
+function getDhikrLifetimeTotals() {
+  const history = getDhikrHistory();
+  const totals = Array(DHIKRS.length).fill(0);
+  for (const dayData of Object.values(history)) {
+    for (let i = 0; i < DHIKRS.length; i++) {
+      totals[i] += dayData[i] || 0;
+    }
+  }
+  return totals;
+}
+
+// ── Dhikr Stats Screen ────────────────────────────────────────
+let _statsYear = new Date().getFullYear();
+let _statsMonth = new Date().getMonth(); // 0-indexed
+
+function openDhikrStats() {
+  _statsYear = new Date().getFullYear();
+  _statsMonth = new Date().getMonth();
+  const tab = document.getElementById('tab-dhikr');
+  tab.innerHTML = _buildStatsHTML();
+}
+
+function closeDhikrStats() { renderDhikr(); }
+
+function navDhikrStatsMonth(dir) {
+  _statsMonth += dir;
+  if (_statsMonth > 11) { _statsMonth = 0; _statsYear++; }
+  if (_statsMonth < 0)  { _statsMonth = 11; _statsYear--; }
+  const tab = document.getElementById('tab-dhikr');
+  tab.innerHTML = _buildStatsHTML();
+}
+
+function _buildStatsHTML() {
+  const history = getDhikrHistory();
+  const today = new Date();
+  const todayKey = _dateToKey(today);
+  const streak = computeStreak();
+  const best = Math.max(computeBestStreak(), streak);
+  const activeDays = getTotalActiveDays();
+  const totals = getDhikrLifetimeTotals();
+  const maxTotal = Math.max(...totals, 1);
+
+  // Calendar build
+  const MONTH_NAMES = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const DAY_LABELS = ['S','M','T','W','T','F','S'];
+  const firstDay = new Date(_statsYear, _statsMonth, 1).getDay();
+  const daysInMonth = new Date(_statsYear, _statsMonth + 1, 0).getDate();
+  // Merge live state for today so stats reflect taps before first saveDhikrHistory() call
+  const effectiveTodayData = (history[todayKey] && Object.keys(history[todayKey]).length > 0)
+    ? history[todayKey]
+    : (Object.keys(state.dhikrCounts).length > 0 ? state.dhikrCounts : null);
+  const nowYear = today.getFullYear(), nowMonth = today.getMonth(), nowDay = today.getDate();
+  const isPastMax = _statsYear > nowYear || (_statsYear === nowYear && _statsMonth > nowMonth);
+
+  let calCells = DAY_LABELS.map(l => `<div class="dhikr-cal-header-cell">${l}</div>`).join('');
+  for (let i = 0; i < firstDay; i++) calCells += `<div class="dhikr-cal-day empty"></div>`;
+  for (let day = 1; day <= daysInMonth; day++) {
+    const key = `${_statsYear}-${String(_statsMonth+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const isFuture = _statsYear > nowYear || (_statsYear === nowYear && (_statsMonth > nowMonth || (_statsMonth === nowMonth && day > nowDay)));
+    const isToday = key === todayKey;
+    const dayData = isToday ? effectiveTodayData : history[key];
+    const level = isFuture ? 'future' : `lv${_getDayLevel(dayData)}`;
+    calCells += `<div class="dhikr-cal-day ${level}${isToday ? ' is-today' : ''}" title="${key}">${day}</div>`;
+  }
+
+  // This week (last 7 days including today)
+  const weekDayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let weekCols = '';
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    const key = _dateToKey(d);
+    const isT = key === todayKey;
+    const weekDayData = isT ? effectiveTodayData : history[key];
+    const lv = _getDayLevel(weekDayData);
+    const completed = weekDayData ? DHIKRS.filter((dh, idx) => (weekDayData[idx] || 0) >= dh.target).length : 0;
+    weekCols += `
+      <div class="dhikr-week-col${isT ? ' today' : ''}">
+        <div class="dhikr-week-day-label">${weekDayLabels[d.getDay()]}</div>
+        <div class="dhikr-week-dot lv${lv}">${lv >= 3 ? '✓' : lv > 0 ? '·' : ''}</div>
+        <div class="dhikr-week-count">${completed > 0 ? completed+'/7' : ''}</div>
+      </div>`;
+  }
+
+  // Lifetime bars
+  const dhikrNames = ['Subḥān Allāh','Alḥamdulillāh','Allāhu Akbar','Lā ilāha illallāh','Astaghfirullāh','Subḥ. wa biḥamdih','Lā ḥawla...'];
+  let lifetimeBars = '';
+  for (let i = 0; i < DHIKRS.length; i++) {
+    const pct = totals[i] > 0 ? Math.max(4, Math.round((totals[i] / maxTotal) * 100)) : 0;
+    const count = totals[i] >= 1000 ? `${(totals[i]/1000).toFixed(1)}k` : String(totals[i]);
+    lifetimeBars += `
+      <div class="dhikr-lifetime-row">
+        <div class="dhikr-lifetime-name">${dhikrNames[i]}</div>
+        <div class="dhikr-lifetime-bar-wrap"><div class="dhikr-lifetime-bar-fill" style="width:${pct}%"></div></div>
+        <div class="dhikr-lifetime-count">${count}</div>
+      </div>`;
+  }
+
+  return `
+    <div class="dhikr-stats-header">
+      <button class="dhikr-stats-back" onclick="closeDhikrStats()">‹</button>
+      <div>
+        <div class="dhikr-stats-title">Dhikr Journey</div>
+        <div class="dhikr-stats-sub">Your remembrance of Allah</div>
+      </div>
+    </div>
+    <div style="overflow-y:auto;padding-bottom:30px">
+      <div class="dhikr-stat-cards">
+        <div class="dhikr-stat-card">
+          <div class="dhikr-stat-icon">🔥</div>
+          <div class="dhikr-stat-num">${streak}</div>
+          <div class="dhikr-stat-label">Streak</div>
+          <div class="dhikr-stat-sub">days</div>
+        </div>
+        <div class="dhikr-stat-card">
+          <div class="dhikr-stat-icon">⭐</div>
+          <div class="dhikr-stat-num">${best}</div>
+          <div class="dhikr-stat-label">Best</div>
+          <div class="dhikr-stat-sub">days</div>
+        </div>
+        <div class="dhikr-stat-card">
+          <div class="dhikr-stat-icon">📅</div>
+          <div class="dhikr-stat-num">${activeDays}</div>
+          <div class="dhikr-stat-label">Active</div>
+          <div class="dhikr-stat-sub">days total</div>
+        </div>
+      </div>
+
+      <div class="dhikr-section-card">
+        <div class="dhikr-cal-nav">
+          <button class="dhikr-cal-nav-btn" onclick="navDhikrStatsMonth(-1)">‹</button>
+          <div class="dhikr-cal-month">${MONTH_NAMES[_statsMonth]} ${_statsYear}</div>
+          <button class="dhikr-cal-nav-btn" onclick="navDhikrStatsMonth(1)" ${isPastMax ? 'disabled' : ''}>›</button>
+        </div>
+        <div class="dhikr-cal-grid">${calCells}</div>
+        <div class="dhikr-cal-legend">
+          <div class="dhikr-cal-legend-item"><div class="dhikr-cal-legend-dot" style="background:#d1fae5"></div>Started</div>
+          <div class="dhikr-cal-legend-item"><div class="dhikr-cal-legend-dot" style="background:#6ee7b7"></div>Partial</div>
+          <div class="dhikr-cal-legend-item"><div class="dhikr-cal-legend-dot" style="background:#059669"></div>Full (6–7/7)</div>
+        </div>
+      </div>
+
+      <div class="dhikr-section-card">
+        <div class="dhikr-section-title">This Week</div>
+        <div class="dhikr-week-grid">${weekCols}</div>
+      </div>
+
+      <div class="dhikr-section-card">
+        <div class="dhikr-section-title">Lifetime Totals</div>
+        ${lifetimeBars}
+      </div>
+    </div>`;
 }
 
 // ── Tasbeeh Counter ───────────────────────────────────────────
@@ -315,6 +555,7 @@ function saveDhikr() {
   const now = String(Date.now());
   localStorage.setItem('huda_dhikr', JSON.stringify(state.dhikrCounts));
   localStorage.setItem('_sync_ts_huda_dhikr', now);
+  saveDhikrHistory();
   debouncedPush();
 }
 

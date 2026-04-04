@@ -619,6 +619,63 @@ const DUAS = {
     }
   ],
 
+  "Essential Duas ⭐": [
+    {
+      arabic: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلٰهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ",
+      transliteration: "Allahumma anta rabbi la ilaha illa ant, khalaqtani wa ana abduk, wa ana 'ala 'ahdika wa wa'dika mastata't, a'udhu bika min sharri ma sana't, abu'u laka bini'matika 'alayya wa abu'u bidhanbi faghfir li fa innahu la yaghfirudh-dhunuba illa ant",
+      meaning: "O Allah, You are my Lord. None has the right to be worshipped except You. You created me and I am Your servant. I am as faithful to Your covenant and promise as I can. I seek refuge in You from the evil of what I have done. I acknowledge Your favour upon me and I confess my sins to You, so forgive me, for none forgives sins except You.",
+      source: "Hisnul Muslim 73", grade: "Sahih — Bukhari 6306 · The Prophet ﷺ said: whoever says this with certainty in the morning or evening and dies that day or night, enters Jannah"
+    },
+    {
+      arabic: "اللَّهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ، وَأَغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاكَ",
+      transliteration: "Allahumma-kfini bi-halalika 'an haramika, wa aghnini bi-fadlika 'amman siwak",
+      meaning: "O Allah, make Your lawful provisions sufficient for me against what is unlawful, and enrich me through Your bounty to the exclusion of all others.",
+      source: "Hisnul Muslim — Tirmidhi 3563", grade: "Hasan — Tirmidhi · Dua for halal rizq and freedom from depending on anyone but Allah"
+    },
+    {
+      arabic: "لَا إِلٰهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ",
+      transliteration: "La ilaha illa anta subhanaka inni kuntu minaz-zalimin",
+      meaning: "None has the right to be worshipped except You; glory be to You. Truly I have been among the wrongdoers.",
+      source: "Hisnul Muslim — Quran 21:87", grade: "Quranic — Sahih · The Prophet ﷺ said: no Muslim calls upon Allah with this except that Allah responds to him"
+    },
+    {
+      arabic: "اللَّهُمَّ إِنِّي عَبْدُكَ وَابْنُ عَبْدِكَ وَابْنُ أَمَتِكَ، نَاصِيَتِي بِيَدِكَ، مَاضٍ فِيَّ حُكْمُكَ، عَدْلٌ فِيَّ قَضَاؤُكَ، أَسْأَلُكَ بِكُلِّ اسْمٍ هُوَ لَكَ سَمَّيْتَ بِهِ نَفْسَكَ أَوْ أَنْزَلْتَهُ فِي كِتَابِكَ أَوْ عَلَّمْتَهُ أَحَدًا مِنْ خَلْقِكَ أَوِ اسْتَأْثَرْتَ بِهِ فِي عِلْمِ الْغَيْبِ عِنْدَكَ، أَنْ تَجْعَلَ الْقُرْآنَ رَبِيعَ قَلْبِي وَنُورَ صَدْرِي وَجَلَاءَ حُزْنِي وَذَهَابَ هَمِّي",
+      transliteration: "Allahumma inni abduka wa ibnu abdika wa ibnu amatik, nasiyati biyadik, madin fiyya hukmuk, 'adlun fiyya qada'uk, as'aluka bikulli ismin huwa laka sammayta bihi nafsak aw anzaltahu fi kitabik aw 'allamtahu ahadan min khalqik aw ista'tharta bihi fi 'ilmil-ghaybi 'indak, an taj'alal-Qurana rabi'a qalbi wa nura sadri wa jala'a huzni wa dhahaba hammi",
+      meaning: "O Allah, I am Your servant, son of Your servant, son of Your female servant. My forelock is in Your hand. Your decree upon me is just. I ask You by every name You have given Yourself, revealed in Your Book, taught to any of Your creation, or kept in Your knowledge of the unseen, to make the Quran the spring of my heart, the light of my chest, the departure of my sorrow, and the relief of my anxiety.",
+      source: "Ahmad 3712 · Ibn Hibban 972", grade: "Sahih — The Prophet ﷺ said: Allah will remove his worry and replace it with joy"
+    },
+    {
+      arabic: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الْآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ",
+      transliteration: "Rabbana atina fid-dunya hasanah, wa fil-akhirati hasanah, wa qina 'adhaab an-nar",
+      meaning: "Our Lord, give us good in this world and good in the Hereafter, and protect us from the punishment of the Fire.",
+      source: "Hisnul Muslim — Quran 2:201 · Bukhari 6389 · Muslim 2690", grade: "Quranic & Sahih · Anas ؓ said the Prophet ﷺ most frequently made this dua"
+    },
+    {
+      arabic: "اللَّهُمَّ لَا سَهْلَ إِلَّا مَا جَعَلْتَهُ سَهْلًا، وَأَنْتَ تَجْعَلُ الْحَزْنَ إِذَا شِئْتَ سَهْلًا",
+      transliteration: "Allahumma la sahla illa ma ja'altahu sahla, wa anta taj'alul-hazna idha shi'ta sahla",
+      meaning: "O Allah, there is no ease except in what You make easy, and You make hardship easy if You will.",
+      source: "Ibn Hibban 2427 · Ibn as-Sunni 351", grade: "Sahih — authenticated by Al-Albani"
+    },
+    {
+      arabic: "حَسْبُنَا اللّٰهُ وَنِعْمَ الْوَكِيلُ",
+      transliteration: "Hasbunallahu wa ni'mal-wakil",
+      meaning: "Allah is sufficient for us and He is the best Disposer of affairs.",
+      source: "Hisnul Muslim — Quran 3:173", grade: "Quranic · Said by Ibrahim ﷺ when thrown into the fire, and by the Prophet ﷺ at the Battle of Uhud"
+    },
+    {
+      arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ",
+      transliteration: "Allahumma inni as'alukal-'afwa wal-'afiyata fid-dunya wal-akhirah",
+      meaning: "O Allah, I ask You for pardon and well-being in this world and in the Hereafter.",
+      source: "Hisnul Muslim — Ibn Majah 3871 · Abu Dawud 5074", grade: "Sahih — authenticated by Al-Albani · Ibn Umar ؓ never left this dua morning or evening"
+    },
+    {
+      arabic: "رَبِّ إِنِّي لِمَا أَنْزَلْتَ إِلَيَّ مِنْ خَيْرٍ فَقِيرٌ",
+      transliteration: "Rabbi inni lima anzalta ilayya min khayrin faqir",
+      meaning: "My Lord, indeed I am in desperate need of whatever good You send down to me.",
+      source: "Hisnul Muslim — Quran 28:24", grade: "Quranic · Dua of Musa ﷺ when he had nothing — shortly after, Allah gave him a home, a wife, and a new life"
+    }
+  ],
+
   "Prophetic Duas ﷺ": [
     {
       prophet: "Prophet Muhammad ﷺ",
@@ -1069,6 +1126,52 @@ Say "Bismillah" (In the name of Allah) before beginning.
 **Daily prayer times:** Fajr (2 raka'ah), Dhuhr (4), Asr (4), Maghrib (3), Isha (4).`,
   },
   {
+    title: "The Tashahhud — Final Sitting",
+    arabic: "التَّشَهُّد",
+    transliteration: "At-Tashahhud",
+    content: `The Tashahhud is recited in the final sitting of every prayer. It is one of the most important and frequently repeated prayers in a Muslim's life.
+
+**The Tashahhud (Arabic):**
+
+التَّحِيَّاتُ لِلّٰهِ وَالصَّلَوَاتُ وَالطَّيِّبَاتُ، السَّلَامُ عَلَيْكَ أَيُّهَا النَّبِيُّ وَرَحْمَةُ اللّٰهِ وَبَرَكَاتُهُ، السَّلَامُ عَلَيْنَا وَعَلَى عِبَادِ اللّٰهِ الصَّالِحِينَ، أَشْهَدُ أَنْ لَا إِلٰهَ إِلَّا اللّٰهُ وَأَشْهَدُ أَنَّ مُحَمَّدًا عَبْدُهُ وَرَسُولُهُ
+
+**Transliteration:**
+At-tahiyyatu lillahi was-salawatu wat-tayyibat. As-salamu 'alayka ayyuhan-nabiyyu wa rahmatullahi wa barakatuh. As-salamu 'alayna wa 'ala 'ibadillahis-salihin. Ash-hadu an la ilaha illallah wa ash-hadu anna Muhammadan 'abduhu wa rasuluh.
+
+**Translation:**
+"All greetings, prayers and pure words are due to Allah. Peace be upon you, O Prophet, and the mercy of Allah and His blessings. Peace be upon us and upon the righteous servants of Allah. I bear witness that there is no deity worthy of worship except Allah, and I bear witness that Muhammad is His servant and Messenger."
+*(Bukhari 831, Muslim 402)*
+
+---
+
+**The Salat al-Ibrahimiyyah (Durood):**
+
+اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا صَلَّيْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ، اللَّهُمَّ بَارِكْ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ كَمَا بَارَكْتَ عَلَى إِبْرَاهِيمَ وَعَلَى آلِ إِبْرَاهِيمَ إِنَّكَ حَمِيدٌ مَجِيدٌ
+
+*Allahumma salli 'ala Muhammadin wa 'ala ali Muhammadin kama sallayta 'ala Ibrahima wa 'ala ali Ibrahim, innaka Hamidun Majid. Allahumma barik 'ala Muhammadin wa 'ala ali Muhammadin kama barakta 'ala Ibrahima wa 'ala ali Ibrahim, innaka Hamidun Majid.*
+
+"O Allah, send prayers upon Muhammad and upon the family of Muhammad, as You sent prayers upon Ibrahim and upon the family of Ibrahim — You are the Most Praiseworthy, the Most Glorious. O Allah, send blessings upon Muhammad and upon the family of Muhammad, as You sent blessings upon Ibrahim and upon the family of Ibrahim — You are the Most Praiseworthy, the Most Glorious."
+*(Bukhari 3370)*
+
+---
+
+**Dua Before Tasleem (Highly Recommended):**
+
+اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ عَذَابِ جَهَنَّمَ، وَمِنْ عَذَابِ الْقَبْرِ، وَمِنْ فِتْنَةِ الْمَحْيَا وَالْمَمَاتِ، وَمِنْ شَرِّ فِتْنَةِ الْمَسِيحِ الدَّجَّالِ
+
+*Allahumma inni a'udhu bika min 'adhabi jahannam, wa min 'adhabil-qabr, wa min fitnatil-mahya wal-mamat, wa min sharri fitnatil-masihid-dajjal.*
+
+"O Allah, I seek refuge in You from the punishment of Hell, from the punishment of the grave, from the trials of life and death, and from the evil of the trial of the False Messiah."
+*(Muslim 588 — the Prophet ﷺ commanded this to be said before tasleem)*
+
+---
+
+**Tips:**
+- Raise the index finger of the right hand during the Tashahhud as a sign of Tawhid (monotheism). (Abu Dawud 989, Sahih)
+- The Tashahhud is obligatory (wajib) in the final sitting; the Salat Ibrahimiyyah is a pillar (rukn) of prayer according to many scholars.
+- The Companion Ibn Mas'ud ؓ narrated teaching the Tashahhud: "The Prophet ﷺ taught it to me as he would teach me a surah of the Quran." (Bukhari 6265)`,
+  },
+  {
     title: "Halal & Haram — Permissible & Prohibited",
     arabic: "الحَلَال وَالحَرَام",
     transliteration: "Al-Halal wal-Haram",
@@ -1280,6 +1383,128 @@ const AYATUL_KURSI = {
 };
 
 // ── Islamic Key Dates ─────────────────────────────────────────
+// ── Quran Thematic Categories ─────────────────────────────────
+const QURAN_CATEGORIES = [
+  {
+    id: 'mercy', label: 'Mercy', icon: '💚', color: '#059669',
+    verses: [
+      {s:7,a:156},{s:39,a:53},{s:6,a:12},{s:21,a:107},
+      {s:12,a:87},{s:6,a:54},{s:30,a:21},{s:17,a:24},
+      {s:21,a:83},{s:57,a:28}
+    ]
+  },
+  {
+    id: 'patience', label: 'Patience', icon: '⚓', color: '#6366f1',
+    verses: [
+      {s:2,a:153},{s:2,a:155},{s:39,a:10},{s:16,a:127},
+      {s:3,a:200},{s:70,a:5},{s:103,a:3},{s:13,a:24},
+      {s:3,a:146},{s:8,a:46}
+    ]
+  },
+  {
+    id: 'gratitude', label: 'Gratitude', icon: '🌿', color: '#d97706',
+    verses: [
+      {s:14,a:7},{s:2,a:152},{s:31,a:12},{s:27,a:40},
+      {s:16,a:114},{s:76,a:3},{s:17,a:3},
+      {s:7,a:144},{s:34,a:13},{s:55,a:13}
+    ]
+  },
+  {
+    id: 'tawakkul', label: 'Trust in Allah', icon: '🕊️', color: '#0284c7',
+    verses: [
+      {s:3,a:159},{s:65,a:3},{s:9,a:51},{s:14,a:12},
+      {s:25,a:58},{s:67,a:29},{s:8,a:2},
+      {s:5,a:23},{s:33,a:3}
+    ]
+  },
+  {
+    id: 'forgiveness', label: 'Forgiveness', icon: '🌙', color: '#7c3aed',
+    verses: [
+      {s:39,a:53},{s:2,a:222},{s:4,a:110},{s:3,a:133},
+      {s:66,a:8},{s:20,a:82},{s:71,a:10},{s:71,a:11},
+      {s:71,a:12},{s:3,a:17},{s:57,a:21}
+    ]
+  },
+  {
+    id: 'paradise', label: 'Paradise', icon: '✨', color: '#db2777',
+    verses: [
+      {s:32,a:17},{s:9,a:72},{s:55,a:46},{s:50,a:35},
+      {s:13,a:23},{s:76,a:12},{s:3,a:133},
+      {s:3,a:15},{s:52,a:17},{s:56,a:15}
+    ]
+  },
+  {
+    id: 'dua', label: 'Dua', icon: '🤲', color: '#0f766e',
+    verses: [
+      {s:2,a:186},{s:40,a:60},{s:7,a:55},{s:27,a:62},
+      {s:21,a:88},{s:3,a:38},{s:14,a:39},
+      {s:2,a:201},{s:17,a:80},{s:3,a:8}
+    ]
+  },
+  {
+    id: 'family', label: 'Family', icon: '🏡', color: '#ea580c',
+    verses: [
+      {s:17,a:23},{s:31,a:14},{s:46,a:15},{s:4,a:1},
+      {s:30,a:21},{s:16,a:72},{s:2,a:233},
+      {s:25,a:74},{s:2,a:83}
+    ]
+  },
+  {
+    id: 'knowledge', label: 'Knowledge', icon: '📖', color: '#0f766e',
+    verses: [
+      {s:96,a:1},{s:96,a:4},{s:20,a:114},{s:2,a:269},
+      {s:58,a:11},{s:39,a:9},{s:35,a:28},
+      {s:29,a:43},{s:3,a:18}
+    ]
+  },
+  {
+    id: 'hardship', label: 'Tests & Hardship', icon: '🌊', color: '#475569',
+    verses: [
+      {s:2,a:286},{s:94,a:5},{s:94,a:6},{s:65,a:7},
+      {s:3,a:139},{s:13,a:28},{s:2,a:45},
+      {s:57,a:22},{s:29,a:2}
+    ]
+  },
+  {
+    id: 'justice', label: 'Justice', icon: '⚖️', color: '#92400e',
+    verses: [
+      {s:4,a:135},{s:5,a:8},{s:16,a:90},{s:4,a:58},
+      {s:57,a:25},{s:55,a:9},{s:49,a:9},{s:7,a:29}
+    ]
+  },
+  {
+    id: 'rizq', label: 'Provision', icon: '🌾', color: '#15803d',
+    verses: [
+      {s:11,a:6},{s:65,a:3},{s:51,a:58},{s:34,a:39},
+      {s:3,a:37},{s:2,a:261},{s:71,a:10},{s:71,a:11},{s:71,a:12}
+    ]
+  },
+  {
+    id: 'guidance', label: 'Guidance', icon: '🌟', color: '#b45309',
+    verses: [
+      {s:1,a:6},{s:2,a:2},{s:2,a:256},{s:24,a:35},
+      {s:39,a:23},{s:16,a:9},{s:7,a:43},
+      {s:6,a:153},{s:2,a:120}
+    ]
+  },
+  {
+    id: 'character', label: 'Character', icon: '💎', color: '#6d28d9',
+    verses: [
+      {s:68,a:4},{s:41,a:34},{s:16,a:90},{s:49,a:11},
+      {s:49,a:13},{s:3,a:134},{s:25,a:63},
+      {s:31,a:18},{s:31,a:19},{s:24,a:30}
+    ]
+  },
+  {
+    id: 'afterlife', label: 'Afterlife', icon: '🌌', color: '#334155',
+    verses: [
+      {s:3,a:185},{s:2,a:156},{s:67,a:2},{s:39,a:68},
+      {s:56,a:60},{s:75,a:1},{s:99,a:7},
+      {s:14,a:48},{s:82,a:1}
+    ]
+  },
+];
+
 const ISLAMIC_DATES = [
   { month: 1,  day: 1,  name: 'Islamic New Year' },
   { month: 1,  day: 10, name: 'Ashura' },

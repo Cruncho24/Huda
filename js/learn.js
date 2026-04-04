@@ -18,7 +18,7 @@ function renderLearnHub() {
     </div>
     <div class="learn-cards">
       ${[
-        { icon:'🕌', bg:'#d1fae5', title:'New Muslim Guide', desc:'7 essential lessons for new Muslims', fn:'openNewMuslimGuide' },
+        { icon:'🕌', bg:'#d1fae5', title:'New Muslim Guide', desc:'8 essential lessons for new Muslims', fn:'openNewMuslimGuide' },
         { icon:'🔤', bg:'#dbeafe', title:"Children's Quran", desc:'Arabic alphabet & short surahs', fn:'openChildrensQuran' },
         { icon:'✨', bg:'#fef3c7', title:'99 Names of Allah', desc:'Asmaul Husna — all 99 names', fn:'openNamesOfAllah' },
         { icon:'🕋', bg:'#ede9fe', title:'Hajj & Umrah Guide', desc:'Complete step-by-step guide', fn:'openHajjGuide' },
