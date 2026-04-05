@@ -202,7 +202,7 @@ async function openSurah(n, targetAyah = null) {
   const _lrAyah = (_prevLr?.surah === n && _prevLr?.ayah) ? _prevLr.ayah : undefined;
   localStorage.setItem('huda_last_read', JSON.stringify({ surah: n, name: s[2], arabic: s[1], ...(_lrAyah ? { ayah: _lrAyah } : {}) }));
   debouncedPush();
-  document.getElementById('reader-title').textContent = `${s[2]} — ${s[1]}`;
+  document.getElementById('reader-title').textContent = `${n}. ${s[2]} — ${s[1]}`;
   document.getElementById('reader-meta').textContent = `${s[5]} · ${s[4]} verses · ${s[3]}`;
   const rbm = document.getElementById('reader-bm-btn');
   if (rbm) rbm.textContent = isSurahBookmarked(n) ? '🔖' : '🏷️';
