@@ -442,10 +442,10 @@ html.dark .hadith-text { color: #e2e8f0; }
 .surah-english { font-size: 14px; font-weight: 600; color: var(--gray-900); }
 .surah-meta { font-size: 11px; color: var(--gray-400); margin-top: 1px; }
 .surah-arabic-name {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
   color: #065f46;
-  font-family: 'Noto Naskh Arabic', serif;
+  font-family: 'UthmanicHafs', 'Scheherazade New', serif;
 }
 .surah-bm-btn {
   background: none; border: none; font-size: 16px; padding: 4px 6px;
@@ -469,7 +469,7 @@ html.dark .hadith-text { color: #e2e8f0; }
 }
 .saved-surah-info { flex: 1; }
 .saved-surah-name { font-size: 16px; font-weight: 600; color: var(--gray-900); }
-.saved-surah-arabic { font-size: 16px; color: var(--emerald); font-family: 'Noto Naskh Arabic', serif; }
+.saved-surah-arabic { font-size: 18px; color: var(--emerald); font-family: 'UthmanicHafs', 'Scheherazade New', serif; }
 .saved-surah-meta { font-size: 11px; color: var(--gray-400); white-space: nowrap; }
 html.dark .saved-surah-row { background: #1e293b; border-color: #334155; }
 html.dark .saved-surah-name { color: var(--gray-100); }
@@ -491,13 +491,13 @@ html.dark .saved-surah-name { color: var(--gray-100); }
   border-bottom: 1px solid var(--gray-100);
 }
 .ayah-arabic {
-  font-size: 20px;
-  line-height: 1.75;
+  font-size: 22px;
+  line-height: 2.6;
   text-align: right;
   direction: rtl;
   color: var(--gray-900);
   margin-bottom: 8px;
-  font-family: 'Scheherazade New', 'Noto Naskh Arabic', serif;
+  font-family: 'UthmanicHafs', 'Scheherazade New', serif;
 }
 .ayah-num-badge {
   display: inline-flex;
@@ -818,10 +818,10 @@ html.dark .saved-surah-name { color: var(--gray-100); }
   font-size: 28px;
   direction: rtl;
   text-align: right;
-  line-height: 2;
+  line-height: 2.8;
   color: var(--gray-900);
   margin-bottom: 18px;
-  font-family: 'Scheherazade New', 'Noto Naskh Arabic', serif;
+  font-family: 'UthmanicHafs', 'Scheherazade New', serif;
 }
 .dua-transliteration {
   font-size: 16px;
@@ -1867,7 +1867,7 @@ html.dark .theme-toggle-text { color: #94a3b8; }
 }
 .bookmark-info { flex: 1; min-width: 0; }
 .bookmark-surah { font-size: 12px; font-weight: 700; color: var(--emerald); margin-bottom: 2px; }
-.bookmark-preview { font-size: 13px; color: var(--gray-600); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'Noto Naskh Arabic', serif; direction: rtl; }
+.bookmark-preview { font-size: 14px; color: var(--gray-600); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: 'UthmanicHafs', 'Scheherazade New', serif; direction: rtl; }
 .bookmark-del { background: none; border: none; color: var(--gray-300); font-size: 14px; padding: 4px; cursor: pointer; flex-shrink: 0; }
 .bookmark-del:hover { color: #ef4444; }
 html.dark .bookmark-row { background: #1e293b; border-color: #334155; }
@@ -1884,11 +1884,11 @@ html.dark .bookmark-del { color: #475569; }
   border: 1px solid var(--emerald-light);
 }
 .ak-arabic {
-  font-family: 'Amiri', 'Noto Naskh Arabic', serif;
-  font-size: 20px;
+  font-family: 'UthmanicHafs', 'Scheherazade New', serif;
+  font-size: 22px;
   direction: rtl;
   text-align: right;
-  line-height: 2;
+  line-height: 2.8;
   color: var(--gray-900);
   margin-bottom: 10px;
 }
@@ -2052,11 +2052,11 @@ html.dark .share-dua-btn { background: #334155; border-color: #475569; color: #9
 
   /* Study view ayahs */
   .ayah { padding: 10px 14px; }
-  .ayah-arabic { font-size: 20px; line-height: 2.1; margin-bottom: 6px; }
+  .ayah-arabic { font-size: 20px; line-height: 2.4; margin-bottom: 6px; }
   .ayah-english { font-size: 12px; line-height: 1.6; }
   .bismillah { font-size: 20px; padding: 10px 16px; }
-  .ayah-arabic-card { font-size: 21px; line-height: 2.2; }
-  .mushaf-arabic-page { line-height: 2.3; } /* font-size is JS-controlled via inline style */
+  .ayah-arabic-card { font-size: 20px; line-height: 2.6; }
+  .mushaf-arabic-page { line-height: 3.4; } /* font-size is JS-controlled via inline style */
   .ayah-btn { padding: 3px 8px; font-size: 11px; }
   .ayah-actions { gap: 5px; margin-top: 4px; }
   .ayah-num-badge { width: 22px; height: 22px; font-size: 9px; }
@@ -2297,9 +2297,12 @@ html.dark .qs-result:active { background: var(--gray-800, #1f2937); }
   padding: 1px 6px;
 }
 .qs-snippet {
-  font-size: 13px;
+  font-size: 18px;
   color: var(--gray-700);
-  line-height: 1.5;
+  line-height: 2.4;
+  font-family: 'UthmanicHafs', 'Scheherazade New', serif;
+  direction: rtl;
+  text-align: right;
 }
 html.dark .qs-snippet { color: var(--gray-300); }
 .qs-truncated {
@@ -3217,11 +3220,11 @@ html.dark #reader-content { background: #0f172a; }
   text-align: center;
 }
 .dhikr-counter-text {
-  font-size: 26px;
+  font-size: 28px;
   color: #065f46;
-  font-family: 'Noto Naskh Arabic', serif;
+  font-family: 'UthmanicHafs', 'Scheherazade New', serif;
   margin-bottom: 4px;
-  line-height: 1.4;
+  line-height: 2.0;
 }
 .dhikr-counter-transliteration {
   font-size: 13px;
