@@ -491,8 +491,9 @@ function resumeAudioPos() {
       if (!cache) return;
       if (pos.mode === 'page') {
         const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === pos.ayah) || cache.arData.ayahs[0];
+        // Always use playMushafAyah so we resume at the saved ayah, not from ayah 1
         if (ayahObj) playMushafAyah(ayahObj.number, pos.surah, ayahObj.numberInSurah);
-        else mushafPlayAll(pos.surah);
+        else mushafPlayAll(pos.surah); // no cache entry at all — last resort
       } else {
         const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === pos.ayah) || cache.arData.ayahs[0];
         if (ayahObj) playAyah(ayahObj.number, pos.surah, ayahObj.numberInSurah);
@@ -512,6 +513,7 @@ function playAyah(globalNum, surahNum, ayahNum) {
     if (prevCard) prevCard.classList.remove('maud-playing-card');
     if (state.audio.playingId === globalNum) {
       state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+      clearAudioPos();
       return;
     }
   }
@@ -581,6 +583,7 @@ function playCatAyah(globalNum, surahNum, ayahNum) {
     if (prevCat) { prevCat.textContent = '▶'; prevCat.classList.remove('cv-playing'); }
     if (state.audio.playingId === globalNum) {
       state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+      clearAudioPos();
       return;
     }
   }
@@ -596,6 +599,7 @@ function playCatAyah(globalNum, surahNum, ayahNum) {
   const reset = () => {
     if (btn) { btn.textContent = '▶'; btn.classList.remove('cv-playing'); }
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+    clearAudioPos();
   };
   audio.onended = reset;
   audio.onerror = reset;
