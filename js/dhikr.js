@@ -71,7 +71,7 @@ function renderDhikr() {
     let _holdTimer = null;
     const tapBtn = tab.querySelector('.dhikr-tap-btn');
     tapBtn.addEventListener('pointerdown', () => {
-      _holdTimer = setTimeout(() => { resetTasbeeh(); renderDhikr(); }, 700);
+      _holdTimer = setTimeout(() => { _clearTasbeeh(); renderDhikr(); }, 700);
     });
     tapBtn.addEventListener('pointerup', () => clearTimeout(_holdTimer));
     tapBtn.addEventListener('pointerleave', () => clearTimeout(_holdTimer));
@@ -463,6 +463,13 @@ function _buildStatsHTML() {
 }
 
 // ── Tasbeeh Counter ───────────────────────────────────────────
+// _clearTasbeeh: state-only reset, no DOM update — called by both the
+// legacy bead counter and the free dhikr counter tab hold-to-reset handler.
+function _clearTasbeeh() {
+  state.tasbeeh = 0;
+  saveTasbeeh();
+}
+
 function tapTasbeeh() {
   state.tasbeeh++;
   haptic();
@@ -472,8 +479,7 @@ function tapTasbeeh() {
 }
 
 function resetTasbeeh() {
-  state.tasbeeh = 0;
-  saveTasbeeh();
+  _clearTasbeeh();
   const el = document.getElementById('tasbeeh-count');
   if (el) el.textContent = '0';
 }

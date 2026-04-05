@@ -462,7 +462,7 @@ function openSettings() {
           </div>
           <div class="settings-row">
             <span class="settings-label" style="color:#6b7280">Version</span>
-            <span class="settings-value" style="color:#9ca3af">v156</span>
+            <span class="settings-value" style="color:#9ca3af">v157</span>
           </div>
         </div>
 

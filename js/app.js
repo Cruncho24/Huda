@@ -288,12 +288,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (document.visibilityState === 'hidden') { _hiddenAt = Date.now(); return; }
     if (Date.now() - _hiddenAt < 5000) return; // brief switch — don't navigate
 
+    if (!state.audio.playingSurah) return; // nothing ever played — nothing to surface
     // If audio was interrupted/paused by another app, show the home screen
     // with the "Continue Listening" card instead of forcing user to Quran tab.
-    if (state.audio.paused || !state.audio.playingSurah) {
-      if (state.audio.paused) switchTab('home'); // surface Continue Listening card
-      return;
-    }
+    if (state.audio.paused) { switchTab('home'); return; }
 
     // Audio is actively playing — navigate to the current ayah so user can see/control it
     const sn = state.audio.playingSurah;
