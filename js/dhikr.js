@@ -3,17 +3,94 @@
    ============================================================ */
 
 // ── DHIKR TAB ─────────────────────────────────────────────────
-let _dhikrTab = 0; // 0=Tasbih, 1=Tahmid, 2=Takbir, 3=Tahlil, 4=Istighfar, 5=Tasbih+, 6=Hawqala
+let _dhikrTab = 0; // 0=Tasbih, 1=Tahmid, 2=Takbir, 3=Tahlil, 4=Istighfar, 5=Tasbih+, 6=Hawqala, 7=Free Counter
+const _FREE_COUNTER_TAB = 7;
 
 function renderDhikr() {
   checkDhikrReset();
   const tab = document.getElementById('tab-dhikr');
+  const isFree = _dhikrTab === _FREE_COUNTER_TAB;
+  const tabNames = ['Tasbih', 'Tahmid', 'Takbir', 'Tahlil', 'Istighfar', 'Tasbih+', 'Hawqala', '∞ Counter'];
+  const totalTabs = tabNames.length;
+  const streak = computeStreak();
+
+  const navDots = tabNames.map((_, i) => `
+    <div onclick="switchDhikrTab(${i})" style="cursor:pointer;width:${i === _dhikrTab ? 20 : 6}px;height:6px;border-radius:3px;background:${i === _dhikrTab ? '#059669' : '#cbd5e1'};transition:all 0.25s ease"></div>
+  `).join('');
+
+  const tabBtns = tabNames.map((name, i) => `
+    <button class="dhikr-tab-btn ${i === _dhikrTab ? 'active' : ''}"
+      style="white-space:nowrap;flex-shrink:0;"
+      onclick="switchDhikrTab(${i})">${name}</button>
+  `).join('');
+
+  const prevDisabled = _dhikrTab === 0;
+  const nextDisabled = _dhikrTab === totalTabs - 1;
+  const navStyle = (disabled, color) =>
+    `flex-shrink:0;width:32px;height:32px;border-radius:50%;border:1px solid #e2e8f0;background:white;font-size:16px;cursor:pointer;color:${color};display:flex;align-items:center;justify-content:center`;
+
+  const navBar = `
+    <div style="display:flex;align-items:center;gap:6px;padding:0 12px 4px">
+      <button onclick="switchDhikrTab(${_dhikrTab - 1})" ${prevDisabled ? 'disabled' : ''}
+        style="${navStyle(prevDisabled, prevDisabled ? '#cbd5e1' : '#059669')}">‹</button>
+      <div class="dhikr-tabs-bar" style="overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;flex:1;margin:0;padding:6px 0">
+        ${tabBtns}
+      </div>
+      <button onclick="switchDhikrTab(${_dhikrTab + 1})" ${nextDisabled ? 'disabled' : ''}
+        style="${navStyle(nextDisabled, nextDisabled ? '#cbd5e1' : '#059669')}">›</button>
+    </div>
+    <div style="display:flex;justify-content:center;align-items:center;gap:6px;padding:0 12px 10px">
+      ${navDots}
+    </div>`;
+
+  if (isFree) {
+    const count = state.tasbeeh;
+    tab.innerHTML = `
+      <div class="dhikr-header-new" style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="dhikr-header-label">Daily Dhikr</div>
+          <div class="dhikr-header-arabic">∞</div>
+        </div>
+        <button class="dhikr-stats-btn" onclick="openDhikrStats()" style="margin-top:4px">
+          ${streak > 0 ? `🔥 ${streak}` : '📊'}
+        </button>
+      </div>
+      <div class="dhikr-counter-area">
+        <div class="dhikr-counter-text" style="font-size:22px;font-weight:600;color:#059669">Free Counter</div>
+        <div class="dhikr-counter-transliteration">Count anything — no limit</div>
+        <div class="dhikr-counter-number" id="dhikr-count-display">${count}</div>
+        <div class="dhikr-counter-of" style="opacity:0">—</div>
+        <div class="dhikr-progress-bar" style="visibility:hidden">
+          <div class="dhikr-progress-fill" style="width:0%"></div>
+        </div>
+        <button class="dhikr-tap-btn" onclick="tapFreeCounter()">✦</button>
+        <div class="dhikr-hint">Tap to count · Hold to reset</div>
+      </div>
+      ${navBar}`;
+
+    let _holdTimer = null;
+    const tapBtn = tab.querySelector('.dhikr-tap-btn');
+    tapBtn.addEventListener('pointerdown', () => {
+      _holdTimer = setTimeout(() => { resetTasbeeh(); renderDhikr(); }, 700);
+    });
+    tapBtn.addEventListener('pointerup', () => clearTimeout(_holdTimer));
+    tapBtn.addEventListener('pointerleave', () => clearTimeout(_holdTimer));
+
+    const counterArea = tab.querySelector('.dhikr-counter-area');
+    let _sx = 0, _sy = 0;
+    counterArea.addEventListener('touchstart', e => { _sx = e.touches[0].clientX; _sy = e.touches[0].clientY; }, { passive: true });
+    counterArea.addEventListener('touchend', e => {
+      const dx = e.changedTouches[0].clientX - _sx;
+      const dy = e.changedTouches[0].clientY - _sy;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) switchDhikrTab(_dhikrTab + (dx < 0 ? 1 : -1));
+    }, { passive: true });
+    return;
+  }
+
   const d = DHIKRS[_dhikrTab];
   const count = state.dhikrCounts[_dhikrTab] || 0;
   const pct = Math.min((count / d.target) * 100, 100);
-  const tabNames = ['Tasbih', 'Tahmid', 'Takbir', 'Tahlil', 'Istighfar', 'Tasbih+', 'Hawqala'];
   const isComplete = count >= d.target;
-  const streak = computeStreak();
 
   tab.innerHTML = `
     <div class="dhikr-header-new" style="display:flex;justify-content:space-between;align-items:flex-start">
@@ -38,24 +115,7 @@ function renderDhikr() {
       ${d.reward ? `<div class="dhikr-reward" style="margin-top:16px;text-align:left">🌟 ${d.reward}</div>` : ''}
       <div class="dhikr-source" style="margin-top:6px;text-align:left">${d.source}</div>
     </div>
-    <div style="display:flex;align-items:center;gap:6px;padding:0 12px 4px">
-      <button onclick="switchDhikrTab(${_dhikrTab - 1})" ${_dhikrTab === 0 ? 'disabled' : ''}
-        style="flex-shrink:0;width:32px;height:32px;border-radius:50%;border:1px solid #e2e8f0;background:white;font-size:16px;cursor:pointer;color:${_dhikrTab === 0 ? '#cbd5e1' : '#059669'};display:flex;align-items:center;justify-content:center">‹</button>
-      <div class="dhikr-tabs-bar" style="overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;flex:1;margin:0;padding:6px 0">
-        ${tabNames.map((name, i) => `
-          <button class="dhikr-tab-btn ${i === _dhikrTab ? 'active' : ''}"
-            style="white-space:nowrap;flex-shrink:0;"
-            onclick="switchDhikrTab(${i})">${name}</button>
-        `).join('')}
-      </div>
-      <button onclick="switchDhikrTab(${_dhikrTab + 1})" ${_dhikrTab === DHIKRS.length - 1 ? 'disabled' : ''}
-        style="flex-shrink:0;width:32px;height:32px;border-radius:50%;border:1px solid #e2e8f0;background:white;font-size:16px;cursor:pointer;color:${_dhikrTab === DHIKRS.length - 1 ? '#cbd5e1' : '#059669'};display:flex;align-items:center;justify-content:center">›</button>
-    </div>
-    <div style="display:flex;justify-content:center;align-items:center;gap:6px;padding:0 12px 10px">
-      ${tabNames.map((_, i) => `
-        <div onclick="switchDhikrTab(${i})" style="cursor:pointer;width:${i === _dhikrTab ? 20 : 6}px;height:6px;border-radius:3px;background:${i === _dhikrTab ? '#059669' : '#cbd5e1'};transition:all 0.25s ease"></div>
-      `).join('')}
-    </div>
+    ${navBar}
   `;
 
   // Long-press reset on tap button
@@ -81,6 +141,18 @@ function renderDhikr() {
       switchDhikrTab(_dhikrTab + (dx < 0 ? 1 : -1));
     }
   }, { passive: true });
+}
+
+function tapFreeCounter() {
+  state.tasbeeh++;
+  haptic();
+  saveTasbeeh();
+  const el = document.getElementById('dhikr-count-display');
+  if (el) {
+    el.textContent = state.tasbeeh;
+    el.classList.add('dhikr-pop');
+    setTimeout(() => el.classList.remove('dhikr-pop'), 300);
+  }
 }
 
 function renderDhikrCard(d, i) {
@@ -127,6 +199,7 @@ function resetDhikr(i) {
 }
 
 function tapActiveDhikr() {
+  if (_dhikrTab === _FREE_COUNTER_TAB) { tapFreeCounter(); return; }
   const d = DHIKRS[_dhikrTab];
   const cur = state.dhikrCounts[_dhikrTab] || 0;
   if (cur >= d.target) { renderDhikr(); return; } // complete — show done state
@@ -151,7 +224,7 @@ function tapActiveDhikr() {
 }
 
 function switchDhikrTab(i) {
-  _dhikrTab = Math.max(0, Math.min(i, DHIKRS.length - 1));
+  _dhikrTab = Math.max(0, Math.min(i, _FREE_COUNTER_TAB));
   renderDhikr();
 }
 
