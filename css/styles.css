@@ -1467,7 +1467,7 @@ html.dark .ri-btn.active { background: #064e3b; border-color: var(--emerald); co
 }
 .mushaf-meta { font-size: 11px; color: #6b7280; font-weight: 600; }
 .mushaf-meta-center {
-  font-family: 'UthmanicHafs', 'Noto Naskh Arabic', serif;
+  font-family: 'Amiri Quran', 'Scheherazade New', serif;
   font-size: 18px;
   color: #111827;
   direction: rtl;
@@ -1535,7 +1535,7 @@ html.dark .mushaf-hint { background: #1f2937; color: #6b7280; border-color: #374
 
 .mushaf-anum {
   font-family: 'Amiri Quran', 'Scheherazade New', serif;
-  font-size: 0.8em;
+  font-size: clamp(13px, 0.75em, 18px);
   color: #059669;
   margin: 0 1px;
   cursor: pointer;
@@ -2050,7 +2050,7 @@ html.dark .share-dua-btn { background: #334155; border-color: #475569; color: #9
   .ayah-english { font-size: 12px; line-height: 1.6; }
   .bismillah { font-size: 20px; padding: 10px 16px; }
   .ayah-arabic-card { font-size: 21px; line-height: 2.2; }
-  .mushaf-arabic-page { font-size: 18px; line-height: 2.3; }
+  .mushaf-arabic-page { line-height: 2.3; } /* font-size is JS-controlled via inline style */
   .ayah-btn { padding: 3px 8px; font-size: 11px; }
   .ayah-actions { gap: 5px; margin-top: 4px; }
   .ayah-num-badge { width: 22px; height: 22px; font-size: 9px; }
@@ -2392,9 +2392,9 @@ html.dark .cv-play-btn.cv-playing { background: #047857; }
 .hdr-reciter-select option { background: #065f46; color: white; }
 
 .cv-arabic {
-  font-family: UthmanicHafs, 'Noto Naskh Arabic', serif;
+  font-family: 'Amiri Quran', 'Scheherazade New', serif;
   font-size: 20px;
-  line-height: 1.9;
+  line-height: 2.2;
   color: #1e293b;
   text-align: right;
   direction: rtl;
