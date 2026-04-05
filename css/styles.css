@@ -478,12 +478,13 @@ html.dark .saved-surah-name { color: var(--gray-100); }
 #quran-reader { display: none; }
 .bismillah {
   text-align: center;
-  font-size: 20px;
+  font-size: 22px;
   color: var(--emerald-dark);
   padding: 14px 20px;
   border-bottom: 1px solid var(--gray-100);
-  font-weight: 600;
-  font-family: 'Scheherazade New', 'Noto Naskh Arabic', serif;
+  font-family: 'Amiri Quran', 'Scheherazade New', serif;
+  text-rendering: optimizeLegibility;
+  line-height: 2.0;
 }
 .ayah {
   padding: 12px 16px;
@@ -1511,28 +1512,30 @@ html.dark .mushaf-hint { background: #1f2937; color: #6b7280; border-color: #374
 
 .mushaf-bismillah {
   text-align: center;
-  font-family: 'UthmanicHafs', 'Noto Naskh Arabic', serif;
-  font-size: 20px;
+  font-family: 'Amiri Quran', 'Scheherazade New', serif;
+  font-size: 22px;
   color: #111827;
   direction: rtl;
-  padding: 6px 0 10px;
+  padding: 8px 0 12px;
   margin-bottom: 4px;
+  text-rendering: optimizeLegibility;
 }
 
 .mushaf-arabic-page {
-  font-family: 'UthmanicHafs', 'Noto Naskh Arabic', serif;
-  font-size: 18px;
-  line-height: 1.85;
+  font-family: 'Amiri Quran', 'Scheherazade New', serif;
+  font-size: 20px;
+  line-height: 2.4;
   direction: rtl;
   text-align: justify;
   text-align-last: right;
   color: #111827;
-  word-spacing: 0px;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "liga" 1, "kern" 1;
 }
 
 .mushaf-anum {
-  font-family: 'UthmanicHafs', 'Noto Naskh Arabic', serif;
-  font-size: 14px;
+  font-family: 'Amiri Quran', 'Scheherazade New', serif;
+  font-size: 0.8em;
   color: #059669;
   margin: 0 1px;
   cursor: pointer;
@@ -2043,9 +2046,11 @@ html.dark .share-dua-btn { background: #334155; border-color: #475569; color: #9
 
   /* Study view ayahs */
   .ayah { padding: 10px 14px; }
-  .ayah-arabic { font-size: 19px; line-height: 1.7; margin-bottom: 6px; }
+  .ayah-arabic { font-size: 20px; line-height: 2.1; margin-bottom: 6px; }
   .ayah-english { font-size: 12px; line-height: 1.6; }
-  .bismillah { font-size: 18px; padding: 10px 16px; }
+  .bismillah { font-size: 20px; padding: 10px 16px; }
+  .ayah-arabic-card { font-size: 21px; line-height: 2.2; }
+  .mushaf-arabic-page { font-size: 18px; line-height: 2.3; }
   .ayah-btn { padding: 3px 8px; font-size: 11px; }
   .ayah-actions { gap: 5px; margin-top: 4px; }
   .ayah-num-badge { width: 22px; height: 22px; font-size: 9px; }
@@ -3150,12 +3155,14 @@ html.dark .settings-value-off { color: #f87171; }
 }
 .ayah-card-btn.bookmarked { background: #d1fae5; }
 .ayah-arabic-card {
-  font-size: 20px;
+  font-size: 22px;
   text-align: right;
-  line-height: 1.8;
+  line-height: 2.2;
   color: #0f172a;
-  font-family: UthmanicHafs, 'Noto Naskh Arabic', serif;
+  font-family: 'Amiri Quran', 'Scheherazade New', serif;
   margin-bottom: 10px;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "liga" 1, "kern" 1;
 }
 .ayah-english-card {
   font-size: 12px;
@@ -3468,7 +3475,7 @@ body, #app { background: #eef2f7; }
 /* ── 13. Bismillah — slightly more presence ─────────────────────── */
 .bismillah {
   color: #065f46;
-  font-size: 22px;
+  font-size: 24px;
   border-bottom: 1px solid #d1fae5;
   background: #f0fdf4;
 }
