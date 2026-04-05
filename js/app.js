@@ -83,7 +83,7 @@ const state = {
   dhikrCounts: (() => { try { return JSON.parse(localStorage.getItem('huda_dhikr') || '{}'); } catch(e) { return {}; } })(),
   hadithIndex: (() => { const d = new Date(); return (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate()) % (typeof HADITHS !== 'undefined' ? HADITHS.length : 40); })(),
   darkMode: localStorage.getItem('huda_dark') === '1',
-  fontSize: parseInt(localStorage.getItem('huda_fontsize') || '24') || 24,
+  fontSize: parseInt(localStorage.getItem('huda_fontsize') || '26') || 26,
   bookmarks: (() => { try { return JSON.parse(localStorage.getItem('huda_bookmarks') || '[]'); } catch(e) { return []; } })(),
   surahBookmarks: (() => { try { return JSON.parse(localStorage.getItem('huda_surah_bm') || '[]'); } catch(e) { return []; } })(),
   reciter: localStorage.getItem('huda_reciter') || 'ar.alafasy',

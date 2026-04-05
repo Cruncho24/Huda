@@ -1450,7 +1450,7 @@ html.dark .ri-btn.active { background: #064e3b; border-color: var(--emerald); co
 
 /* ── Mushaf (Page View) ─────────────────────────────────────── */
 #mushaf-page {
-  background: #ffffff;
+  background: #fdf8f0;
   overflow-y: auto;
 }
 
@@ -1458,7 +1458,7 @@ html.dark .ri-btn.active { background: #064e3b; border-color: var(--emerald); co
   position: sticky;
   top: 0;
   z-index: 5;
-  background: #ffffff;
+  background: #fdf8f0;
   border-bottom: 1px solid #e5e7eb;
   display: flex;
   align-items: center;
@@ -1503,56 +1503,57 @@ html.dark .mushaf-audio-btn:active { background: #047857; }
 
 html.dark .mushaf-hint { background: #1f2937; color: #6b7280; border-color: #374151; }
 
-.mushaf-scroll-body { padding: 0 0 24px; }
+.mushaf-scroll-body { padding: 0 0 40px; }
 
 .mushaf-page-block {
-  padding: 16px 18px 0;
+  padding: 20px 22px 0;
   margin-bottom: 0;
 }
 
 .mushaf-bismillah {
   text-align: center;
   font-family: 'Amiri Quran', 'Scheherazade New', serif;
-  font-size: 22px;
-  color: #111827;
+  font-size: 26px;
+  color: #1a1207;
   direction: rtl;
-  padding: 8px 0 12px;
+  padding: 10px 0 14px;
   margin-bottom: 4px;
   text-rendering: optimizeLegibility;
+  line-height: 3.0;
 }
 
 .mushaf-arabic-page {
   font-family: 'Amiri Quran', 'Scheherazade New', serif;
-  font-size: 20px;
-  line-height: 2.4;
+  font-size: 22px;
+  line-height: 3.2;
   direction: rtl;
   text-align: justify;
   text-align-last: right;
-  color: #111827;
+  color: #1a1207;
   text-rendering: optimizeLegibility;
-  font-feature-settings: "liga" 1, "kern" 1;
+  word-spacing: 0.05em;
 }
 
+/* Ayah number marker — styled as an ornamental medallion like a physical Quran */
 .mushaf-anum {
   font-family: 'Amiri Quran', 'Scheherazade New', serif;
-  font-size: clamp(13px, 0.75em, 18px);
-  color: #059669;
-  margin: 0 1px;
+  font-size: clamp(11px, 0.7em, 16px);
+  color: #7c5c1e;
+  margin: 0 3px;
   cursor: pointer;
-  border-radius: 50%;
-  padding: 0 1px;
-  transition: background 0.15s, color 0.15s;
   display: inline-block;
+  transition: opacity 0.15s;
+  vertical-align: middle;
 }
-.mushaf-anum:active { background: rgba(5,150,105,0.15); }
+.mushaf-anum:active { opacity: 0.5; }
 .mushaf-anum.maud-playing {
-  background: #059669;
-  color: white;
+  color: #059669;
+  font-weight: 700;
   animation: mushaf-pulse 0.8s ease infinite;
 }
 @keyframes mushaf-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  50% { opacity: 0.5; }
 }
 
 /* ── Mushaf word highlighting ───────────────────────────────── */
@@ -1603,10 +1604,11 @@ html.dark .ak-reciter-select { border-color: rgba(255,255,255,0.15); }
 .mushaf-page-divider {
   text-align: center;
   font-size: 11px;
-  color: #9ca3af;
-  padding: 16px 0 20px;
-  border-bottom: 1px solid #e5e7eb;
-  letter-spacing: 1px;
+  color: #a0845c;
+  padding: 18px 0 22px;
+  border-bottom: 1px solid #e8dcc8;
+  letter-spacing: 2px;
+  font-weight: 500;
 }
 .mushaf-page-block:last-child .mushaf-page-divider { border-bottom: none; }
 
@@ -1706,13 +1708,15 @@ html.dark .search-bar { background: #1e293b; border-color: #334155; }
 html.dark .ayah { border-color: #334155; }
 html.dark .bismillah { border-color: #334155; }
 html.dark .dua-nav-btn { background: #1e293b; border-color: #334155; color: #cbd5e1; }
-html.dark .mushaf-arabic-page { color: #f3f4f6; }
-html.dark #mushaf-page { background: #111827; }
-html.dark .mushaf-sticky-header { background: #1f2937; border-color: #374151; }
+html.dark .mushaf-arabic-page { color: #f3e8c8; }
+html.dark #mushaf-page { background: #0f0e0b; }
+html.dark .mushaf-sticky-header { background: #1a1810; border-color: #2d2a1f; }
+html.dark .mushaf-bismillah { color: #f3e8c8; }
+html.dark .mushaf-anum { color: #c9a35a; }
 html.dark .mushaf-meta { color: #9ca3af; }
 html.dark .mushaf-meta-center { color: #f3f4f6; }
 html.dark .mushaf-bismillah { color: #f3f4f6; }
-html.dark .mushaf-page-divider { color: #6b7280; border-color: #374151; }
+html.dark .mushaf-page-divider { color: #8a7250; border-color: #2d2a1f; }
 html.dark .tab-switch-btn.active { background: #334155; color: #d1fae5; }
 html.dark .result-row { border-color: #334155; }
 html.dark .disclaimer { background: #2d2200; border-color: #4a3800; color: #fcd34d; }
@@ -3157,12 +3161,11 @@ html.dark .settings-value-off { color: #f87171; }
 .ayah-arabic-card {
   font-size: 22px;
   text-align: right;
-  line-height: 2.2;
-  color: #0f172a;
+  line-height: 2.8;
+  color: #1a1207;
   font-family: 'Amiri Quran', 'Scheherazade New', serif;
   margin-bottom: 10px;
   text-rendering: optimizeLegibility;
-  font-feature-settings: "liga" 1, "kern" 1;
 }
 .ayah-english-card {
   font-size: 12px;
