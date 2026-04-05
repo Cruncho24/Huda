@@ -55,6 +55,7 @@ function renderHome() {
   const isRamadan = hijri.month === 9;
   const h = HADITHS[state.hadithIndex % HADITHS.length];
   const lastRead = (() => { try { return JSON.parse(localStorage.getItem('huda_last_read') || 'null'); } catch(e) { return null; } })();
+  const audioPos = (() => { try { return JSON.parse(localStorage.getItem('huda_audio_pos') || 'null'); } catch(e) { return null; } })();
 
   // Compute next prayer for hero pill
   let _pillHtml;
@@ -150,6 +151,22 @@ function renderHome() {
     <div style="padding:12px 12px 0" id="plan-card-wrap">
       ${renderPlanCard()}
     </div>
+
+    ${audioPos?.surah ? (() => {
+      const s = SURAHS[audioPos.surah - 1];
+      return `
+    <div style="position:relative;margin:0 12px 10px">
+      <div class="continue-card" onclick="resumeAudioPos()" style="margin:0;border-color:#059669">
+        <div>
+          <div class="card-section-label" style="color:#059669">▶ Continue Listening</div>
+          <div style="font-size:15px;font-weight:700;color:#065f46">${s ? esc(s[1]) : 'Surah ' + audioPos.surah}</div>
+          <div style="font-size:12px;color:#94a3b8;margin-top:1px">${s ? esc(s[2]) : ''}${audioPos.ayah ? ` · Ayah ${audioPos.ayah}` : ''}</div>
+        </div>
+        <div class="continue-icon-well" style="background:#d1fae5">🎧</div>
+      </div>
+      <button onclick="clearAudioPos();renderHome()" style="position:absolute;top:8px;right:8px;background:none;border:none;color:#94a3b8;font-size:20px;cursor:pointer;padding:4px;line-height:1;z-index:1" title="Dismiss">×</button>
+    </div>`;
+    })() : ''}
 
     ${lastRead?.view === 'page' ? `
     <div style="position:relative;margin:0 12px 10px">
@@ -445,7 +462,7 @@ function openSettings() {
           </div>
           <div class="settings-row">
             <span class="settings-label" style="color:#6b7280">Version</span>
-            <span class="settings-value" style="color:#9ca3af">v152</span>
+            <span class="settings-value" style="color:#9ca3af">v153</span>
           </div>
         </div>
 

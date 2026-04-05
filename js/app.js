@@ -456,6 +456,51 @@ function removeSurahBookmark(num) {
   renderHome();
 }
 
+// ── Audio position persistence ────────────────────────────────
+// Saves current playback position so the app can resume after reload/reopen.
+function saveAudioPos() {
+  const { playingSurah, playingAyah, playingId } = state.audio;
+  if (!playingSurah) return;
+  try {
+    localStorage.setItem('huda_audio_pos', JSON.stringify({
+      surah: playingSurah,
+      ayah: playingAyah || 1,
+      globalNum: playingId,
+      mode: state.quran.viewMode,
+      reciter: state.reciter,
+      ts: Date.now(),
+    }));
+  } catch(e) {}
+}
+
+function clearAudioPos() {
+  localStorage.removeItem('huda_audio_pos');
+}
+
+// Called from "Continue Listening" card on home screen
+function resumeAudioPos() {
+  let pos;
+  try { pos = JSON.parse(localStorage.getItem('huda_audio_pos') || 'null'); } catch(e) {}
+  if (!pos?.surah) return;
+  if (pos.reciter) { state.reciter = pos.reciter; localStorage.setItem('huda_reciter', pos.reciter); }
+  if (pos.mode) state.quran.viewMode = pos.mode;
+  switchTab('quran');
+  setTimeout(() => {
+    openSurah(pos.surah, pos.ayah).then(() => {
+      const cache = state.quran.cache[pos.surah];
+      if (!cache) return;
+      if (pos.mode === 'page') {
+        const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === pos.ayah) || cache.arData.ayahs[0];
+        if (ayahObj) playMushafAyah(ayahObj.number, pos.surah, ayahObj.numberInSurah);
+        else mushafPlayAll(pos.surah);
+      } else {
+        const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === pos.ayah) || cache.arData.ayahs[0];
+        if (ayahObj) playAyah(ayahObj.number, pos.surah, ayahObj.numberInSurah);
+      }
+    });
+  }, 100);
+}
+
 // ── Audio ─────────────────────────────────────────────────────
 function playAyah(globalNum, surahNum, ayahNum) {
   const btnId = `aud-${globalNum}`;
@@ -472,20 +517,25 @@ function playAyah(globalNum, surahNum, ayahNum) {
   }
   const audio = new Audio(getAyahUrl(globalNum, surahNum, ayahNum));
   state.audio = { player: audio, playingId: globalNum, playingSurah: surahNum, playingAyah: ayahNum, paused: false };
+  saveAudioPos();
   const btn = document.getElementById(btnId);
   if (btn) { btn.textContent = '⏸'; btn.classList.add('playing'); }
   const card = document.getElementById(`ayah-${ayahNum}`);
   if (card) card.classList.add('maud-playing-card');
 
-  // Sync state with system-level interruptions (calls, Bluetooth, Siri)
+  // Sync state with system-level interruptions (calls, Bluetooth, Siri, other devices)
   audio.onpause = () => {
     if (state.audio.player !== audio) return;
     state.audio.paused = true;
+    const b = document.getElementById(`aud-${globalNum}`);
+    if (b) b.textContent = '▶'; // show resume button so user knows it's paused
     if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
   };
   audio.onplay = () => {
     if (state.audio.player !== audio) return;
     state.audio.paused = false;
+    const b = document.getElementById(`aud-${globalNum}`);
+    if (b) b.textContent = '⏸';
     _registerMediaSession(); // reclaim lock screen after another app interrupts
   };
 
@@ -498,22 +548,25 @@ function playAyah(globalNum, surahNum, ayahNum) {
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
     showToast('Audio unavailable — check connection');
   });
-  audio.onended = () => {
-    if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
+
+  const _advanceStudy = () => {
+    const b = document.getElementById(`aud-${globalNum}`);
+    if (b) { b.textContent = '▶'; b.classList.remove('playing'); }
     if (card) card.classList.remove('maud-playing-card');
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+    // Chain to next ayah — look up surah/ayah from DOM rather than fragile .click()
     const nextBtn = document.getElementById(`aud-${globalNum + 1}`);
-    if (nextBtn) nextBtn.click();
-    else advanceToNextSurah();
+    if (nextBtn) {
+      const parentCard = nextBtn.closest('.ayah');
+      const ns = parentCard ? +parentCard.dataset.surah : surahNum;
+      const na = parentCard ? +parentCard.dataset.ayah : ayahNum + 1;
+      playAyah(globalNum + 1, ns, na);
+    } else {
+      advanceToNextSurah();
+    }
   };
-  audio.onerror = () => {
-    if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
-    if (card) card.classList.remove('maud-playing-card');
-    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
-    const nextBtn = document.getElementById(`aud-${globalNum + 1}`);
-    if (nextBtn) nextBtn.click();
-    else advanceToNextSurah();
-  };
+  audio.onended = _advanceStudy;
+  audio.onerror = _advanceStudy;
 }
 
 // Play a single ayah from the category view — no chaining when done

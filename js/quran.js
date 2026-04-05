@@ -544,6 +544,7 @@ function _surahTimeUpdate() {
         if (_surahBadge) _surahBadge.classList.add('maud-playing');
       }
       state.audio.playingAyah = an;
+      saveAudioPos();
       updateMushafPlayerBar();
       return;
     }
@@ -664,6 +665,7 @@ function _mushafSetupOnEnded(audio, globalNum, surahNum, ayahNum) {
     const prevBadge = document.getElementById(`maud-${globalNum}`);
     if (prevBadge) prevBadge.classList.remove('maud-playing');
     state.audio = { player: nextAudio, playingId: globalNum + 1, playingSurah: ns, playingAyah: na, paused: false };
+    saveAudioPos();
     const nextBadge = document.getElementById(`maud-${globalNum + 1}`);
     if (nextBadge) nextBadge.classList.add('maud-playing');
 
@@ -746,6 +748,7 @@ function playMushafAyah(globalNum, surahNum, ayahNum) {
 
   // Set state before play() so onplay handler reads the correct surah/ayah
   state.audio = { player: audio, playingId: globalNum, playingSurah: surahNum, playingAyah: ayahNum, paused: false };
+  saveAudioPos();
   audio.play().catch(() => { mushafStop(); });
 
   const badge = document.getElementById(`maud-${globalNum}`);
@@ -807,6 +810,7 @@ function mushafPlayAll(surahNum) {
   } else {
     state.audio = { player: _surahAudio, playingId: -1, playingSurah: surahNum, playingAyah: 1, paused: false };
   }
+  saveAudioPos();
 
   _surahAudio.play().catch(() => mushafStop());
   _surahAudio.onended = () => advanceToNextSurah();
@@ -894,6 +898,7 @@ function mushafStop() {
   _surahBadge = null;
   _surahTiming = null;
   state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+  clearAudioPos();
   clearSleepTimer(); // always cancel sleep timer on stop (idempotent)
   if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
   updateMushafPlayBtn(false);
@@ -930,11 +935,10 @@ function updateMushafPlayerBar() {
   if (playing) {
     const s = SURAHS[state.audio.playingSurah - 1];
     const surahName = s ? s[1] : '';
-    const surahEn = s ? s[2] : '';
-    const ayah = state.audio.playingAyah;
+    const ayahLabel = state.audio.playingAyah ? `:${state.audio.playingAyah}` : '';
 
     const info = document.getElementById('mpb-info');
-    if (info) info.textContent = surahName;
+    if (info) info.textContent = surahName + ayahLabel;
 
     const btn = document.getElementById('mpb-pause-btn');
     if (btn) btn.textContent = state.audio.paused ? '▶' : '⏸';
