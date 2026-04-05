@@ -83,7 +83,7 @@ const state = {
   dhikrCounts: (() => { try { return JSON.parse(localStorage.getItem('huda_dhikr') || '{}'); } catch(e) { return {}; } })(),
   hadithIndex: (() => { const d = new Date(); return (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate()) % (typeof HADITHS !== 'undefined' ? HADITHS.length : 40); })(),
   darkMode: localStorage.getItem('huda_dark') === '1',
-  fontSize: parseInt(localStorage.getItem('huda_fontsize') || '26') || 26,
+  fontSize: parseInt(localStorage.getItem('huda_fontsize') || '28') || 28,
   bookmarks: (() => { try { return JSON.parse(localStorage.getItem('huda_bookmarks') || '[]'); } catch(e) { return []; } })(),
   surahBookmarks: (() => { try { return JSON.parse(localStorage.getItem('huda_surah_bm') || '[]'); } catch(e) { return []; } })(),
   reciter: localStorage.getItem('huda_reciter') || 'ar.alafasy',
@@ -750,7 +750,7 @@ function dismissInstall() {
 
 // ── Font Size ─────────────────────────────────────────────────
 function changeFontSize(delta) {
-  state.fontSize = Math.max(16, Math.min(36, state.fontSize + delta));
+  state.fontSize = Math.max(18, Math.min(42, state.fontSize + delta));
   localStorage.setItem('huda_fontsize', state.fontSize);
   debouncedPush();
   // Re-render mushaf if open
