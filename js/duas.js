@@ -124,6 +124,7 @@ function renderProphetDuaReader() {
       <button class="dua-nav-btn" onclick="changeProphetDua(1)" ${i === duas.length - 1 ? 'disabled' : ''}>Next →</button>
     </div>` : ''}
   `;
+  if (duas.length > 1) _attachDuaSwipe(tab.querySelector('.dua-card'), dir => changeProphetDua(dir));
 }
 
 function changeProphetDua(dir) {
@@ -170,6 +171,21 @@ function renderDuaReader() {
       <button class="dua-nav-btn" onclick="changeDua(1)" ${i === duas.length - 1 ? 'disabled' : ''}>Next →</button>
     </div>
   `;
+  _attachDuaSwipe(tab.querySelector('.dua-card'), dir => changeDua(dir));
+}
+
+function _attachDuaSwipe(el, onSwipe) {
+  let _sx = 0, _sy = 0;
+  el.addEventListener('touchstart', e => {
+    _sx = e.touches[0].clientX;
+    _sy = e.touches[0].clientY;
+  }, { passive: true });
+  el.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - _sx;
+    const dy = e.changedTouches[0].clientY - _sy;
+    if (Math.abs(dx) < 50 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    onSwipe(dx < 0 ? 1 : -1);
+  }, { passive: true });
 }
 
 function changeDua(dir) {
