@@ -27,7 +27,7 @@ const RECITERS = [
   {
     id: 'ar.mahermuaiqly', name: 'Maher Al-Muqaili',
     surahUrl: n => `https://download.quranicaudio.com/quran/maher_256/${String(n).padStart(3,'0')}.mp3`,
-    perAyahUrl: (s, a) => `https://everyayah.com/data/Maher_Al_Muaiqly_128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
+    perAyahUrl: (s, a) => `https://everyayah.com/data/MaherAlMuaiqly128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
   },
   {
     id: 'ar.abdullahbasfar', name: 'Abdullah Basfar',
