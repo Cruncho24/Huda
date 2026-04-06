@@ -273,7 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderHome();
   fetchAndCacheHijri(new Date());
   registerSW();
-  setupSwipeNav();
   setupInstallPrompt();
 
   // Handle notification tap — open to specific tab (whitelist to prevent invalid state)
@@ -725,26 +724,6 @@ function registerSW() {
   });
 }
 
-// ── Swipe between main tabs ───────────────────────────────────
-function setupSwipeNav() {
-  const TABS = ['home', 'quran', 'prayer', 'dhikr', 'duas', 'learn'];
-  let _sx = 0, _sy = 0;
-  document.addEventListener('touchstart', e => {
-    _sx = e.touches[0].clientX;
-    _sy = e.touches[0].clientY;
-  }, { passive: true });
-  document.addEventListener('touchend', e => {
-    // Dhikr handles its own internal swipe
-    if (state.activeTab === 'dhikr') return;
-    const dx = e.changedTouches[0].clientX - _sx;
-    const dy = e.changedTouches[0].clientY - _sy;
-    // Must be clearly horizontal (>60px, more horizontal than vertical)
-    if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
-    const idx = TABS.indexOf(state.activeTab);
-    if (dx < 0 && idx < TABS.length - 1) switchTab(TABS[idx + 1]);
-    if (dx > 0 && idx > 0) switchTab(TABS[idx - 1]);
-  }, { passive: true });
-}
 
 let deferredPrompt = null;
 function setupInstallPrompt() {
