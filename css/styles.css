@@ -3240,23 +3240,6 @@ html.dark .dhikr-nav-bar {
   background: #111827;
   border-color: #1f2937;
 }
-.dhikr-nav-chevron {
-  flex-shrink: 0;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid #e2e8f0;
-  background: white;
-  font-size: 16px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-html.dark .dhikr-nav-chevron {
-  background: #1e293b;
-  border-color: #334155;
-}
 .dhikr-counter-text {
   font-size: 28px;
   color: #065f46;
@@ -3313,23 +3296,25 @@ html.dark .dhikr-nav-chevron {
 }
 .dhikr-tap-btn:active { transform: scale(0.95); }
 .dhikr-hint { margin-top: 10px; font-size: 12px; color: #94a3b8; }
-.dhikr-tabs-bar {
-  background: transparent;
-  padding: 4px 0;
-  display: flex;
+.dhikr-tabs-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 6px;
+  padding: 10px 12px 12px;
 }
 .dhikr-tab-btn {
-  flex: 1;
   border-radius: 10px;
-  padding: 7px;
+  padding: 8px 4px;
   text-align: center;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  border: 1px solid #f1f5f9;
+  border: 1px solid #e8edf2;
   background: white;
-  color: #94a3b8;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   -webkit-tap-highlight-color: transparent;
 }
 .dhikr-tab-btn.active {
@@ -3353,7 +3338,7 @@ html.dark .ayah-num-badge-card { background: #0f2d1e; }
 html.dark .dhikr-counter-area { background: #1e293b; }
 html.dark .dhikr-counter-text { color: #6ee7b7; }
 html.dark .dhikr-counter-number { color: #f1f5f9; }
-html.dark .dhikr-tabs-bar { background: #111827; }
+html.dark .dhikr-tabs-grid { background: transparent; }
 html.dark .dhikr-counter-foot .dhikr-source { color: #64748b; }
 html.dark .dhikr-tab-btn { background: #1e293b; border-color: #334155; color: #64748b; }
 html.dark .dhikr-tab-btn.active { background: #059669; color: white; border-color: #059669; }

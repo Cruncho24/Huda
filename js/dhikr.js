@@ -14,31 +14,15 @@ function renderDhikr() {
   const totalTabs = tabNames.length;
   const streak = computeStreak();
 
-  const navDots = tabNames.map((_, i) => `
-    <div onclick="switchDhikrTab(${i})" style="cursor:pointer;width:${i === _dhikrTab ? 20 : 6}px;height:6px;border-radius:3px;background:${i === _dhikrTab ? '#059669' : '#cbd5e1'};transition:all 0.25s ease"></div>
-  `).join('');
-
   const tabBtns = tabNames.map((name, i) => `
     <button class="dhikr-tab-btn ${i === _dhikrTab ? 'active' : ''}"
-      style="white-space:nowrap;flex-shrink:0;"
       onclick="switchDhikrTab(${i})">${name}</button>
   `).join('');
 
-  const prevDisabled = _dhikrTab === 0;
-  const nextDisabled = _dhikrTab === totalTabs - 1;
   const navBar = `
     <div class="dhikr-nav-bar">
-      <div style="display:flex;align-items:center;gap:6px;padding:0 12px 4px">
-        <button class="dhikr-nav-chevron" onclick="switchDhikrTab(${_dhikrTab - 1})" ${prevDisabled ? 'disabled' : ''}
-          style="color:${prevDisabled ? '#cbd5e1' : '#059669'}">‹</button>
-        <div class="dhikr-tabs-bar" style="overflow-x:auto;-webkit-overflow-scrolling:touch;flex-wrap:nowrap;flex:1;margin:0;padding:6px 0">
-          ${tabBtns}
-        </div>
-        <button class="dhikr-nav-chevron" onclick="switchDhikrTab(${_dhikrTab + 1})" ${nextDisabled ? 'disabled' : ''}
-          style="color:${nextDisabled ? '#cbd5e1' : '#059669'}">›</button>
-      </div>
-      <div style="display:flex;justify-content:center;align-items:center;gap:6px;padding:0 12px 6px">
-        ${navDots}
+      <div class="dhikr-tabs-grid">
+        ${tabBtns}
       </div>
     </div>`;
 
