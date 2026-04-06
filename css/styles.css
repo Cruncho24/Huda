@@ -3214,10 +3214,29 @@ html.dark #reader-content { background: #0f172a; }
   font-weight: 700;
   margin-top: 4px;
 }
+#tab-dhikr.active {
+  display: flex;
+  flex-direction: column;
+}
 .dhikr-counter-area {
   background: white;
-  padding: 20px 20px 16px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
   text-align: center;
+  padding: 0;
+}
+.dhikr-counter-core {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px 20px 10px;
+}
+.dhikr-counter-foot {
+  padding: 0 16px 16px;
+  text-align: left;
 }
 .dhikr-counter-text {
   font-size: 28px;

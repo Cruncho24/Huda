@@ -56,15 +56,17 @@ function renderDhikr() {
         </button>
       </div>
       <div class="dhikr-counter-area">
-        <div class="dhikr-counter-text" style="font-size:22px;font-weight:600;color:#059669">Free Counter</div>
-        <div class="dhikr-counter-transliteration">Count anything — no limit</div>
-        <div class="dhikr-counter-number" id="dhikr-count-display">${count}</div>
-        <div class="dhikr-counter-of" style="opacity:0">—</div>
-        <div class="dhikr-progress-bar" style="visibility:hidden">
-          <div class="dhikr-progress-fill" style="width:0%"></div>
+        <div class="dhikr-counter-core">
+          <div class="dhikr-counter-text" style="font-size:22px;font-weight:600;color:#059669">Free Counter</div>
+          <div class="dhikr-counter-transliteration">Count anything — no limit</div>
+          <div class="dhikr-counter-number" id="dhikr-count-display">${count}</div>
+          <div class="dhikr-counter-of" style="opacity:0">—</div>
+          <div class="dhikr-progress-bar" style="visibility:hidden">
+            <div class="dhikr-progress-fill" style="width:0%"></div>
+          </div>
+          <button class="dhikr-tap-btn" onclick="tapFreeCounter()">✦</button>
+          <div class="dhikr-hint">Tap to count · Hold to reset</div>
         </div>
-        <button class="dhikr-tap-btn" onclick="tapFreeCounter()">✦</button>
-        <div class="dhikr-hint">Tap to count · Hold to reset</div>
       </div>
       ${navBar}`;
 
@@ -103,17 +105,22 @@ function renderDhikr() {
       </button>
     </div>
     <div class="dhikr-counter-area${isComplete ? ' dhikr-complete' : ''}">
-      <div class="dhikr-counter-text">${d.arabic}</div>
-      <div class="dhikr-counter-transliteration">${d.transliteration} · ${d.meaning}</div>
-      <div class="dhikr-counter-number" id="dhikr-count-display">${count}</div>
-      <div class="dhikr-counter-of">of ${d.target}${isComplete ? ' ✓' : ''}</div>
-      <div class="dhikr-progress-bar">
-        <div class="dhikr-progress-fill" id="dhikr-prog" style="width:${pct}%"></div>
+      <div class="dhikr-counter-core">
+        <div class="dhikr-counter-text">${d.arabic}</div>
+        <div class="dhikr-counter-transliteration">${d.transliteration} · ${d.meaning}</div>
+        <div class="dhikr-counter-number" id="dhikr-count-display">${count}</div>
+        <div class="dhikr-counter-of">of ${d.target}${isComplete ? ' ✓' : ''}</div>
+        <div class="dhikr-progress-bar">
+          <div class="dhikr-progress-fill" id="dhikr-prog" style="width:${pct}%"></div>
+        </div>
+        <button class="dhikr-tap-btn" onclick="tapActiveDhikr()">✦</button>
+        <div class="dhikr-hint">Tap to count · Hold to reset</div>
       </div>
-      <button class="dhikr-tap-btn" onclick="tapActiveDhikr()">✦</button>
-      <div class="dhikr-hint">Tap to count · Hold to reset</div>
-      ${d.reward ? `<div class="dhikr-reward" style="margin-top:16px;text-align:left">🌟 ${d.reward}</div>` : ''}
-      <div class="dhikr-source" style="margin-top:6px;text-align:left">${d.source}</div>
+      ${d.reward || d.source ? `
+      <div class="dhikr-counter-foot">
+        ${d.reward ? `<div class="dhikr-reward">🌟 ${d.reward}</div>` : ''}
+        ${d.source ? `<div class="dhikr-source">${d.source}</div>` : ''}
+      </div>` : ''}
     </div>
     ${navBar}
   `;
