@@ -3199,7 +3199,7 @@ html.dark #reader-content { background: #0f172a; }
 /* ── Dhikr Counter Redesign ────────────────────────────────── */
 .dhikr-header-new {
   background: linear-gradient(160deg, #047857 0%, #065f46 100%);
-  padding: calc(20px + env(safe-area-inset-top,0px)) 18px 20px;
+  padding: calc(14px + env(safe-area-inset-top,0px)) 18px 14px;
   color: white;
   text-align: center;
 }
@@ -3216,40 +3216,40 @@ html.dark #reader-content { background: #0f172a; }
 }
 .dhikr-counter-area {
   background: white;
-  padding: 28px 20px;
+  padding: 20px 20px 16px;
   text-align: center;
 }
 .dhikr-counter-text {
   font-size: 28px;
   color: #065f46;
   font-family: 'UthmanicHafs', 'Scheherazade New', serif;
-  margin-bottom: 4px;
-  line-height: 2.0;
+  margin-bottom: 2px;
+  line-height: 1.5;
 }
 .dhikr-counter-transliteration {
   font-size: 13px;
   color: #94a3b8;
-  margin-bottom: 28px;
+  margin-bottom: 14px;
 }
 .dhikr-counter-number {
-  font-size: 72px;
+  font-size: 64px;
   font-weight: 800;
   color: #0f172a;
   line-height: 1;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
 }
 .dhikr-counter-of {
   font-size: 13px;
   color: #94a3b8;
-  margin-bottom: 28px;
+  margin-bottom: 14px;
 }
 .dhikr-progress-bar {
   width: 100px;
-  height: 8px;
+  height: 7px;
   background: #f1f5f9;
   border-radius: 4px;
   overflow: hidden;
-  margin: 0 auto 24px;
+  margin: 0 auto 16px;
 }
 .dhikr-progress-fill {
   height: 100%;
@@ -3258,14 +3258,14 @@ html.dark #reader-content { background: #0f172a; }
   transition: width 0.2s;
 }
 .dhikr-tap-btn {
-  width: 110px;
-  height: 110px;
+  width: 96px;
+  height: 96px;
   border-radius: 50%;
   background: linear-gradient(160deg, #059669, #047857);
   border: none;
   color: white;
-  font-size: 32px;
-  box-shadow: 0 8px 24px rgba(5,150,105,0.35);
+  font-size: 28px;
+  box-shadow: 0 6px 20px rgba(5,150,105,0.35);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -3274,7 +3274,7 @@ html.dark #reader-content { background: #0f172a; }
   -webkit-tap-highlight-color: transparent;
 }
 .dhikr-tap-btn:active { transform: scale(0.95); }
-.dhikr-hint { margin-top: 20px; font-size: 12px; color: #94a3b8; }
+.dhikr-hint { margin-top: 10px; font-size: 12px; color: #94a3b8; }
 .dhikr-tabs-bar {
   background: #f8fafc;
   padding: 10px 12px;

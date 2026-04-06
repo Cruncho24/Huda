@@ -39,7 +39,7 @@ function renderDhikr() {
       <button onclick="switchDhikrTab(${_dhikrTab + 1})" ${nextDisabled ? 'disabled' : ''}
         style="${navStyle(nextDisabled, nextDisabled ? '#cbd5e1' : '#059669')}">›</button>
     </div>
-    <div style="display:flex;justify-content:center;align-items:center;gap:6px;padding:0 12px 10px">
+    <div style="display:flex;justify-content:center;align-items:center;gap:6px;padding:0 12px 6px">
       ${navDots}
     </div>`;
 
