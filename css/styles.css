@@ -3214,29 +3214,31 @@ html.dark #reader-content { background: #0f172a; }
   font-weight: 700;
   margin-top: 4px;
 }
-#tab-dhikr.active {
-  display: flex;
-  flex-direction: column;
-}
 .dhikr-counter-area {
   background: white;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
   text-align: center;
   padding: 0;
 }
 .dhikr-counter-core {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   padding: 20px 20px 10px;
 }
 .dhikr-counter-foot {
   padding: 0 16px 16px;
   text-align: left;
+}
+.dhikr-nav-bar {
+  position: sticky;
+  bottom: calc(var(--nav-height) + var(--safe-bottom));
+  background: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+  z-index: 2;
+}
+html.dark .dhikr-nav-bar {
+  background: #111827;
+  border-color: #1f2937;
 }
 .dhikr-counter-text {
   font-size: 28px;
@@ -3295,11 +3297,10 @@ html.dark #reader-content { background: #0f172a; }
 .dhikr-tap-btn:active { transform: scale(0.95); }
 .dhikr-hint { margin-top: 10px; font-size: 12px; color: #94a3b8; }
 .dhikr-tabs-bar {
-  background: #f8fafc;
-  padding: 10px 12px;
+  background: transparent;
+  padding: 4px 0;
   display: flex;
   gap: 6px;
-  border-top: 1px solid #f1f5f9;
 }
 .dhikr-tab-btn {
   flex: 1;
