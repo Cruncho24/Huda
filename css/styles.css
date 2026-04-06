@@ -3240,6 +3240,23 @@ html.dark .dhikr-nav-bar {
   background: #111827;
   border-color: #1f2937;
 }
+.dhikr-nav-chevron {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #e2e8f0;
+  background: white;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+html.dark .dhikr-nav-chevron {
+  background: #1e293b;
+  border-color: #334155;
+}
 .dhikr-counter-text {
   font-size: 28px;
   color: #065f46;
@@ -3336,7 +3353,8 @@ html.dark .ayah-num-badge-card { background: #0f2d1e; }
 html.dark .dhikr-counter-area { background: #1e293b; }
 html.dark .dhikr-counter-text { color: #6ee7b7; }
 html.dark .dhikr-counter-number { color: #f1f5f9; }
-html.dark .dhikr-tabs-bar { background: #111827; border-color: #1f2937; }
+html.dark .dhikr-tabs-bar { background: #111827; }
+html.dark .dhikr-counter-foot .dhikr-source { color: #64748b; }
 html.dark .dhikr-tab-btn { background: #1e293b; border-color: #334155; color: #64748b; }
 html.dark .dhikr-tab-btn.active { background: #059669; color: white; border-color: #059669; }
 html.dark .dhikr-progress-bar { background: #334155; }
