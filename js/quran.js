@@ -696,7 +696,7 @@ function _mushafSetupOnEnded(audio, globalNum, surahNum, ayahNum) {
   };
 }
 
-function playMushafAyah(globalNum, surahNum, ayahNum) {
+function playMushafAyah(globalNum, surahNum, ayahNum, _skipSurahSeek = false) {
   // If surah audio is active for this surah, seek to the tapped ayah
   if (_surahAudio && state.audio.playingSurah === surahNum && _surahTiming) {
     const t = _surahTiming[`${surahNum}:${ayahNum}`];
@@ -720,9 +720,10 @@ function playMushafAyah(globalNum, surahNum, ayahNum) {
   if (state.audio.player || _surahAudio) mushafStop();
 
   // Reciters with full-surah URL + timing data: seek within the surah file
-  // rather than chaining per-ayah files (smoother, no gaps between ayahs)
+  // rather than chaining per-ayah files (smoother, no gaps between ayahs).
+  // _skipSurahSeek=true is passed from onerror to avoid an infinite loop.
   const _r = RECITERS.find(r => r.id === state.reciter);
-  if (_r?.surahUrl && _r?.qurancdnId) {
+  if (!_skipSurahSeek && _r?.surahUrl && _r?.qurancdnId) {
     mushafPlayAll(surahNum, ayahNum);
     return;
   }
@@ -806,7 +807,7 @@ function mushafPlayAll(surahNum, startAyah = 1) {
     const cache = state.quran.cache[surahNum];
     if (!cache) return;
     const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === resumeAyah) || cache.arData.ayahs[0];
-    playMushafAyah(ayahObj.number, surahNum, ayahObj.numberInSurah);
+    playMushafAyah(ayahObj.number, surahNum, ayahObj.numberInSurah, true);
   };
 
   // Highlight the starting ayah badge
@@ -821,21 +822,29 @@ function mushafPlayAll(surahNum, startAyah = 1) {
   }
   saveAudioPos();
 
-  _surahAudio.play().catch(() => mushafStop());
   _surahAudio.onended = () => advanceToNextSurah();
-  updateMushafPlayBtn(true);
-  updateMushafPlayerBar();
 
-  // Fetch per-ayah timestamps — seek to startAyah once ready
+  // Fetch timestamps first when seeking mid-surah so the user doesn't hear
+  // ayah 1 briefly before the seek lands. If timings are cached the Promise
+  // resolves synchronously (microtask) before any audio plays.
   fetchSurahTimings(surahNum).then(t => {
-    if (!t || _surahAudio !== state.audio.player) return;
+    if (!t || !_surahAudio || _surahAudio !== state.audio.player) return;
     _surahTiming = t;
     if (startAyah > 1) {
       const timing = t[`${surahNum}:${startAyah}`];
       if (timing) _surahAudio.currentTime = timing.from / 1000;
     }
+    _surahAudio.play().catch(() => mushafStop());
     _surahAudio.addEventListener('timeupdate', _surahTimeUpdate);
+  }).catch(() => {
+    // Timings unavailable — play from start
+    if (_surahAudio && _surahAudio === state.audio.player) {
+      _surahAudio.play().catch(() => mushafStop());
+    }
   });
+
+  updateMushafPlayBtn(true);
+  updateMushafPlayerBar();
 }
 
 function setReciter(id) {
