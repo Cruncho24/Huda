@@ -717,9 +717,15 @@ function playMushafAyah(globalNum, surahNum, ayahNum) {
   if (state.audio.playingId === globalNum && state.audio.player) {
     mushafStop(); return;
   }
-  // Stop previous — use mushafStop() to also clear _surahAudio, otherwise
-  // toggleMushafPlayback picks _surahAudio over the new per-ayah player
   if (state.audio.player || _surahAudio) mushafStop();
+
+  // Reciters with full-surah URL + timing data: seek within the surah file
+  // rather than chaining per-ayah files (smoother, no gaps between ayahs)
+  const _r = RECITERS.find(r => r.id === state.reciter);
+  if (_r?.surahUrl && _r?.qurancdnId) {
+    mushafPlayAll(surahNum, ayahNum);
+    return;
+  }
 
   // Use preloaded slot if ready, otherwise load now
   if (_poolFor[1 - _poolIdx] === globalNum) _poolIdx = 1 - _poolIdx;
@@ -764,13 +770,16 @@ function playMushafAyah(globalNum, surahNum, ayahNum) {
   _mushafSetupOnEnded(audio, globalNum, surahNum, ayahNum);
 }
 
-function mushafPlayAll(surahNum) {
+function mushafPlayAll(surahNum, startAyah = 1) {
   mushafStop();
   const url = getSurahAudioUrl(surahNum);
   // No gapless audio for this reciter — fall back to per-ayah chain
   if (!url) {
     const cache = state.quran.cache[surahNum];
-    if (cache) playMushafAyah(cache.arData.ayahs[0].number, surahNum, 1);
+    if (cache) {
+      const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === startAyah) || cache.arData.ayahs[0];
+      playMushafAyah(ayahObj.number, surahNum, ayahObj.numberInSurah);
+    }
     return;
   }
   _surahAudio = new Audio(url);
@@ -791,7 +800,7 @@ function mushafPlayAll(surahNum) {
   };
   _surahAudio.onerror = () => {
     // Fall back to per-ayah from the ayah we were on (not always restart from 1)
-    const resumeAyah = state.audio.playingAyah || 1;
+    const resumeAyah = state.audio.playingAyah || startAyah;
     _surahAudio = null; _surahTiming = null;
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
     const cache = state.quran.cache[surahNum];
@@ -800,15 +809,15 @@ function mushafPlayAll(surahNum) {
     playMushafAyah(ayahObj.number, surahNum, ayahObj.numberInSurah);
   };
 
-  // Highlight first ayah badge if cache is ready
+  // Highlight the starting ayah badge
   const cache = state.quran.cache[surahNum];
   if (cache && cache.arData) {
-    const first = cache.arData.ayahs[0];
-    _surahBadge = document.getElementById(`maud-${first.number}`);
+    const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === startAyah) || cache.arData.ayahs[0];
+    _surahBadge = document.getElementById(`maud-${ayahObj.number}`);
     if (_surahBadge) _surahBadge.classList.add('maud-playing');
-    state.audio = { player: _surahAudio, playingId: first.number, playingSurah: surahNum, playingAyah: 1, paused: false };
+    state.audio = { player: _surahAudio, playingId: ayahObj.number, playingSurah: surahNum, playingAyah: startAyah, paused: false };
   } else {
-    state.audio = { player: _surahAudio, playingId: -1, playingSurah: surahNum, playingAyah: 1, paused: false };
+    state.audio = { player: _surahAudio, playingId: -1, playingSurah: surahNum, playingAyah: startAyah, paused: false };
   }
   saveAudioPos();
 
@@ -817,10 +826,14 @@ function mushafPlayAll(surahNum) {
   updateMushafPlayBtn(true);
   updateMushafPlayerBar();
 
-  // Fetch per-ayah timestamps in background for badge tracking
+  // Fetch per-ayah timestamps — seek to startAyah once ready
   fetchSurahTimings(surahNum).then(t => {
     if (!t || _surahAudio !== state.audio.player) return;
     _surahTiming = t;
+    if (startAyah > 1) {
+      const timing = t[`${surahNum}:${startAyah}`];
+      if (timing) _surahAudio.currentTime = timing.from / 1000;
+    }
     _surahAudio.addEventListener('timeupdate', _surahTimeUpdate);
   });
 }

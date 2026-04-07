@@ -41,12 +41,12 @@ const RECITERS = [
     perAyahUrl: (s, a) => `https://everyayah.com/data/Yasser_Ad-Dussary_128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
   },
   {
-    id: 'ar.abdurrahmanalsudais', name: 'Abdurrahman Al-Sudais',
+    id: 'ar.abdurrahmanalsudais', name: 'Abdurrahman Al-Sudais', qurancdnId: 3,
     surahUrl: n => `https://server11.mp3quran.net/sds/${String(n).padStart(3,'0')}.mp3`,
     perAyahUrl: (s, a) => `https://everyayah.com/data/Abdurrahmaan_As-Sudais_192kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
   },
   {
-    id: 'ar.shuraim', name: 'Saud Al-Shuraim',
+    id: 'ar.shuraim', name: 'Saud Al-Shuraim', qurancdnId: 10,
     surahUrl: n => `https://server7.mp3quran.net/shur/${String(n).padStart(3,'0')}.mp3`,
     perAyahUrl: (s, a) => `https://everyayah.com/data/Saood_ash-Shuraym_128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
   },
