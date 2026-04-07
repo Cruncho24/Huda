@@ -23,7 +23,6 @@ function esc(str) {
 
 // ── Reciters ──────────────────────────────────────────────────
 const RECITERS = [
-  { id: 'ar.alafasy',        name: 'Mishary Alafasy',      qurancdnId: 7 },
   {
     id: 'ar.mahermuaiqly', name: 'Maher Al-Muqaili',
     surahUrl: n => `https://download.quranicaudio.com/quran/maher_256/${String(n).padStart(3,'0')}.mp3`,
@@ -82,7 +81,7 @@ const state = {
   fontSize: parseInt(localStorage.getItem('huda_fontsize') || '28') || 28,
   bookmarks: (() => { try { return JSON.parse(localStorage.getItem('huda_bookmarks') || '[]'); } catch(e) { return []; } })(),
   surahBookmarks: (() => { try { return JSON.parse(localStorage.getItem('huda_surah_bm') || '[]'); } catch(e) { return []; } })(),
-  reciter: localStorage.getItem('huda_reciter') || 'ar.alafasy',
+  reciter: localStorage.getItem('huda_reciter') || 'ar.mahermuaiqly',
   audio: { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false },
   prayer: {
     times: null, location: null, qibla: null, city: '',
