@@ -25,8 +25,8 @@ function esc(str) {
 const RECITERS = [
   { id: 'ar.alafasy',        name: 'Mishary Alafasy',      qurancdnId: 7 },
   {
-    id: 'ar.mahermuaiqly', name: 'Maher Al-Muqaili', qurancdnId: 159,
-    surahUrl: n => `https://download.quranicaudio.com/quran/maher_almu3aiqly/year1440//${String(n).padStart(3,'0')}.mp3`,
+    id: 'ar.mahermuaiqly', name: 'Maher Al-Muqaili',
+    surahUrl: n => `https://download.quranicaudio.com/quran/maher_256/${String(n).padStart(3,'0')}.mp3`,
     perAyahUrl: (s, a) => `https://everyayah.com/data/MaherAlMuaiqly128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
   },
   {
