@@ -822,11 +822,14 @@ function mushafPlayAll(surahNum, startAyah = 1) {
   }
   saveAudioPos();
 
+  // play() must be called synchronously from the user gesture — iOS blocks
+  // play() inside any async callback (Promise .then, setTimeout, etc.)
+  _surahAudio.play().catch(() => mushafStop());
   _surahAudio.onended = () => advanceToNextSurah();
+  updateMushafPlayBtn(true);
+  updateMushafPlayerBar();
 
-  // Fetch timestamps first when seeking mid-surah so the user doesn't hear
-  // ayah 1 briefly before the seek lands. If timings are cached the Promise
-  // resolves synchronously (microtask) before any audio plays.
+  // Fetch timestamps then seek — audio already playing, seek is allowed async
   fetchSurahTimings(surahNum).then(t => {
     if (!t || !_surahAudio || _surahAudio !== state.audio.player) return;
     _surahTiming = t;
@@ -834,17 +837,8 @@ function mushafPlayAll(surahNum, startAyah = 1) {
       const timing = t[`${surahNum}:${startAyah}`];
       if (timing) _surahAudio.currentTime = timing.from / 1000;
     }
-    _surahAudio.play().catch(() => mushafStop());
     _surahAudio.addEventListener('timeupdate', _surahTimeUpdate);
-  }).catch(() => {
-    // Timings unavailable — play from start
-    if (_surahAudio && _surahAudio === state.audio.player) {
-      _surahAudio.play().catch(() => mushafStop());
-    }
   });
-
-  updateMushafPlayBtn(true);
-  updateMushafPlayerBar();
 }
 
 function setReciter(id) {
