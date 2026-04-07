@@ -30,11 +30,6 @@ const RECITERS = [
     perAyahUrl: (s, a) => `https://everyayah.com/data/MaherAlMuaiqly128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
   },
   {
-    id: 'ar.abdullahbasfar', name: 'Abdullah Basfar', qurancdnId: 163,
-    surahUrl: n => `https://download.quranicaudio.com/quran/abdullaah_basfar//${String(n).padStart(3,'0')}.mp3`,
-    perAyahUrl: (s, a) => `https://everyayah.com/data/Abdullah_Basfar_192kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
-  },
-  {
     id: 'ar.yasserdossari', name: 'Yasser Al-Dosari', qurancdnId: 97,
     surahUrl: n => `https://download.quranicaudio.com/quran/yasser_ad-dussary//${String(n).padStart(3,'0')}.mp3`,
     // cdn.islamic.network returns 403 for this reciter's per-ayah files
