@@ -25,13 +25,13 @@ function esc(str) {
 const RECITERS = [
   { id: 'ar.alafasy',        name: 'Mishary Alafasy',      qurancdnId: 7 },
   {
-    id: 'ar.mahermuaiqly', name: 'Maher Al-Muqaili',
-    surahUrl: n => `https://download.quranicaudio.com/quran/maher_256/${String(n).padStart(3,'0')}.mp3`,
+    id: 'ar.mahermuaiqly', name: 'Maher Al-Muqaili', qurancdnId: 159,
+    surahUrl: n => `https://download.quranicaudio.com/quran/maher_almu3aiqly/year1440//${String(n).padStart(3,'0')}.mp3`,
     perAyahUrl: (s, a) => `https://everyayah.com/data/MaherAlMuaiqly128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
   },
   {
-    id: 'ar.abdullahbasfar', name: 'Abdullah Basfar',
-    // cdn.islamic.network returns 403 for this reciter's per-ayah files
+    id: 'ar.abdullahbasfar', name: 'Abdullah Basfar', qurancdnId: 163,
+    surahUrl: n => `https://download.quranicaudio.com/quran/abdullaah_basfar//${String(n).padStart(3,'0')}.mp3`,
     perAyahUrl: (s, a) => `https://everyayah.com/data/Abdullah_Basfar_192kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
   },
   {
@@ -51,8 +51,8 @@ const RECITERS = [
     perAyahUrl: (s, a) => `https://everyayah.com/data/Saood_ash-Shuraym_128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
   },
   {
-    id: 'ar.juhany', name: 'Abdullah Al-Juhani',
-    surahUrl: n => `https://download.quranicaudio.com/quran/abdullaah_3awwaad_al-juhaynee/${String(n).padStart(3,'0')}.mp3`,
+    id: 'ar.juhany', name: 'Abdullah Al-Juhani', qurancdnId: 162,
+    surahUrl: n => `https://download.quranicaudio.com/quran/abdullaah_3awwaad_al-juhaynee//${String(n).padStart(3,'0')}.mp3`,
     perAyahUrl: (s, a) => `https://everyayah.com/data/Abdullaah_3awwaad_Al-Juhaynee_128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
   },
 ];
