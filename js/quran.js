@@ -297,7 +297,7 @@ async function openSurah(n, targetAyah = null, { keepAudio = false } = {}) {
       document.getElementById('reader-content').style.display = 'block';
       renderSurahContent(n, arData, enData);
     }
-    document.getElementById('quran-reader').scrollTop = 0;
+    document.documentElement.scrollTop = 0;
     if (targetAyah) {
       requestAnimationFrame(() => {
         setTimeout(() => {
@@ -374,7 +374,7 @@ function setQuranView(mode) {
         }, 400);
       }, 100);
     } else {
-      document.getElementById('reader-content').scrollTop = 0;
+      document.documentElement.scrollTop = 0;
     }
   }
   document.getElementById('quran-reader').scrollTop = 0;
