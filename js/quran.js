@@ -576,6 +576,8 @@ function _scrollToAyah(ayahNum) {
   }
   if (!target) return;
 
+  // Measure the actual bottom of the sticky chrome (works on notch devices,
+  // with/without plan bar, in both verse and mushaf modes).
   const stickyEl = document.querySelector('.reader-sticky-header') ||
                    document.querySelector('.page-header');
   const headerH = stickyEl ? stickyEl.getBoundingClientRect().bottom : 60;
@@ -583,18 +585,23 @@ function _scrollToAyah(ayahNum) {
   const rect = target.getBoundingClientRect();
   const viewH = window.innerHeight;
 
+  // Treat an ayah as visible if its top is past the header and it's at least
+  // partially in view (handles very tall ayahs that exceed the viewport height).
   const isVisible = rect.top >= headerH && (rect.bottom <= viewH || rect.top < viewH * 0.5);
   if (isVisible) return;
 
-  // Flag our own scroll so _pauseAutoScroll ignores it
+  // Flag our own scroll so _pauseAutoScroll ignores the event it triggers.
   _isAutoScrolling = true;
   requestAnimationFrame(() => { _isAutoScrolling = false; });
 
   const behavior = _speedSteps[_speedIdx] > 1 ? 'instant' : 'smooth';
 
   if (rect.top < headerH) {
+    // Ayah is above/behind the sticky header — scroll up with explicit offset
+    // so it lands just below the header, not hidden behind it.
     window.scrollBy({ top: rect.top - headerH - 8, behavior });
   } else {
+    // Ayah is below the fold — bring its bottom edge into view.
     target.scrollIntoView({ behavior, block: 'end' });
   }
 }
@@ -1212,8 +1219,8 @@ function mushafStop() {
     _surahAudio.removeEventListener('timeupdate', _surahTimeUpdate);
     _surahAudio.pause();
   }
-  if (_surahBadge) { _surahBadge.classList.remove('maud-playing'); }
-  if (_verseCard)  { _verseCard.classList.remove('ayah-playing');  _verseCard = null; }
+  if (_surahBadge) { _surahBadge.classList.remove('maud-playing'); _surahBadge = null; }
+  if (_verseCard)  { _verseCard.classList.remove('ayah-playing');  _verseCard  = null; }
   // Also stop per-ayah pool player if it's different from surahAudio
   if (state.audio.player && state.audio.player !== _surahAudio) {
     state.audio.player.onpause = null;
@@ -1235,6 +1242,7 @@ function mushafStop() {
   _loopSurah = false;  // reset loop on stop so it doesn't silently re-arm next session
   _speedIdx = 1;       // reset speed to 1× on stop
   _autoScrollPaused = false;
+  _isAutoScrolling  = false;
   if (_autoScrollTimer) { clearTimeout(_autoScrollTimer); _autoScrollTimer = null; }
   if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
   updateMushafPlayBtn(false);
