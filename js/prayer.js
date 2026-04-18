@@ -14,6 +14,11 @@ const PRAYER_NAMES = [
 
 function renderPrayer() {
   const tab = document.getElementById('tab-prayer');
+  // If DOM already rendered with valid times, skip full re-render — just refresh GPS in background
+  if (state.prayer.times && document.getElementById('prayer-countdown')) {
+    _prayerBackgroundRefresh();
+    return;
+  }
   if (!state.prayer.times) {
     tab.innerHTML = `
       <div class="prayer-hero" style="padding-top:calc(24px + env(safe-area-inset-top,0px))">
@@ -38,6 +43,10 @@ function renderPrayer() {
     return;
   }
   renderPrayerTimes();
+  _prayerBackgroundRefresh();
+}
+
+function _prayerBackgroundRefresh() {
   // Silently refresh GPS in background — recalculate if user has moved >0.1° (~11 km)
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(

@@ -225,7 +225,14 @@ function catchUpPlan() {
   const expected = Math.min(Math.max(0, (dayNum - 1) * plan.ayahsPerDay), TOTAL_AYAHS);
   if (expected <= (plan.completedThrough || 0)) return;
   plan.completedThrough = expected;
-  plan.log[_todayStr()] = true;
+  // Fill in all skipped days so the streak is preserved after catching up
+  const start = new Date(plan.startDate + 'T12:00:00');
+  for (let d = 0; d < dayNum; d++) {
+    const date = new Date(start);
+    date.setDate(start.getDate() + d);
+    const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+    if (!plan.log[key]) plan.log[key] = true;
+  }
   if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) {
     plan.completedDate = _todayStr();
   }

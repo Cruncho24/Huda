@@ -378,10 +378,10 @@ function closeHelpScreen() {
 }
 
 function openSettings() {
-  // Stop audio if playing to avoid button/state desync
-  if (state.audio.player) {
+  // Pause audio (not stop) — state is preserved so user can resume on return
+  if (state.audio.player && !state.audio.player.paused) {
     state.audio.player.pause();
-    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+    state.audio.paused = true;
   }
 
   const perm = ('Notification' in window) ? Notification.permission : 'unsupported';
