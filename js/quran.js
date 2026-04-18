@@ -551,6 +551,7 @@ let _loopSurah       = false; // repeat current surah on end
 let _autoScrollPaused  = false; // true while user is manually scrolling
 let _autoScrollTimer   = null;  // timeout to resume auto-scroll after user touch
 let _isAutoScrolling   = false; // true during our own programmatic scroll — prevents self-pause
+let _autoScrollAnimTimer = null; // timeout to clear _isAutoScrolling after smooth animation
 
 function _pauseAutoScroll(e) {
   // Only relevant during gapless surah playback — ignore stray scroll events elsewhere
@@ -590,11 +591,18 @@ function _scrollToAyah(ayahNum) {
   const isVisible = rect.top >= headerH && (rect.bottom <= viewH || rect.top < viewH * 0.5);
   if (isVisible) return;
 
-  // Flag our own scroll so _pauseAutoScroll ignores the event it triggers.
-  _isAutoScrolling = true;
-  requestAnimationFrame(() => { _isAutoScrolling = false; });
-
   const behavior = _speedSteps[_speedIdx] > 1 ? 'instant' : 'smooth';
+
+  // Flag our own scroll so _pauseAutoScroll ignores the scroll events it triggers.
+  // Smooth animations fire scroll events over ~400ms so hold the flag for 600ms;
+  // instant scrolls fire once synchronously so a single rAF is enough.
+  _isAutoScrolling = true;
+  if (_autoScrollAnimTimer) clearTimeout(_autoScrollAnimTimer);
+  if (behavior === 'instant') {
+    requestAnimationFrame(() => { _isAutoScrolling = false; });
+  } else {
+    _autoScrollAnimTimer = setTimeout(() => { _isAutoScrolling = false; _autoScrollAnimTimer = null; }, 600);
+  }
 
   if (rect.top < headerH) {
     // Ayah is above/behind the sticky header — scroll up with explicit offset
@@ -1243,7 +1251,8 @@ function mushafStop() {
   _speedIdx = 1;       // reset speed to 1× on stop
   _autoScrollPaused = false;
   _isAutoScrolling  = false;
-  if (_autoScrollTimer) { clearTimeout(_autoScrollTimer); _autoScrollTimer = null; }
+  if (_autoScrollTimer)     { clearTimeout(_autoScrollTimer);     _autoScrollTimer     = null; }
+  if (_autoScrollAnimTimer) { clearTimeout(_autoScrollAnimTimer); _autoScrollAnimTimer = null; }
   if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
   updateMushafPlayBtn(false);
   updateMushafPlayerBar();
