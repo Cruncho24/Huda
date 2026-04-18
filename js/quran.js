@@ -10,6 +10,29 @@ let _offlineDownloading = false;
 let _offlineCancelled   = false;
 let _pendingShareText   = '';
 
+// Persist quran cache with bounded eviction to avoid QuotaExceededError.
+// Keeps the 20 most-recently-opened surahs; older ones are evicted first.
+const _QURAN_CACHE_KEYS_KEY = 'huda_quran_order'; // tracks LRU order
+function _persistQuranCache() {
+  // Update LRU order
+  const currentKeys = Object.keys(state.quran.cache).map(Number);
+  try {
+    const serialized = JSON.stringify(state.quran.cache);
+    localStorage.setItem('huda_quran', serialized);
+  } catch(e) {
+    // QuotaExceededError — evict oldest entries until it fits
+    const order = (() => { try { return JSON.parse(localStorage.getItem(_QURAN_CACHE_KEYS_KEY) || '[]'); } catch(_) { return []; } })();
+    // Remove oldest entries not in the most-recent 20
+    const keep = new Set(currentKeys.slice(-20));
+    for (const k of order) {
+      if (!keep.has(k)) { delete state.quran.cache[k]; }
+    }
+    try { localStorage.setItem('huda_quran', JSON.stringify(state.quran.cache)); } catch(_) {}
+  }
+  // Save LRU order (most recently used last)
+  try { localStorage.setItem(_QURAN_CACHE_KEYS_KEY, JSON.stringify(currentKeys)); } catch(_) {}
+}
+
 // ── QURAN TAB ─────────────────────────────────────────────────
 function renderQuranList() {
   if (document.getElementById('quran-list-view')) return;
@@ -175,6 +198,7 @@ async function downloadQuranOffline() {
   _offlineDownloading = false;
   if (!_offlineCancelled) {
     localStorage.setItem('huda_quran_offline', '1');
+    _persistQuranCache(); // Persist downloaded surahs so they survive page reload
   }
   _renderOfflineBanner();
 }
@@ -229,10 +253,13 @@ async function openSurah(n, targetAyah = null, { keepAudio = false } = {}) {
   const _prevLr = (() => { try { return JSON.parse(localStorage.getItem('huda_last_read') || 'null'); } catch(e) { return null; } })();
   const _lrAyah = (_prevLr?.surah === n && _prevLr?.ayah) ? _prevLr.ayah : (targetAyah || undefined);
   localStorage.setItem('huda_last_read', JSON.stringify({ surah: n, name: s[2], arabic: s[1], ...(_lrAyah ? { ayah: _lrAyah } : {}) }));
-  // Track furthest global ayah visited for reading plan progress
-  const _lrFr = globalAyahNum(n, _lrAyah || 1);
-  const _prevFr = parseInt(localStorage.getItem('huda_furthest_read') || '0', 10);
-  if (_lrFr > _prevFr) localStorage.setItem('huda_furthest_read', String(_lrFr));
+  // Track furthest global ayah — only when resuming a previously read position,
+  // not when navigating to a surah for the first time (IntersectionObserver handles that).
+  if (_prevLr?.surah === n && _lrAyah) {
+    const _lrFr = globalAyahNum(n, _lrAyah);
+    const _prevFr = parseInt(localStorage.getItem('huda_furthest_read') || '0', 10);
+    if (_lrFr > _prevFr) localStorage.setItem('huda_furthest_read', String(_lrFr));
+  }
   debouncedPush();
   document.getElementById('reader-title').textContent = `${n}. ${s[2]} — ${s[1]}`;
   document.getElementById('reader-meta').textContent = `${s[5]} · ${s[4]} verses · ${s[3]}`;
@@ -257,7 +284,7 @@ async function openSurah(n, targetAyah = null, { keepAudio = false } = {}) {
       arData = arJson.data;
       enData = enJson.data;
       state.quran.cache[n] = { arData, enData };
-      try { localStorage.setItem('huda_quran', JSON.stringify(state.quran.cache)); } catch(e) {}
+      _persistQuranCache();
     }
     if (state.quran.viewMode === 'page') {
       document.getElementById('reader-content').style.display = 'none';
@@ -1454,8 +1481,11 @@ function renderSurahContent(n, arData, enData) {
 function shareAyah(surahNum, ayahNum) {
   const cached = state.quran.cache[surahNum];
   if (!cached) return;
-  const ar = cached.arData.ayahs[ayahNum - 1].text;
-  const en = cached.enData.ayahs[ayahNum - 1].text;
+  const arAyah = cached.arData.ayahs.find(a => a.numberInSurah === ayahNum);
+  const enAyah = cached.enData.ayahs.find(a => a.numberInSurah === ayahNum);
+  if (!arAyah || !enAyah) return;
+  const ar = arAyah.text;
+  const en = enAyah.text;
   const surahName = SURAHS[surahNum - 1][2]; // index 2 = English name e.g. "Al-Fatiha"
   const ref = `Surah ${surahName} (${surahNum}:${ayahNum})`;
   _pendingShareText = `${ar}\n\n${en}\n\n— ${ref}`;
