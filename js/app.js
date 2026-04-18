@@ -91,6 +91,7 @@ const state = {
   quran: {
     currentSurah: null,
     cache: (() => { try { return JSON.parse(localStorage.getItem('huda_quran') || '{}'); } catch(e) { return {}; } })(),
+    cacheOrder: (() => { try { return JSON.parse(localStorage.getItem('huda_quran_order') || '[]'); } catch(e) { return []; } })(),
     filteredSurahs: [...SURAHS],
     viewMode: 'verse',
     currentPage: 0,

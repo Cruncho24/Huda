@@ -11,26 +11,26 @@ let _offlineCancelled   = false;
 let _pendingShareText   = '';
 
 // Persist quran cache with bounded eviction to avoid QuotaExceededError.
-// Keeps the 20 most-recently-opened surahs; older ones are evicted first.
-const _QURAN_CACHE_KEYS_KEY = 'huda_quran_order'; // tracks LRU order
+// Keeps the 20 most-recently-opened surahs; recency tracked in state.quran.cacheOrder.
 function _persistQuranCache() {
-  // Update LRU order
-  const currentKeys = Object.keys(state.quran.cache).map(Number);
   try {
-    const serialized = JSON.stringify(state.quran.cache);
-    localStorage.setItem('huda_quran', serialized);
+    localStorage.setItem('huda_quran', JSON.stringify(state.quran.cache));
   } catch(e) {
-    // QuotaExceededError — evict oldest entries until it fits
-    const order = (() => { try { return JSON.parse(localStorage.getItem(_QURAN_CACHE_KEYS_KEY) || '[]'); } catch(_) { return []; } })();
-    // Remove oldest entries not in the most-recent 20
-    const keep = new Set(currentKeys.slice(-20));
-    for (const k of order) {
-      if (!keep.has(k)) { delete state.quran.cache[k]; }
+    // QuotaExceededError — evict least-recently-used surahs until it fits
+    const order = state.quran.cacheOrder; // oldest first, most-recent last
+    const keep = new Set(order.slice(-20));
+    for (const k of Object.keys(state.quran.cache).map(Number)) {
+      if (!keep.has(k)) delete state.quran.cache[k];
     }
     try { localStorage.setItem('huda_quran', JSON.stringify(state.quran.cache)); } catch(_) {}
   }
-  // Save LRU order (most recently used last)
-  try { localStorage.setItem(_QURAN_CACHE_KEYS_KEY, JSON.stringify(currentKeys)); } catch(_) {}
+  try { localStorage.setItem('huda_quran_order', JSON.stringify(state.quran.cacheOrder)); } catch(_) {}
+}
+
+// Record surah n as most-recently accessed in the LRU order list.
+function _touchCacheOrder(n) {
+  state.quran.cacheOrder = state.quran.cacheOrder.filter(k => k !== n);
+  state.quran.cacheOrder.push(n);
 }
 
 // ── QURAN TAB ─────────────────────────────────────────────────
@@ -284,8 +284,9 @@ async function openSurah(n, targetAyah = null, { keepAudio = false } = {}) {
       arData = arJson.data;
       enData = enJson.data;
       state.quran.cache[n] = { arData, enData };
-      _persistQuranCache();
     }
+    _touchCacheOrder(n);
+    _persistQuranCache();
     if (state.quran.viewMode === 'page') {
       document.getElementById('reader-content').style.display = 'none';
       document.getElementById('mushaf-page').style.display = 'block';

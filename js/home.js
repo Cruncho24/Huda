@@ -378,10 +378,12 @@ function closeHelpScreen() {
 }
 
 function openSettings() {
-  // Pause audio (not stop) — state is preserved so user can resume on return
+  // Pause audio (not stop) — state preserved so user can resume on return to Quran tab.
+  // Track whether settings caused the pause so closeSettings can clear the flag.
   if (state.audio.player && !state.audio.player.paused) {
     state.audio.player.pause();
     state.audio.paused = true;
+    state.audio._pausedBySettings = true;
   }
 
   const perm = ('Notification' in window) ? Notification.permission : 'unsupported';
@@ -463,7 +465,7 @@ function openSettings() {
           </div>
           <div class="settings-row">
             <span class="settings-label" style="color:#6b7280">Version</span>
-            <span class="settings-value" style="color:#9ca3af">v199</span>
+            <span class="settings-value" style="color:#9ca3af">v201</span>
           </div>
         </div>
 
@@ -474,6 +476,11 @@ function openSettings() {
 }
 
 function closeSettings() {
+  // Clear the settings-pause flag so auto-resume-on-foreground works again
+  if (state.audio._pausedBySettings) {
+    state.audio.paused = false;
+    state.audio._pausedBySettings = false;
+  }
   renderHome();
 }
 
