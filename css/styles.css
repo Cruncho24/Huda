@@ -1657,6 +1657,26 @@ html.dark .mushaf-hint { background: #111827; color: #4b5563; border-color: #1f2
   50% { opacity: 0.5; }
 }
 
+/* ── Verse mode playback highlight ─────────────────────────── */
+.ayah-card.ayah-playing {
+  background: rgba(5, 150, 105, 0.07);
+  border-left: 3px solid #059669;
+  padding-left: 13px;
+  transition: background 0.3s, border-color 0.3s;
+}
+html.dark .ayah-card.ayah-playing {
+  background: rgba(5, 150, 105, 0.12);
+  border-left-color: #34d399;
+}
+.ayah-card.ayah-playing .ayah-num-badge-card {
+  background: #059669;
+  color: white;
+}
+html.dark .ayah-card.ayah-playing .ayah-num-badge-card {
+  background: #34d399;
+  color: #064e3b;
+}
+
 /* ── Mushaf word highlighting ───────────────────────────────── */
 .mword {
   display: inline;
