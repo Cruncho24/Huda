@@ -52,23 +52,42 @@ function renderQuranList() {
           <button class="mhdr-btn" id="surah-next-btn" onclick="navigateSurah(1)" title="Next surah">›</button>
         </div>
         <div id="mushaf-header-controls" style="display:none;align-items:center;gap:6px;flex-shrink:0">
-          <span id="mpb-info" style="font-size:11px;opacity:0.9;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
+          <span id="mpb-info" style="font-size:11px;opacity:0.9;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"></span>
           <button id="mpb-sleep-btn" class="mhdr-btn" onclick="openSleepTimerPicker()" title="Sleep timer">🌙</button>
+          <button id="mpb-speed-btn" class="mhdr-btn" onclick="cyclePlaybackSpeed()" title="Playback speed">1×</button>
+          <button id="mpb-loop-btn" class="mhdr-btn" onclick="toggleLoopSurah()" title="Loop surah">🔁</button>
           <button id="mpb-pause-btn" class="mhdr-btn" onclick="toggleMushafPlayback()">⏸</button>
           <button class="mhdr-btn" title="Next surah" onclick="advanceToNextSurah()">⏭</button>
           <button class="mhdr-btn" onclick="mushafStop()">■</button>
         </div>
       </div>
-      <div class="reader-toolbar">
-        <button class="view-toggle-btn active" id="btn-verse" onclick="setQuranView('verse')">Study</button>
-        <button class="view-toggle-btn" id="btn-page" onclick="setQuranView('page')">📖 Mushaf</button>
-        <div class="font-size-ctrl" id="font-ctrl" style="display:none">
-          <button class="font-btn" onclick="changeFontSize(-2)">A−</button>
-          <button class="font-btn" onclick="changeFontSize(2)">A+</button>
+      <div id="mpb-seekbar" style="display:none">
+        <input id="mpb-seek-range" type="range" min="0" max="100" value="0" step="0.1"
+          class="mpb-seek-input"
+          onchange="seekMushafTo(this.value)"
+          onmousedown="seekMushafStart()" ontouchstart="seekMushafStart()"
+          onmouseup="seekMushafEnd(this.value)" ontouchend="seekMushafEnd(this.value)">
+        <div class="mpb-seek-times">
+          <span id="mpb-time-cur">0:00</span>
+          <span id="mpb-time-dur">0:00</span>
         </div>
-        <select class="reciter-select" id="reciter-select" onchange="setReciter(this.value)">
-          ${RECITERS.map(r => `<option value="${r.id}" ${state.reciter === r.id ? 'selected' : ''}>${r.name}</option>`).join('')}
-        </select>
+      </div>
+      <div class="reader-sticky-header">
+        <div class="reader-toolbar">
+          <button class="view-toggle-btn active" id="btn-verse" onclick="setQuranView('verse')">Study</button>
+          <button class="view-toggle-btn" id="btn-page" onclick="setQuranView('page')">📖 Mushaf</button>
+          <div class="font-size-ctrl" id="font-ctrl" style="display:none">
+            <button class="font-btn" onclick="changeFontSize(-2)">A−</button>
+            <button class="font-btn" onclick="changeFontSize(2)">A+</button>
+          </div>
+          <select class="reciter-select" id="reciter-select" onchange="setReciter(this.value)">
+            ${RECITERS.map(r => `<option value="${r.id}" ${state.reciter === r.id ? 'selected' : ''}>${r.name}</option>`).join('')}
+          </select>
+        </div>
+        <div id="reader-plan-bar" style="display:none">
+          <div class="reader-plan-track"><div class="reader-plan-fill" id="reader-plan-fill"></div></div>
+          <div class="reader-plan-label" id="reader-plan-label"></div>
+        </div>
       </div>
       <div id="reader-content"></div>
       <div id="mushaf-page" style="display:none"></div>
@@ -77,6 +96,12 @@ function renderQuranList() {
   renderSurahList(SURAHS);
   _renderOfflineBanner();
   _renderQuranThemes();
+
+  // Pause auto-scroll when user manually scrolls/touches anywhere.
+  // #quran-reader has no overflow-y so scroll events bubble to window.
+  window.addEventListener('scroll', _pauseAutoScroll, { passive: true });
+  window.addEventListener('touchstart', _pauseAutoScroll, { passive: true });
+  window.addEventListener('wheel', _pauseAutoScroll, { passive: true });
 }
 
 function _renderOfflineBanner() {
@@ -190,17 +215,24 @@ function filterSurahs(query) {
   renderSurahList(filtered);
 }
 
-async function openSurah(n, targetAyah = null) {
-  mushafStop();
+async function openSurah(n, targetAyah = null, { keepAudio = false } = {}) {
+  if (!keepAudio) mushafStop();
   document.getElementById('quran-list-view').style.display = 'none';
   const reader = document.getElementById('quran-reader');
   reader.style.display = 'block';
+  // Reset auto-scroll so the new surah starts tracking immediately
+  _autoScrollPaused = false;
+  if (_autoScrollTimer) { clearTimeout(_autoScrollTimer); _autoScrollTimer = null; }
   state.quran.currentSurah = n;
   state.quran.currentPage = 0;
   const s = SURAHS[n - 1];
   const _prevLr = (() => { try { return JSON.parse(localStorage.getItem('huda_last_read') || 'null'); } catch(e) { return null; } })();
-  const _lrAyah = (_prevLr?.surah === n && _prevLr?.ayah) ? _prevLr.ayah : undefined;
+  const _lrAyah = (_prevLr?.surah === n && _prevLr?.ayah) ? _prevLr.ayah : (targetAyah || undefined);
   localStorage.setItem('huda_last_read', JSON.stringify({ surah: n, name: s[2], arabic: s[1], ...(_lrAyah ? { ayah: _lrAyah } : {}) }));
+  // Track furthest global ayah visited for reading plan progress
+  const _lrFr = globalAyahNum(n, _lrAyah || 1);
+  const _prevFr = parseInt(localStorage.getItem('huda_furthest_read') || '0', 10);
+  if (_lrFr > _prevFr) localStorage.setItem('huda_furthest_read', String(_lrFr));
   debouncedPush();
   document.getElementById('reader-title').textContent = `${n}. ${s[2]} — ${s[1]}`;
   document.getElementById('reader-meta').textContent = `${s[5]} · ${s[4]} verses · ${s[3]}`;
@@ -255,6 +287,7 @@ async function openSurah(n, targetAyah = null) {
       });
     }
     updateSurahNavBtns();
+    if (typeof updateReaderPlanBar === 'function') updateReaderPlanBar();
   } catch(e) {
     content.innerHTML = `
       <div class="error-state">
@@ -365,6 +398,7 @@ function renderMushafPage(n, arData, enData) {
     <div class="mushaf-scroll-body">${pagesHtml}</div>
   `;
   setupAyahLongPress(el);
+  if (typeof injectPlanTargetMarker === 'function') injectPlanTargetMarker(n, false);
   updateMushafPlayerBar();
 
   // Track reading position by page block — same delayed approach as verse mode
@@ -384,7 +418,14 @@ function renderMushafPage(n, arData, enData) {
       if (isNaN(ayah)) return;
       try {
         const lr = JSON.parse(localStorage.getItem('huda_last_read') || 'null');
-        if (lr) { lr.ayah = ayah; localStorage.setItem('huda_last_read', JSON.stringify(lr)); }
+        if (lr) {
+          lr.ayah = ayah;
+          localStorage.setItem('huda_last_read', JSON.stringify(lr));
+          const _g = globalAyahNum(lr.surah, ayah);
+          const _pf = parseInt(localStorage.getItem('huda_furthest_read') || '0', 10);
+          if (_g > _pf) localStorage.setItem('huda_furthest_read', String(_g));
+        }
+        if (typeof updateReaderPlanBar === 'function') updateReaderPlanBar();
       } catch(e) { console.warn('[huda] failed to save reading position', e); }
     }, { threshold: 0.3 });
     el.querySelectorAll('.mushaf-page-block').forEach(block => _ayahObserver.observe(block));
@@ -392,29 +433,39 @@ function renderMushafPage(n, arData, enData) {
 }
 
 // ── Sleep Timer ───────────────────────────────────────────────
-let _sleepTimer      = null; // setTimeout handle
-let _sleepEndsAt     = 0;   // epoch ms when timer fires
-let _sleepTickTimer  = null; // setInterval for countdown display
+let _sleepEndsAt     = 0;    // epoch ms when timer fires (checked by interval + visibilitychange)
+let _sleepTickTimer  = null; // setInterval handle for per-second countdown
 
 function setSleepTimer(minutes) {
   clearSleepTimer();
   if (!minutes) return;
   _sleepEndsAt = Date.now() + minutes * 60 * 1000;
-  _sleepTimer = setTimeout(() => {
-    mushafStop(); // mushafStop() calls clearSleepTimer() unconditionally
-    showToast('Sleep timer ended');
-  }, minutes * 60 * 1000);
-  // Tick every second to update the button label
-  _sleepTickTimer = setInterval(_updateSleepBtn, 1000);
+  // setTimeout alone is throttled/frozen on iOS when app is backgrounded.
+  // _sleepTickTimer checks every second; visibilitychange catches the gap.
+  _sleepTickTimer = setInterval(_checkSleepTimer, 1000);
   _updateSleepBtn();
 }
 
+function _checkSleepTimer() {
+  if (!_sleepEndsAt) return;
+  if (Date.now() >= _sleepEndsAt) {
+    mushafStop(); // also calls clearSleepTimer()
+    showToast('Sleep timer ended');
+  } else {
+    _updateSleepBtn();
+  }
+}
+
 function clearSleepTimer() {
-  clearTimeout(_sleepTimer);
   clearInterval(_sleepTickTimer);
-  _sleepTimer = null; _sleepEndsAt = 0; _sleepTickTimer = null;
+  _sleepTickTimer = null; _sleepEndsAt = 0;
   _updateSleepBtn();
 }
+
+// Check sleep timer when app returns to foreground (catches the frozen-setTimeout gap)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && _sleepEndsAt) _checkSleepTimer();
+}, { capture: false });
 
 function _updateSleepBtn() {
   const btn = document.getElementById('mpb-sleep-btn');
@@ -460,9 +511,64 @@ function closeSleepTimerSheet() {
 
 // ── Surah-level audio (gapless) ───────────────────────────────
 const _surahTimingsCache = {};
-let _surahAudio   = null; // the full-surah Audio element when active
-let _surahBadge   = null; // currently highlighted ayah badge
-let _surahTiming  = null; // { [verse_key]: { from, to } }
+let _surahAudio      = null;  // the full-surah Audio element when active
+let _surahBadge      = null;  // currently highlighted ayah badge
+let _surahTiming     = null;  // { [verse_key]: {from, to} } — used for seek-by-ayah lookups
+let _surahTimingArr  = null;  // sorted [{key, from, to}] — used by timeupdate for O(1) scan
+let _surahTimingIdx  = 0;     // current position in _surahTimingArr
+let _loopSurah       = false; // repeat current surah on end
+
+// ── Auto-scroll state ─────────────────────────────────────────
+let _autoScrollPaused = false;  // true while user is manually scrolling
+let _autoScrollTimer  = null;   // timeout to resume auto-scroll after user touch
+
+function _pauseAutoScroll(e) {
+  // Only relevant during gapless surah playback — ignore stray scroll events elsewhere
+  if (!state.audio?.playingSurah) return;
+  // Don't pause when the user taps a player control button — only real content scrolls
+  if (e?.target?.closest && e.target.closest('#mushaf-header-controls, #mpb-seekbar, .mhdr-btn, .page-header')) return;
+  _autoScrollPaused = true;
+  if (_autoScrollTimer) clearTimeout(_autoScrollTimer);
+  _autoScrollTimer = setTimeout(() => { _autoScrollPaused = false; }, 4000);
+}
+
+function _scrollToAyah(ayahNum) {
+  if (_autoScrollPaused) return;
+  const mode = state.quran?.viewMode;
+
+  let target = null;
+  if (mode === 'verse') {
+    target = document.getElementById(`ayah-${ayahNum}`);
+  } else {
+    target = document.querySelector(`#mushaf-page .mushaf-ayah-wrap[data-ayah="${ayahNum}"]`);
+  }
+  if (!target) return;
+
+  // Measure the actual bottom of the sticky chrome (works on notch devices,
+  // with/without plan bar, in both verse and mushaf modes).
+  const stickyEl = document.querySelector('.reader-sticky-header') ||
+                   document.querySelector('.page-header');
+  const headerH = stickyEl ? stickyEl.getBoundingClientRect().bottom : 60;
+
+  const rect = target.getBoundingClientRect();
+  const viewH = window.innerHeight;
+
+  // Treat an ayah as visible if its top is past the header and it's at least
+  // partially in view (handles very tall ayahs that exceed the viewport height).
+  const isVisible = rect.top >= headerH && (rect.bottom <= viewH || rect.top < viewH * 0.5);
+  if (isVisible) return;
+
+  const behavior = _speedSteps[_speedIdx] > 1 ? 'instant' : 'smooth';
+
+  if (rect.top < headerH) {
+    // Ayah is above/under the sticky header — scroll up with explicit offset
+    // so it lands just below the header, not behind it.
+    window.scrollBy({ top: rect.top - headerH - 8, behavior });
+  } else {
+    // Ayah is below the fold — bring its bottom edge into view.
+    target.scrollIntoView({ behavior, block: 'end' });
+  }
+}
 
 // Register (or re-register) MediaSession metadata + action handlers.
 // Called on every play event so lock screen reclaims focus after interruptions.
@@ -488,20 +594,68 @@ function _registerMediaSession() {
     if (p) p.pause();
   });
   navigator.mediaSession.setActionHandler('stop', () => mushafStop());
+  // seekforward/seekbackward: car stereos, AirPods Pro squeeze-hold, lock screen scrub
+  try {
+    navigator.mediaSession.setActionHandler('seekforward', e => {
+      const p = _surahAudio || state.audio.player;
+      if (p && isFinite(p.duration)) {
+        p.currentTime = Math.min(p.duration, p.currentTime + (e?.seekOffset ?? 30));
+        _surahTimingIdx = 0;
+      }
+    });
+    navigator.mediaSession.setActionHandler('seekbackward', e => {
+      const p = _surahAudio || state.audio.player;
+      if (p) { p.currentTime = Math.max(0, p.currentTime - (e?.seekOffset ?? 10)); _surahTimingIdx = 0; }
+    });
+  } catch(_) {} // some older browsers don't support these handlers
   navigator.mediaSession.setActionHandler('nexttrack', () => advanceToNextSurah());
   navigator.mediaSession.setActionHandler('previoustrack', () => {
     const prev = (state.quran.currentSurah || 1) - 1;
     if (prev < 1) return;
-    const cache = state.quran.cache[prev];
-    openSurah(prev).then(() => {
-      if (state.quran.viewMode === 'page') {
-        mushafPlayAll(prev);
-      } else {
-        const first = cache ? cache.arData.ayahs[0] : state.quran.cache[prev]?.arData.ayahs[0];
-        if (first) playAyah(first.number, prev, first.numberInSurah);
-        else mushafPlayAll(prev); // fallback
-      }
-    });
+    // Use the same src-swap as advanceToNextSurah — keeps iOS audio session alive.
+    // play() is called synchronously here (MediaSession action handler is trusted).
+    const prevUrl = getSurahAudioUrl(prev);
+    if (_surahAudio && prevUrl) {
+      _surahAudio.removeEventListener('timeupdate', _surahTimeUpdate);
+      if (_surahBadge) { _surahBadge.classList.remove('maud-playing'); _surahBadge = null; }
+      _surahTiming = null; _surahTimingArr = null; _surahTimingIdx = 0;
+      state.quran.currentSurah = prev;
+      state.audio.playingSurah = prev;
+      state.audio.playingAyah = 1;
+      state.audio.playingId = -1;
+      state.audio.paused = false;
+      _surahAudio.onerror = () => {
+        _surahAudio = null; _surahTiming = null; _surahTimingArr = null; _surahTimingIdx = 0;
+        state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+        openSurah(prev).then(() => mushafPlayAll(prev));
+      };
+      _surahAudio.src = prevUrl;
+      _surahAudio.play().catch(() => mushafStop());
+      saveAudioPos();
+      updateMushafPlayBtn(true);
+      updateMushafPlayerBar();
+      updateSurahNavBtns();
+      openSurah(prev, null, { keepAudio: true }).then(() => {
+        if (state.audio.playingSurah !== prev || !_surahAudio) return;
+        fetchSurahTimings(prev).then(t => {
+          if (!t || state.audio.playingSurah !== prev || !_surahAudio) return;
+          _surahTiming = t; _surahTimingArr = _buildTimingArr(t); _surahTimingIdx = 0;
+          _surahAudio.addEventListener('timeupdate', _surahTimeUpdate);
+          const cache = state.quran.cache[prev];
+          if (cache?.arData) {
+            const ayahObj = cache.arData.ayahs[0];
+            if (ayahObj) {
+              _surahBadge = document.getElementById(`maud-${ayahObj.number}`);
+              if (_surahBadge) _surahBadge.classList.add('maud-playing');
+              state.audio.playingId = ayahObj.number;
+            }
+          }
+        });
+      });
+    } else {
+      // Per-ayah fallback — mushafPlayAll will call mushafStop first
+      openSurah(prev).then(() => mushafPlayAll(prev));
+    }
   });
 }
 
@@ -527,28 +681,48 @@ async function fetchSurahTimings(surahNum) {
 }
 
 // timeupdate handler: highlights the correct ayah badge
+// Build the sorted array used by _surahTimeUpdate whenever timings are loaded.
+// This is called once per surah; _surahTimeUpdate itself is O(1) amortised.
+function _buildTimingArr(timingObj) {
+  const arr = Object.entries(timingObj).map(([key, t]) => ({ key, from: t.from, to: t.to }));
+  arr.sort((a, b) => a.from - b.from);
+  return arr;
+}
+
+// O(1) amortised: scan forward from _surahTimingIdx (audio always moves forward)
+// Falls back to a full scan only on seek (currentTime jumps backwards).
 function _surahTimeUpdate() {
-  if (!_surahAudio || !_surahTiming) return;
-  const ms   = _surahAudio.currentTime * 1000;
-  const sn   = state.audio.playingSurah;
+  if (!_surahAudio || !_surahTimingArr) return;
+  const ms  = _surahAudio.currentTime * 1000;
+  const sn  = state.audio.playingSurah;
+  const arr = _surahTimingArr;
+  let idx   = _surahTimingIdx;
+
+  // If time went backwards (user seeked), reset to start
+  if (idx > 0 && ms < arr[idx - 1].to) idx = 0;
+
+  // Advance index until we're inside the current entry
+  while (idx < arr.length - 1 && ms >= arr[idx].to) idx++;
+  _surahTimingIdx = idx;
+
+  const entry = arr[idx];
+  if (!entry || ms < entry.from || ms >= entry.to) return; // between ayahs
+
+  const an = +entry.key.split(':')[1];
+  if (state.audio.playingAyah === an) return; // already highlighted
+
   const cache = state.quran.cache[sn];
   if (!cache) return;
-  for (const [key, t] of Object.entries(_surahTiming)) {
-    if (ms >= t.from && ms < t.to) {
-      const an = +key.split(':')[1];
-      if (state.audio.playingAyah === an) return;
-      if (_surahBadge) _surahBadge.classList.remove('maud-playing');
-      const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === an);
-      if (ayahObj) {
-        _surahBadge = document.getElementById(`maud-${ayahObj.number}`);
-        if (_surahBadge) _surahBadge.classList.add('maud-playing');
-      }
-      state.audio.playingAyah = an;
-      saveAudioPos();
-      updateMushafPlayerBar();
-      return;
-    }
+  if (_surahBadge) _surahBadge.classList.remove('maud-playing');
+  const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === an);
+  if (ayahObj) {
+    _surahBadge = document.getElementById(`maud-${ayahObj.number}`);
+    if (_surahBadge) _surahBadge.classList.add('maud-playing');
   }
+  state.audio.playingAyah = an;
+  saveAudioPos();
+  updateMushafPlayerBar();
+  _scrollToAyah(an);
 }
 
 // ── Mushaf word-timing helpers (kept for potential future use) ─
@@ -603,10 +777,21 @@ function startWordHighlight(audio, surahNum, ayahNum, globalNum, timings) {
 }
 
 // ── Ayatul Kursi audio (Surah 2:255 = global ayah 262) ────────
+let _loopAyatulKursi = false;
+
+function toggleAyatulKursiLoop() {
+  _loopAyatulKursi = !_loopAyatulKursi;
+  const btn = document.getElementById('ak-loop');
+  if (btn) btn.style.opacity = _loopAyatulKursi ? '1' : '0.45';
+}
+
 function playAyatulKursi() {
   const GLOBAL = 262;
   const btn = document.getElementById('ak-play');
   const resetAK = () => {
+    _loopAyatulKursi = false;
+    const loopBtn = document.getElementById('ak-loop');
+    if (loopBtn) loopBtn.style.opacity = '0.45';
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
     updateMushafPlayerBar();
     if (btn) btn.innerHTML = '▶ Play';
@@ -618,12 +803,17 @@ function playAyatulKursi() {
     return;
   }
   mushafStop();
-  const audio = new Audio(getAyahUrl(GLOBAL, 2, 255));
-  state.audio = { player: audio, playingId: GLOBAL, playingSurah: null, playingAyah: null, paused: false };
-  if (btn) btn.innerHTML = '⏸ Stop';
-  audio.play().catch(resetAK);
-  audio.onended = resetAK;
-  audio.onerror = resetAK;
+  const startAK = () => {
+    const audio = new Audio(getAyahUrl(GLOBAL, 2, 255));
+    state.audio = { player: audio, playingId: GLOBAL, playingSurah: null, playingAyah: null, paused: false };
+    if (btn) btn.innerHTML = '⏸ Stop';
+    audio.play().catch(resetAK);
+    audio.onended = () => {
+      if (_loopAyatulKursi) { startAK(); } else { resetAK(); }
+    };
+    audio.onerror = resetAK;
+  };
+  startAK();
 }
 
 // Attach an onended handler that plays the next ayah with zero overhead.
@@ -702,6 +892,7 @@ function playMushafAyah(globalNum, surahNum, ayahNum, _skipSurahSeek = false) {
     const t = _surahTiming[`${surahNum}:${ayahNum}`];
     if (t) {
       _surahAudio.currentTime = t.from / 1000;
+      _surahTimingIdx = 0; // reset scan index after manual seek
       if (state.audio.paused) {
         _surahAudio.play().then(() => {
           state.audio.paused = false;
@@ -799,10 +990,15 @@ function mushafPlayAll(surahNum, startAyah = 1) {
     updateMushafPlayerBar();
     _registerMediaSession(); // reclaim lock screen after interruption
   };
+  _surahAudio.onwaiting = () => { if (_surahAudio) _setBuffering(true); };
+  _surahAudio.onstalled = () => { if (_surahAudio) _setBuffering(true); };
+  // Clear buffering on canplay (not onplay) to avoid flicker: play fires before
+  // data is available, then onwaiting can fire immediately after.
+  _surahAudio.oncanplay = () => { if (_surahAudio) _setBuffering(false); };
   _surahAudio.onerror = () => {
     // Fall back to per-ayah from the ayah we were on (not always restart from 1)
     const resumeAyah = state.audio.playingAyah || startAyah;
-    _surahAudio = null; _surahTiming = null;
+    _surahAudio = null; _surahTiming = null; _surahTimingArr = null; _surahTimingIdx = 0;
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
     const cache = state.quran.cache[surahNum];
     if (!cache) return;
@@ -824,15 +1020,17 @@ function mushafPlayAll(surahNum, startAyah = 1) {
 
   // play() must be called synchronously from the user gesture — iOS blocks
   // play() inside any async callback (Promise .then, setTimeout, etc.)
+  _applyPlaybackSpeed(_surahAudio);
   _surahAudio.play().catch(() => mushafStop());
   _surahAudio.onended = () => advanceToNextSurah();
+  _seekbarStart();
   updateMushafPlayBtn(true);
   updateMushafPlayerBar();
 
   // Fetch timestamps then seek — audio already playing, seek is allowed async
   fetchSurahTimings(surahNum).then(t => {
     if (!t || !_surahAudio || _surahAudio !== state.audio.player) return;
-    _surahTiming = t;
+    _surahTiming = t; _surahTimingArr = _buildTimingArr(t); _surahTimingIdx = 0;
     if (startAyah > 1) {
       const timing = t[`${surahNum}:${startAyah}`];
       if (timing) _surahAudio.currentTime = timing.from / 1000;
@@ -877,15 +1075,90 @@ function updateSurahNavBtns() {
 }
 
 async function advanceToNextSurah() {
+  // ── Loop: just rewind the same element ──────────────────────────────────────
+  // Never call mushafStop() or create new Audio() here — iOS suspends background
+  // PWAs after ~30s. Reusing the existing Audio element keeps the audio session
+  // alive and allows play() to succeed without a user gesture.
+  if (_loopSurah) {
+    if (_surahAudio) {
+      _surahAudio.currentTime = 0;
+      _surahAudio.play().catch(() => mushafStop());
+      return;
+    }
+    // _surahAudio gone (e.g. per-ayah reciter) — can't loop, just stop cleanly
+    mushafStop();
+    return;
+  }
+
   const next = (state.quran.currentSurah || 0) + 1;
   if (next > 114) { mushafStop(); return; }
+
+  // ── Gapless path: swap src on existing element (background-safe) ─────────
+  // play() is called synchronously here — still within the onended microtask.
+  // Swapping src on an existing element keeps the iOS audio session alive,
+  // preventing both the "random pause" and "car controls stop working" issues.
+  const nextUrl = getSurahAudioUrl(next);
+  if (_surahAudio && nextUrl) {
+    // Clear previous surah's highlights and timings
+    _surahAudio.removeEventListener('timeupdate', _surahTimeUpdate);
+    if (_surahBadge) { _surahBadge.classList.remove('maud-playing'); _surahBadge = null; }
+    _surahTiming = null; _surahTimingArr = null; _surahTimingIdx = 0;
+
+    // Update state BEFORE play() so onplay/onpause handlers read the right surah
+    state.quran.currentSurah = next;
+    state.audio.playingSurah = next;
+    state.audio.playingAyah = 1;
+    state.audio.playingId = -1;
+    state.audio.paused = false;
+
+    // Update onerror for the new surah (old closure would reference the old surah)
+    _surahAudio.onerror = () => {
+      const resumeAyah = state.audio.playingAyah || 1;
+      _surahAudio = null; _surahTiming = null; _surahTimingArr = null; _surahTimingIdx = 0;
+      state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+      const cache = state.quran.cache[next];
+      if (!cache) return;
+      const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === resumeAyah) || cache.arData.ayahs[0];
+      playMushafAyah(ayahObj.number, next, ayahObj.numberInSurah, true);
+    };
+
+    // Swap src and play — no new Audio(), no mushafStop(), iOS session intact
+    _surahAudio.src = nextUrl;
+    _surahAudio.play().catch(() => mushafStop());
+    saveAudioPos();
+    updateMushafPlayBtn(true);
+    updateMushafPlayerBar();
+    updateSurahNavBtns();
+
+    // Open DOM + load timings async — audio is already playing; keepAudio=true
+    // prevents openSurah from calling mushafStop() and killing the transition
+    openSurah(next, null, { keepAudio: true }).then(() => {
+      if (state.audio.playingSurah !== next || !_surahAudio) return;
+      fetchSurahTimings(next).then(t => {
+        if (!t || state.audio.playingSurah !== next || !_surahAudio) return;
+        _surahTiming = t; _surahTimingArr = _buildTimingArr(t); _surahTimingIdx = 0;
+        _surahAudio.addEventListener('timeupdate', _surahTimeUpdate);
+        const cache = state.quran.cache[next];
+        if (cache?.arData) {
+          const ayahObj = cache.arData.ayahs[0];
+          if (ayahObj) {
+            _surahBadge = document.getElementById(`maud-${ayahObj.number}`);
+            if (_surahBadge) _surahBadge.classList.add('maud-playing');
+            state.audio.playingId = ayahObj.number;
+          }
+        }
+      });
+    });
+    return;
+  }
+
+  // ── Per-ayah fallback (reciter has no surah-level audio) ─────────────────
   await openSurah(next);
   const cache = state.quran.cache[next];
   if (!cache) return;
   if (state.quran.viewMode === 'page') {
     mushafPlayAll(next);
   } else {
-    // Directly invoke playAyah — avoids fragile click() and wires MediaSession
     const first = cache.arData.ayahs[0];
     playAyah(first.number, next, first.numberInSurah);
   }
@@ -912,13 +1185,34 @@ function mushafStop() {
   }
   _surahAudio = null;
   _surahBadge = null;
-  _surahTiming = null;
+  _surahTiming = null; _surahTimingArr = null; _surahTimingIdx = 0;
+  _isBuffering = false;
+  _seekbarStop();
   state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
   clearAudioPos();
   clearSleepTimer(); // always cancel sleep timer on stop (idempotent)
+  _loopSurah = false;  // reset loop on stop so it doesn't silently re-arm next session
+  _speedIdx = 1;       // reset speed to 1× on stop
+  _autoScrollPaused = false;
+  if (_autoScrollTimer) { clearTimeout(_autoScrollTimer); _autoScrollTimer = null; }
   if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
   updateMushafPlayBtn(false);
   updateMushafPlayerBar();
+}
+
+// Show/hide a buffering spinner in the player bar info label
+let _isBuffering = false;
+function _setBuffering(on) {
+  _isBuffering = on;
+  const info = document.getElementById('mpb-info');
+  if (!info) return;
+  if (on) {
+    info.dataset.prevText = info.textContent;
+    info.innerHTML = '<span class="mpb-spinner"></span> Buffering…';
+  } else if (info.dataset.prevText !== undefined) {
+    info.textContent = info.dataset.prevText;
+    delete info.dataset.prevText;
+  }
 }
 
 function updateMushafPlayBtn(playing) {
@@ -931,6 +1225,91 @@ function updateMushafPlayBtn(playing) {
 function mushafPlayToggle(surahNum) {
   if (_surahAudio || state.audio.player) toggleMushafPlayback();
   else mushafPlayAll(surahNum);
+}
+
+// ── Seek bar ──────────────────────────────────────────────────
+let _seekDragging = false; // true while user is dragging the range input
+let _seekRafId    = null;
+
+function _formatTime(sec) {
+  if (!isFinite(sec) || sec < 0) return '0:00';
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
+function _seekbarTick() {
+  _seekRafId = null;
+  const seekbar = document.getElementById('mpb-seekbar');
+  // Seekbar only applies to gapless surah audio. Per-ayah pool elements each
+  // cover a single ayah (~5-30s), so showing duration would be misleading.
+  const player = _surahAudio;
+  if (!player || !state.audio.playingSurah) {
+    if (seekbar) seekbar.style.display = 'none';
+    return;
+  }
+  if (seekbar) seekbar.style.display = 'block';
+  if (!_seekDragging) {
+    const dur = player.duration || 0;
+    const cur = player.currentTime || 0;
+    const range = document.getElementById('mpb-seek-range');
+    if (range) range.value = dur > 0 ? (cur / dur) * 100 : 0;
+    const curEl = document.getElementById('mpb-time-cur');
+    const durEl = document.getElementById('mpb-time-dur');
+    if (curEl) curEl.textContent = _formatTime(cur);
+    if (durEl) durEl.textContent = _formatTime(dur);
+  }
+  _seekRafId = requestAnimationFrame(_seekbarTick);
+}
+
+function _seekbarStart() {
+  if (_seekRafId) return; // already running
+  _seekbarTick();
+}
+
+function _seekbarStop() {
+  if (_seekRafId) { cancelAnimationFrame(_seekRafId); _seekRafId = null; }
+  const seekbar = document.getElementById('mpb-seekbar');
+  if (seekbar) seekbar.style.display = 'none';
+}
+
+function seekMushafStart() { _seekDragging = true; _pauseAutoScroll(); }
+function seekMushafEnd(pct) {
+  _seekDragging = false;
+  if (pct !== undefined) seekMushafTo(pct); // seek on finger-lift (iOS touch)
+}
+function seekMushafTo(pct) {
+  const player = _surahAudio || state.audio.player;
+  if (!player || !isFinite(player.duration)) return;
+  player.currentTime = (pct / 100) * player.duration;
+  _surahTimingIdx = 0; // reset badge scan index after seek
+}
+
+const _speedSteps = [0.75, 1, 1.25, 1.5];
+let _speedIdx = 1; // default 1×
+
+function cyclePlaybackSpeed() {
+  _speedIdx = (_speedIdx + 1) % _speedSteps.length;
+  const speed = _speedSteps[_speedIdx];
+  const p = _surahAudio || state.audio.player;
+  if (p) p.playbackRate = speed;
+  const btn = document.getElementById('mpb-speed-btn');
+  if (btn) {
+    btn.textContent = speed === 1 ? '1×' : `${speed}×`;
+    btn.style.opacity = speed === 1 ? '0.7' : '1';
+    btn.style.fontWeight = speed === 1 ? '' : '700';
+  }
+}
+
+function _applyPlaybackSpeed(audio) {
+  if (!audio) return;
+  audio.playbackRate = _speedSteps[_speedIdx];
+}
+
+function toggleLoopSurah() {
+  _loopSurah = !_loopSurah;
+  const btn = document.getElementById('mpb-loop-btn');
+  if (btn) btn.style.opacity = _loopSurah ? '1' : '0.45';
 }
 
 function toggleMushafPlayback() {
@@ -954,16 +1333,25 @@ function updateMushafPlayerBar() {
     const ayahLabel = state.audio.playingAyah ? `:${state.audio.playingAyah}` : '';
 
     const info = document.getElementById('mpb-info');
-    if (info) info.textContent = surahName + ayahLabel;
+    if (info && !_isBuffering) info.textContent = surahName + ayahLabel;
 
     const btn = document.getElementById('mpb-pause-btn');
     if (btn) btn.textContent = state.audio.paused ? '▶' : '⏸';
+    const loopBtn = document.getElementById('mpb-loop-btn');
+    if (loopBtn) loopBtn.style.opacity = _loopSurah ? '1' : '0.45';
+    const speedBtn = document.getElementById('mpb-speed-btn');
+    if (speedBtn) {
+      const sp = _speedSteps[_speedIdx];
+      speedBtn.textContent = sp === 1 ? '1×' : `${sp}×`;
+      speedBtn.style.opacity = sp === 1 ? '0.7' : '1';
+      speedBtn.style.fontWeight = sp === 1 ? '' : '700';
+    }
   } else {
     // Clear media session when stopped
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = null;
       navigator.mediaSession.playbackState = 'none';
-      ['play','pause','stop','nexttrack','previoustrack'].forEach(a => {
+      ['play','pause','stop','nexttrack','previoustrack','seekforward','seekbackward'].forEach(a => {
         try { navigator.mediaSession.setActionHandler(a, null); } catch(_) {}
       });
     }
@@ -972,6 +1360,19 @@ function updateMushafPlayerBar() {
   updateMushafPlayBtn(!!(state.audio.player || _surahAudio));
 }
 
+
+// ── Auto-resume after phone call / Bluetooth interruption ─────────────────
+// iOS pauses audio when a call comes in (fires onpause but NOT our intentional
+// pause path, so state.audio.paused stays false). When the user returns to the
+// app, if our state says "should be playing" but audio is actually paused,
+// it was a system interruption — resume automatically.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  const player = _surahAudio || state.audio.player;
+  if (player && !state.audio.paused && player.paused) {
+    player.play().catch(() => {});
+  }
+});
 
 function toArabicNumerals(n) {
   return String(n).replace(/\d/g, d => '٠١٢٣٤٥٦٧٨٩'[d]);
@@ -1019,6 +1420,7 @@ function renderSurahContent(n, arData, enData) {
   </div>`;
   }).join('');
   content.innerHTML = bismillah + ayahs;
+  if (typeof injectPlanTargetMarker === 'function') injectPlanTargetMarker(n, true);
 
   // Track reading position — delayed to skip the initial-render intersection fire
   // so the scroll-restore has time to settle before we start recording position
@@ -1035,7 +1437,14 @@ function renderSurahContent(n, arData, enData) {
       const firstVisible = visible.reduce((a, b) => a < b ? a : b);
       try {
         const lr = JSON.parse(localStorage.getItem('huda_last_read') || 'null');
-        if (lr) { lr.ayah = firstVisible; localStorage.setItem('huda_last_read', JSON.stringify(lr)); }
+        if (lr) {
+          lr.ayah = firstVisible;
+          localStorage.setItem('huda_last_read', JSON.stringify(lr));
+          const _gv = globalAyahNum(lr.surah, firstVisible);
+          const _pfv = parseInt(localStorage.getItem('huda_furthest_read') || '0', 10);
+          if (_gv > _pfv) localStorage.setItem('huda_furthest_read', String(_gv));
+        }
+        if (typeof updateReaderPlanBar === 'function') updateReaderPlanBar();
       } catch(e) { console.warn('[huda] failed to save reading position', e); }
     }, { threshold: 0.5 });
     content.querySelectorAll('.ayah').forEach(el => _ayahObserver.observe(el));

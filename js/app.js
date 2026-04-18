@@ -24,7 +24,7 @@ function esc(str) {
 // ── Reciters ──────────────────────────────────────────────────
 const RECITERS = [
   {
-    id: 'ar.mahermuaiqly', name: 'Maher Al-Muqaili',
+    id: 'ar.mahermuaiqly', name: 'Maher Al-Muqaili', qurancdnId: 7,
     surahUrl: n => `https://download.quranicaudio.com/quran/maher_256/${String(n).padStart(3,'0')}.mp3`,
     perAyahUrl: (s, a) => `https://everyayah.com/data/MaherAlMuaiqly128kbps/${String(s).padStart(3,'0')}${String(a).padStart(3,'0')}.mp3`,
   },
@@ -682,7 +682,11 @@ function setupNav() {
   });
 }
 
+const _tabScrollY = {};
 function switchTab(tab) {
+  // Preserve scroll position of current tab before hiding it
+  if (state.activeTab) _tabScrollY[state.activeTab] = window.scrollY;
+
   state.activeTab = tab;
   haptic();
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -699,6 +703,9 @@ function switchTab(tab) {
     learn: renderLearnHub,
   };
   if (renderers[tab]) renderers[tab]();
+
+  // Restore scroll position after repaint (display:none→block needs a frame)
+  requestAnimationFrame(() => window.scrollTo(0, _tabScrollY[tab] || 0));
 }
 
 // ── PWA ───────────────────────────────────────────────────────
@@ -709,6 +716,8 @@ function registerSW() {
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') reg.update();
     });
+    // Also check every 30s while app is in foreground
+    setInterval(() => { if (document.visibilityState === 'visible') reg.update(); }, 30000);
   }).catch(() => {});
   // New SW activated → reload so users get the latest version
   navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());

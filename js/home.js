@@ -238,6 +238,7 @@ function renderHome() {
       <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <span class="badge badge-emerald">${AYATUL_KURSI.ref}</span>
         <button class="ak-play-btn" id="ak-play" onclick="playAyatulKursi()">▶ Play</button>
+        <button class="ak-loop-btn" id="ak-loop" onclick="toggleAyatulKursiLoop()" title="Loop" style="opacity:${_loopAyatulKursi ? '1' : '0.45'}">🔁</button>
         <select class="ak-reciter-select" onchange="setReciter(this.value)" title="Reciter">
           ${RECITERS.map(r => `<option value="${r.id}" ${state.reciter === r.id ? 'selected' : ''}>${r.name}</option>`).join('')}
         </select>

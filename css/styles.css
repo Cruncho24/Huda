@@ -319,6 +319,16 @@ body {
 }
 .mhdr-btn:active { background: rgba(255,255,255,0.4); }
 .mhdr-btn:disabled { opacity: 0.3; cursor: default; }
+@keyframes mpb-spin { to { transform: rotate(360deg); } }
+.mpb-spinner {
+  display: inline-block;
+  width: 10px; height: 10px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: mpb-spin 0.7s linear infinite;
+  vertical-align: middle;
+}
 #surah-prev-btn, #surah-next-btn { font-size: 18px; padding: 3px 10px; }
 
 /* ── Hadith Card ────────────────────────────────────────────── */
@@ -1407,7 +1417,101 @@ html.dark .ri-btn.active { background: #064e3b; border-color: var(--emerald); co
 @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
 .dhikr-card.tapped { animation: pulse 0.15s ease; }
 
+/* ── Seekbar ─────────────────────────────────────────────────── */
+#mpb-seekbar {
+  background: #064e3b;
+  padding: 4px 12px 6px;
+}
+.mpb-seek-input {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+.mpb-seek-input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: white;
+  cursor: pointer;
+}
+.mpb-seek-input::-moz-range-thumb {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  background: white;
+  border: none;
+  cursor: pointer;
+}
+.mpb-seek-times {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: rgba(255,255,255,0.6);
+  margin-top: 2px;
+}
+html.dark #mpb-seekbar { background: #1e293b; }
+
 /* ── Quran reader view toggle ───────────────────────────────── */
+.reader-sticky-header {
+  position: sticky;
+  top: 56px; /* matches .page-header height — update here if that changes */
+  z-index: 4;
+  background: var(--white);
+}
+#reader-plan-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 16px;
+  border-bottom: 1px solid var(--gray-100);
+}
+.reader-plan-track {
+  flex: 1;
+  height: 5px;
+  background: #e2e8f0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+.reader-plan-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #059669, #10b981);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+.reader-plan-fill-done {
+  background: linear-gradient(90deg, #065f46, #059669);
+}
+.reader-plan-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  white-space: nowrap;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.reader-plan-done-btn {
+  font-size: 11px;
+  font-weight: 700;
+  color: white;
+  background: #059669;
+  border: none;
+  border-radius: 20px;
+  padding: 3px 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.reader-plan-done-btn:active { background: #047857; }
+html.dark .reader-plan-done-btn { background: #065f46; }
+html.dark .reader-sticky-header { background: #1e293b; }
+html.dark #reader-plan-bar { border-color: #334155; }
+html.dark .reader-plan-track { background: #334155; }
+html.dark .reader-plan-label { color: #94a3b8; }
+
 .reader-toolbar {
   display: flex;
   align-items: center;
@@ -1416,9 +1520,6 @@ html.dark .ri-btn.active { background: #064e3b; border-color: var(--emerald); co
   background: var(--white);
   border-bottom: 1px solid var(--gray-100);
   gap: 6px;
-  position: sticky;
-  top: 56px;
-  z-index: 4;
 }
 .view-toggle-btn {
   padding: 7px 18px;
@@ -1588,6 +1689,18 @@ html.dark .mword.active {
 }
 .ak-play-btn:active { background: var(--emerald-dark); }
 html.dark .ak-play-btn { background: var(--emerald-dark); }
+.ak-loop-btn {
+  background: transparent;
+  border: 1.5px solid var(--emerald);
+  color: var(--emerald);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0.45;
+  transition: opacity 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
 .ak-reciter-select {
   font-size: 12px;
   padding: 5px 8px;
@@ -3561,6 +3674,12 @@ body, #app { background: #eef2f7; }
   border: 1px solid rgba(0,0,0,0.05);
   box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 4px 16px rgba(0,0,0,0.07);
 }
+.plan-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
 .plan-label {
   font-size: 11px;
   font-weight: 800;
@@ -3572,29 +3691,146 @@ body, #app { background: #eef2f7; }
   font-size: 15px;
   font-weight: 700;
   color: #0f172a;
-  margin: 4px 0 10px;
+  margin: 2px 0 8px;
 }
 .plan-streak {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: #f59e0b;
   background: #fef3c7;
   padding: 3px 8px;
   border-radius: 20px;
 }
+.plan-status-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 20px;
+}
+.plan-status-behind {
+  color: #b45309;
+  background: #fef3c7;
+}
+.plan-stop-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 10px;
+}
+.plan-stop-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  flex-shrink: 0;
+}
+.plan-stop-ref {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  background: #f0fdf4;
+  border: 1.5px solid #a7f3d0;
+  border-radius: 8px;
+  padding: 2px 10px;
+}
+html.dark .plan-stop-ref { background: #0f2d1e; border-color: #065f46; color: #34d399; }
+
+/* Plan target marker — injected into Quran reader */
+.plan-target-marker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 24px 0 20px;
+  padding: 0 4px;
+}
+.plan-target-marker-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.plan-keep-reading-btn {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0369a1;
+  background: #f0f9ff;
+  border: 1.5px solid #bae6fd;
+  border-radius: 20px;
+  padding: 4px 14px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+.plan-keep-reading-btn:active { background: #e0f2fe; }
+html.dark .plan-keep-reading-btn { background: #0c1a2e; border-color: #1e40af; color: #60a5fa; }
+.plan-target-marker-line {
+  flex: 1;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, #059669, transparent);
+}
+.plan-target-marker-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: #059669;
+  background: #f0fdf4;
+  border: 1.5px solid #a7f3d0;
+  border-radius: 20px;
+  padding: 4px 12px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.plan-target-marker-continue {
+  color: #0369a1;
+  background: #f0f9ff;
+  border-color: #bae6fd;
+}
+html.dark .plan-target-marker-line { background: linear-gradient(90deg, transparent, #065f46, transparent); }
+html.dark .plan-target-marker-badge { background: #0f2d1e; border-color: #065f46; color: #34d399; }
+html.dark .plan-target-marker-continue { background: #0c1a2e; border-color: #1e40af; color: #60a5fa; }
+
+.plan-today-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.plan-day-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+.plan-target-reached {
+  font-size: 11px;
+  font-weight: 700;
+  color: #059669;
+  background: #f0fdf4;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
 .plan-progress-wrap {
-  height: 5px;
+  height: 4px;
   background: #e2e8f0;
   border-radius: 99px;
   overflow: hidden;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
+}
+.plan-progress-today {
+  height: 7px;
+  margin-bottom: 6px;
 }
 .plan-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #059669, #10b981);
   border-radius: 99px;
   transition: width 0.4s ease;
-  min-width: 4px;
+}
+.plan-fill-complete {
+  background: linear-gradient(90deg, #065f46, #059669);
+}
+.plan-fill-overall {
+  background: linear-gradient(90deg, #94a3b8, #cbd5e1);
 }
 .plan-footer-row {
   display: flex;
@@ -3618,6 +3854,11 @@ body, #app { background: #eef2f7; }
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s;
+}
+.plan-read-ahead-btn {
+  background: none;
+  color: #059669;
+  border: 1.5px solid #a7f3d0;
 }
 .plan-read-btn:active { background: #047857; }
 .plan-done-btn {
@@ -3725,10 +3966,14 @@ body, #app { background: #eef2f7; }
 /* Dark mode */
 html.dark .plan-card { background: #1e293b; border-color: #334155; box-shadow: none; }
 html.dark .plan-range { color: #f1f5f9; }
+html.dark .plan-day-count { color: #94a3b8; }
+html.dark .plan-target-reached { background: #0f2d1e; color: #34d399; }
+html.dark .plan-status-behind { background: #2d1e0f; color: #fbbf24; }
 html.dark .plan-empty-title { color: #f1f5f9; }
 html.dark .plan-empty-sub { color: #64748b; }
 html.dark .plan-empty-arrow { color: #334155; }
 html.dark .plan-progress-wrap { background: #334155; }
+html.dark .plan-fill-overall { background: linear-gradient(90deg, #334155, #475569); }
 html.dark .plan-done-btn { background: #0f2d1e; border-color: #065f46; }
 html.dark .plan-card-done { background: linear-gradient(135deg, #0f2d1e, #064e3b); border-color: #065f46; }
 html.dark .plan-setup-box { background: #1e293b; }
@@ -3740,6 +3985,10 @@ html.dark .plan-next-label { color: #64748b; }
 html.dark .plan-cancel-box { background: #1e293b; }
 html.dark .plan-cancel-title { color: #f1f5f9; }
 html.dark .plan-cancel-sub { color: #64748b; }
+html.dark .plan-restart-btn { background: #0f2d1e; border-color: #065f46; color: #34d399; }
+html.dark .plan-restart-btn:active { background: #064e3b; }
+html.dark .plan-cancel-confirm-btn { background: #2d0f0f; border-color: #7f1d1d; color: #f87171; }
+html.dark .plan-cancel-confirm-btn:active { background: #450a0a; }
 
 /* ── Dhikr counter pop animation ─────────────────────────── */
 @keyframes dhikr-pop {
@@ -4001,6 +4250,19 @@ html.dark .dhikr-week-col.today .dhikr-week-dot { outline-color: #34d399; }
 }
 .plan-cancel-title { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
 .plan-cancel-sub { font-size: 13px; color: #64748b; }
+.plan-restart-btn {
+  width: 100%;
+  padding: 14px;
+  background: #f0fdf4;
+  border: 1.5px solid #a7f3d0;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #059669;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.plan-restart-btn:active { background: #d1fae5; }
 .plan-cancel-confirm-btn {
   width: 100%;
   padding: 14px;
@@ -4020,6 +4282,123 @@ html.dark .dhikr-week-col.today .dhikr-week-dot { outline-color: #34d399; }
   border: 1.5px solid rgba(5, 150, 105, 0.2);
 }
 .plan-card-empty:hover { border-color: rgba(5, 150, 105, 0.4); }
+
+/* ── Plan: weekly calendar ───────────────────────────────── */
+.plan-week-cal {
+  display: flex;
+  justify-content: space-between;
+  margin: 8px 0 4px;
+  gap: 2px;
+}
+.plan-week-day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  flex: 1;
+}
+.plan-week-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  border: 1.5px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 700;
+}
+.plan-week-dot-done {
+  background: #059669;
+  border-color: #059669;
+  color: #fff;
+}
+.plan-week-name {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 600;
+}
+.plan-week-today .plan-week-dot {
+  border-color: #059669;
+  color: #059669;
+}
+.plan-week-today .plan-week-name { color: #059669; font-weight: 700; }
+
+/* ── Plan: catch-up button ───────────────────────────────── */
+.plan-catchup-btn {
+  background: #fffbeb;
+  border: 1.5px solid #fbbf24;
+  border-radius: 8px;
+  color: #92400e;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  margin-bottom: 6px;
+  text-align: left;
+  width: 100%;
+}
+.plan-catchup-btn:active { background: #fef3c7; }
+
+/* ── Plan: change pace button ────────────────────────────── */
+.plan-change-pace-btn {
+  background: #f0fdf4;
+  border: 1.5px solid #6ee7b7;
+  border-radius: 10px;
+  color: #065f46;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 12px 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.plan-change-pace-btn:active { background: #d1fae5; }
+
+/* ── Plan: "start from current" checkbox row ─────────────── */
+.plan-from-current-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #475569;
+  margin-bottom: 12px;
+  cursor: pointer;
+}
+.plan-from-current-row input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #059669;
+}
+
+/* ── Plan: custom days input ─────────────────────────────── */
+.plan-custom-input {
+  width: 100%;
+  padding: 12px;
+  font-size: 20px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 12px;
+  text-align: center;
+  box-sizing: border-box;
+  outline: none;
+}
+.plan-custom-input:focus { border-color: #059669; }
+
+/* ── Dark mode: plan additions ───────────────────────────── */
+html.dark .plan-week-dot { background: #334155; border-color: #475569; color: #64748b; }
+html.dark .plan-week-dot-done { background: #059669; border-color: #059669; color: #fff; }
+html.dark .plan-week-name { color: #64748b; }
+html.dark .plan-week-today .plan-week-dot { border-color: #34d399; color: #34d399; }
+html.dark .plan-week-today .plan-week-name { color: #34d399; }
+html.dark .plan-catchup-btn { background: #2d2106; border-color: #92400e; color: #fbbf24; }
+html.dark .plan-catchup-btn:active { background: #3d2e0a; }
+html.dark .plan-change-pace-btn { background: #0f2d1e; border-color: #065f46; color: #34d399; }
+html.dark .plan-from-current-row { color: #94a3b8; }
+html.dark .plan-custom-input { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+html.dark .plan-custom-input:focus { border-color: #059669; }
 
 /* ── Sleep timer button — active state ───────────────────── */
 #mpb-sleep-btn { font-size: 12px; min-width: 32px; letter-spacing: -0.3px; }
