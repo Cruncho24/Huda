@@ -95,11 +95,21 @@ function openProphetDuas(prophet) {
   renderProphetDuaReader();
 }
 
+function _prophetOrder() {
+  const seen = [];
+  DUAS['Prophetic Duas ﷺ'].forEach(d => { if (!seen.includes(d.prophet)) seen.push(d.prophet); });
+  return seen;
+}
+
 function renderProphetDuaReader() {
   const prophet = state.learn.currentProphet;
   const duas = DUAS['Prophetic Duas ﷺ'].filter(d => d.prophet === prophet);
   const i = state.learn.currentDuaIndex;
   const dua = duas[i];
+  const prophets = _prophetOrder();
+  const pIdx = prophets.indexOf(prophet);
+  const isFirst = pIdx === 0 && i === 0;
+  const isLast = pIdx === prophets.length - 1 && i === duas.length - 1;
   const tab = document.getElementById('tab-duas');
   tab.innerHTML = `
     <div class="page-header">
@@ -118,19 +128,35 @@ function renderProphetDuaReader() {
       <span class="dua-source-badge">📚 ${dua.source} · ${dua.grade}</span>
       <button class="share-dua-btn" onclick="shareProphetDua(${i})">Share ↗</button>
     </div>
-    ${duas.length > 1 ? `
     <div class="dua-nav">
-      <button class="dua-nav-btn" onclick="changeProphetDua(-1)" ${i === 0 ? 'disabled' : ''}>← Previous</button>
+      <button class="dua-nav-btn" onclick="changeProphetDua(-1)" ${isFirst ? 'disabled' : ''}>← Previous</button>
       <span style="font-size:12px;color:var(--gray-400)">${i + 1} / ${duas.length}</span>
-      <button class="dua-nav-btn" onclick="changeProphetDua(1)" ${i === duas.length - 1 ? 'disabled' : ''}>Next →</button>
-    </div>` : ''}
+      <button class="dua-nav-btn" onclick="changeProphetDua(1)" ${isLast ? 'disabled' : ''}>Next →</button>
+    </div>
   `;
-  if (duas.length > 1) _attachDuaSwipe(tab.querySelector('.dua-card'), dir => changeProphetDua(dir));
+  _attachDuaSwipe(tab.querySelector('.dua-card'), dir => changeProphetDua(dir));
 }
 
 function changeProphetDua(dir) {
+  const prophets = _prophetOrder();
   const duas = DUAS['Prophetic Duas ﷺ'].filter(d => d.prophet === state.learn.currentProphet);
-  state.learn.currentDuaIndex = Math.max(0, Math.min(duas.length - 1, state.learn.currentDuaIndex + dir));
+  const newIndex = state.learn.currentDuaIndex + dir;
+  if (newIndex >= 0 && newIndex < duas.length) {
+    state.learn.currentDuaIndex = newIndex;
+  } else if (dir === 1) {
+    const pIdx = prophets.indexOf(state.learn.currentProphet);
+    if (pIdx < prophets.length - 1) {
+      state.learn.currentProphet = prophets[pIdx + 1];
+      state.learn.currentDuaIndex = 0;
+    }
+  } else {
+    const pIdx = prophets.indexOf(state.learn.currentProphet);
+    if (pIdx > 0) {
+      state.learn.currentProphet = prophets[pIdx - 1];
+      const prevDuas = DUAS['Prophetic Duas ﷺ'].filter(d => d.prophet === prophets[pIdx - 1]);
+      state.learn.currentDuaIndex = prevDuas.length - 1;
+    }
+  }
   renderProphetDuaReader();
 }
 
