@@ -28,6 +28,7 @@
   --gray-700: #374151;
   --gray-900: #111827;
   --nav-height: 68px;
+  --page-header-height: 56px;
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 }
 
@@ -145,6 +146,12 @@ body {
 
   /* Install banner: hide on desktop */
   #install-banner { display: none !important; }
+
+  /* Dua reader: sidebar nav is a width not a height, so reset the flex layout */
+  .dua-reader-layout {
+    height: auto;
+    flex: 1;
+  }
 }
 
 /* ── Tabs ───────────────────────────────────────────────────── */
@@ -858,12 +865,11 @@ html.dark .saved-surah-name { color: var(--gray-100); }
 .dua-reader-layout {
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - var(--nav-height) - var(--safe-bottom));
+  height: calc(100dvh - var(--nav-height) - var(--safe-bottom) - var(--page-header-height));
 }
 .dua-reader-layout .dua-card {
   flex: 1;
   overflow-y: auto;
-  margin: 12px 16px;
 }
 .dua-nav {
   display: flex;
