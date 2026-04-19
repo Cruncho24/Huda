@@ -1,0 +1,769 @@
+- generic [ref=e2]:
+  - generic [ref=e1087]:
+    - generic [ref=e1088]:
+      - generic [ref=e1090]: Holy Quran
+      - generic [ref=e1091]: القُرْآن الكَرِيم
+      - generic [ref=e1092]:
+        - generic [ref=e1093]:
+          - generic [ref=e1094]: 🔍
+          - textbox "Search surah..." [ref=e1095]
+        - button "Search verse" [ref=e1096] [cursor=pointer]
+    - generic [ref=e1098]:
+      - generic [ref=e1099]:
+        - generic [ref=e1100]: 📥
+        - generic [ref=e1101]:
+          - generic [ref=e1102]: Download for offline reading
+          - generic [ref=e1103]: Save all 114 surahs to your device
+      - button "Download" [ref=e1104] [cursor=pointer]
+    - generic [ref=e1106]:
+      - generic [ref=e1107]: Browse by Theme
+      - generic [ref=e1108]:
+        - button "💚 Mercy" [ref=e1109] [cursor=pointer]:
+          - generic [ref=e1110]: 💚
+          - generic [ref=e1111]: Mercy
+        - button "⚓ Patience" [ref=e1112] [cursor=pointer]:
+          - generic [ref=e1113]: ⚓
+          - generic [ref=e1114]: Patience
+        - button "🌿 Gratitude" [ref=e1115] [cursor=pointer]:
+          - generic [ref=e1116]: 🌿
+          - generic [ref=e1117]: Gratitude
+        - button "🕊️ Trust in Allah" [ref=e1118] [cursor=pointer]:
+          - generic [ref=e1119]: 🕊️
+          - generic [ref=e1120]: Trust in Allah
+        - button "🌙 Forgiveness" [ref=e1121] [cursor=pointer]:
+          - generic [ref=e1122]: 🌙
+          - generic [ref=e1123]: Forgiveness
+        - button "✨ Paradise" [ref=e1124] [cursor=pointer]:
+          - generic [ref=e1125]: ✨
+          - generic [ref=e1126]: Paradise
+        - button "🤲 Dua" [ref=e1127] [cursor=pointer]:
+          - generic [ref=e1128]: 🤲
+          - generic [ref=e1129]: Dua
+        - button "🏡 Family" [ref=e1130] [cursor=pointer]:
+          - generic [ref=e1131]: 🏡
+          - generic [ref=e1132]: Family
+        - button "📖 Knowledge" [ref=e1133] [cursor=pointer]:
+          - generic [ref=e1134]: 📖
+          - generic [ref=e1135]: Knowledge
+        - button "🌊 Tests & Hardship" [ref=e1136] [cursor=pointer]:
+          - generic [ref=e1137]: 🌊
+          - generic [ref=e1138]: Tests & Hardship
+        - button "⚖️ Justice" [ref=e1139] [cursor=pointer]:
+          - generic [ref=e1140]: ⚖️
+          - generic [ref=e1141]: Justice
+        - button "🌾 Provision" [ref=e1142] [cursor=pointer]:
+          - generic [ref=e1143]: 🌾
+          - generic [ref=e1144]: Provision
+        - button "🌟 Guidance" [ref=e1145] [cursor=pointer]:
+          - generic [ref=e1146]: 🌟
+          - generic [ref=e1147]: Guidance
+        - button "💎 Character" [ref=e1148] [cursor=pointer]:
+          - generic [ref=e1149]: 💎
+          - generic [ref=e1150]: Character
+        - button "🌌 Afterlife" [ref=e1151] [cursor=pointer]:
+          - generic [ref=e1152]: 🌌
+          - generic [ref=e1153]: Afterlife
+    - generic [ref=e1154]:
+      - generic [ref=e1155] [cursor=pointer]:
+        - generic [ref=e1156]: "1"
+        - generic [ref=e1157]:
+          - generic [ref=e1158]: Al-Fatihah
+          - generic [ref=e1159]: The Opening · 7 verses
+        - generic [ref=e1161]: الفاتحة
+      - generic [ref=e1162] [cursor=pointer]:
+        - generic [ref=e1163]: "2"
+        - generic [ref=e1164]:
+          - generic [ref=e1165]: Al-Baqarah
+          - generic [ref=e1166]: The Cow · 286 verses
+        - generic [ref=e1168]: البقرة
+      - generic [ref=e1169] [cursor=pointer]:
+        - generic [ref=e1170]: "3"
+        - generic [ref=e1171]:
+          - generic [ref=e1172]: Ali 'Imran
+          - generic [ref=e1173]: Family of Imran · 200 verses
+        - generic [ref=e1175]: آل عمران
+      - generic [ref=e1176] [cursor=pointer]:
+        - generic [ref=e1177]: "4"
+        - generic [ref=e1178]:
+          - generic [ref=e1179]: An-Nisa
+          - generic [ref=e1180]: The Women · 176 verses
+        - generic [ref=e1182]: النساء
+      - generic [ref=e1183] [cursor=pointer]:
+        - generic [ref=e1184]: "5"
+        - generic [ref=e1185]:
+          - generic [ref=e1186]: Al-Ma'idah
+          - generic [ref=e1187]: The Table Spread · 120 verses
+        - generic [ref=e1189]: المائدة
+      - generic [ref=e1190] [cursor=pointer]:
+        - generic [ref=e1191]: "6"
+        - generic [ref=e1192]:
+          - generic [ref=e1193]: Al-An'am
+          - generic [ref=e1194]: The Cattle · 165 verses
+        - generic [ref=e1196]: الأنعام
+      - generic [ref=e1197] [cursor=pointer]:
+        - generic [ref=e1198]: "7"
+        - generic [ref=e1199]:
+          - generic [ref=e1200]: Al-A'raf
+          - generic [ref=e1201]: The Heights · 206 verses
+        - generic [ref=e1203]: الأعراف
+      - generic [ref=e1204] [cursor=pointer]:
+        - generic [ref=e1205]: "8"
+        - generic [ref=e1206]:
+          - generic [ref=e1207]: Al-Anfal
+          - generic [ref=e1208]: The Spoils of War · 75 verses
+        - generic [ref=e1210]: الأنفال
+      - generic [ref=e1211] [cursor=pointer]:
+        - generic [ref=e1212]: "9"
+        - generic [ref=e1213]:
+          - generic [ref=e1214]: At-Tawbah
+          - generic [ref=e1215]: The Repentance · 129 verses
+        - generic [ref=e1217]: التوبة
+      - generic [ref=e1218] [cursor=pointer]:
+        - generic [ref=e1219]: "10"
+        - generic [ref=e1220]:
+          - generic [ref=e1221]: Yunus
+          - generic [ref=e1222]: Jonah · 109 verses
+        - generic [ref=e1224]: يونس
+      - generic [ref=e1225] [cursor=pointer]:
+        - generic [ref=e1226]: "11"
+        - generic [ref=e1227]:
+          - generic [ref=e1228]: Hud
+          - generic [ref=e1229]: Hud · 123 verses
+        - generic [ref=e1231]: هود
+      - generic [ref=e1232] [cursor=pointer]:
+        - generic [ref=e1233]: "12"
+        - generic [ref=e1234]:
+          - generic [ref=e1235]: Yusuf
+          - generic [ref=e1236]: Joseph · 111 verses
+        - generic [ref=e1238]: يوسف
+      - generic [ref=e1239] [cursor=pointer]:
+        - generic [ref=e1240]: "13"
+        - generic [ref=e1241]:
+          - generic [ref=e1242]: Ar-Ra'd
+          - generic [ref=e1243]: The Thunder · 43 verses
+        - generic [ref=e1245]: الرعد
+      - generic [ref=e1246] [cursor=pointer]:
+        - generic [ref=e1247]: "14"
+        - generic [ref=e1248]:
+          - generic [ref=e1249]: Ibrahim
+          - generic [ref=e1250]: Abraham · 52 verses
+        - generic [ref=e1252]: إبراهيم
+      - generic [ref=e1253] [cursor=pointer]:
+        - generic [ref=e1254]: "15"
+        - generic [ref=e1255]:
+          - generic [ref=e1256]: Al-Hijr
+          - generic [ref=e1257]: The Rocky Tract · 99 verses
+        - generic [ref=e1259]: الحجر
+      - generic [ref=e1260] [cursor=pointer]:
+        - generic [ref=e1261]: "16"
+        - generic [ref=e1262]:
+          - generic [ref=e1263]: An-Nahl
+          - generic [ref=e1264]: The Bee · 128 verses
+        - generic [ref=e1266]: النحل
+      - generic [ref=e1267] [cursor=pointer]:
+        - generic [ref=e1268]: "17"
+        - generic [ref=e1269]:
+          - generic [ref=e1270]: Al-Isra
+          - generic [ref=e1271]: The Night Journey · 111 verses
+        - generic [ref=e1273]: الإسراء
+      - generic [ref=e1274] [cursor=pointer]:
+        - generic [ref=e1275]: "18"
+        - generic [ref=e1276]:
+          - generic [ref=e1277]: Al-Kahf
+          - generic [ref=e1278]: The Cave · 110 verses
+        - generic [ref=e1280]: الكهف
+      - generic [ref=e1281] [cursor=pointer]:
+        - generic [ref=e1282]: "19"
+        - generic [ref=e1283]:
+          - generic [ref=e1284]: Maryam
+          - generic [ref=e1285]: Mary · 98 verses
+        - generic [ref=e1287]: مريم
+      - generic [ref=e1288] [cursor=pointer]:
+        - generic [ref=e1289]: "20"
+        - generic [ref=e1290]:
+          - generic [ref=e1291]: Ta-Ha
+          - generic [ref=e1292]: Ta-Ha · 135 verses
+        - generic [ref=e1294]: طه
+      - generic [ref=e1295] [cursor=pointer]:
+        - generic [ref=e1296]: "21"
+        - generic [ref=e1297]:
+          - generic [ref=e1298]: Al-Anbiya
+          - generic [ref=e1299]: The Prophets · 112 verses
+        - generic [ref=e1301]: الأنبياء
+      - generic [ref=e1302] [cursor=pointer]:
+        - generic [ref=e1303]: "22"
+        - generic [ref=e1304]:
+          - generic [ref=e1305]: Al-Hajj
+          - generic [ref=e1306]: The Pilgrimage · 78 verses
+        - generic [ref=e1308]: الحج
+      - generic [ref=e1309] [cursor=pointer]:
+        - generic [ref=e1310]: "23"
+        - generic [ref=e1311]:
+          - generic [ref=e1312]: Al-Mu'minun
+          - generic [ref=e1313]: The Believers · 118 verses
+        - generic [ref=e1315]: المؤمنون
+      - generic [ref=e1316] [cursor=pointer]:
+        - generic [ref=e1317]: "24"
+        - generic [ref=e1318]:
+          - generic [ref=e1319]: An-Nur
+          - generic [ref=e1320]: The Light · 64 verses
+        - generic [ref=e1322]: النور
+      - generic [ref=e1323] [cursor=pointer]:
+        - generic [ref=e1324]: "25"
+        - generic [ref=e1325]:
+          - generic [ref=e1326]: Al-Furqan
+          - generic [ref=e1327]: The Criterion · 77 verses
+        - generic [ref=e1329]: الفرقان
+      - generic [ref=e1330] [cursor=pointer]:
+        - generic [ref=e1331]: "26"
+        - generic [ref=e1332]:
+          - generic [ref=e1333]: Ash-Shu'ara
+          - generic [ref=e1334]: The Poets · 227 verses
+        - generic [ref=e1336]: الشعراء
+      - generic [ref=e1337] [cursor=pointer]:
+        - generic [ref=e1338]: "27"
+        - generic [ref=e1339]:
+          - generic [ref=e1340]: An-Naml
+          - generic [ref=e1341]: The Ant · 93 verses
+        - generic [ref=e1343]: النمل
+      - generic [ref=e1344] [cursor=pointer]:
+        - generic [ref=e1345]: "28"
+        - generic [ref=e1346]:
+          - generic [ref=e1347]: Al-Qasas
+          - generic [ref=e1348]: The Stories · 88 verses
+        - generic [ref=e1350]: القصص
+      - generic [ref=e1351] [cursor=pointer]:
+        - generic [ref=e1352]: "29"
+        - generic [ref=e1353]:
+          - generic [ref=e1354]: Al-Ankabut
+          - generic [ref=e1355]: The Spider · 69 verses
+        - generic [ref=e1357]: العنكبوت
+      - generic [ref=e1358] [cursor=pointer]:
+        - generic [ref=e1359]: "30"
+        - generic [ref=e1360]:
+          - generic [ref=e1361]: Ar-Rum
+          - generic [ref=e1362]: The Romans · 60 verses
+        - generic [ref=e1364]: الروم
+      - generic [ref=e1365] [cursor=pointer]:
+        - generic [ref=e1366]: "31"
+        - generic [ref=e1367]:
+          - generic [ref=e1368]: Luqman
+          - generic [ref=e1369]: Luqman · 34 verses
+        - generic [ref=e1371]: لقمان
+      - generic [ref=e1372] [cursor=pointer]:
+        - generic [ref=e1373]: "32"
+        - generic [ref=e1374]:
+          - generic [ref=e1375]: As-Sajdah
+          - generic [ref=e1376]: The Prostration · 30 verses
+        - generic [ref=e1378]: السجدة
+      - generic [ref=e1379] [cursor=pointer]:
+        - generic [ref=e1380]: "33"
+        - generic [ref=e1381]:
+          - generic [ref=e1382]: Al-Ahzab
+          - generic [ref=e1383]: The Combined Forces · 73 verses
+        - generic [ref=e1385]: الأحزاب
+      - generic [ref=e1386] [cursor=pointer]:
+        - generic [ref=e1387]: "34"
+        - generic [ref=e1388]:
+          - generic [ref=e1389]: Saba
+          - generic [ref=e1390]: Sheba · 54 verses
+        - generic [ref=e1392]: سبأ
+      - generic [ref=e1393] [cursor=pointer]:
+        - generic [ref=e1394]: "35"
+        - generic [ref=e1395]:
+          - generic [ref=e1396]: Fatir
+          - generic [ref=e1397]: Originator · 45 verses
+        - generic [ref=e1399]: فاطر
+      - generic [ref=e1400] [cursor=pointer]:
+        - generic [ref=e1401]: "36"
+        - generic [ref=e1402]:
+          - generic [ref=e1403]: Ya-Sin
+          - generic [ref=e1404]: Ya-Sin · 83 verses
+        - generic [ref=e1406]: يس
+      - generic [ref=e1407] [cursor=pointer]:
+        - generic [ref=e1408]: "37"
+        - generic [ref=e1409]:
+          - generic [ref=e1410]: As-Saffat
+          - generic [ref=e1411]: Those Ranged in Ranks · 182 verses
+        - generic [ref=e1413]: الصافات
+      - generic [ref=e1414] [cursor=pointer]:
+        - generic [ref=e1415]: "38"
+        - generic [ref=e1416]:
+          - generic [ref=e1417]: Sad
+          - generic [ref=e1418]: The Letter Sad · 88 verses
+        - generic [ref=e1420]: ص
+      - generic [ref=e1421] [cursor=pointer]:
+        - generic [ref=e1422]: "39"
+        - generic [ref=e1423]:
+          - generic [ref=e1424]: Az-Zumar
+          - generic [ref=e1425]: The Groups · 75 verses
+        - generic [ref=e1427]: الزمر
+      - generic [ref=e1428] [cursor=pointer]:
+        - generic [ref=e1429]: "40"
+        - generic [ref=e1430]:
+          - generic [ref=e1431]: Ghafir
+          - generic [ref=e1432]: The Forgiver · 85 verses
+        - generic [ref=e1434]: غافر
+      - generic [ref=e1435] [cursor=pointer]:
+        - generic [ref=e1436]: "41"
+        - generic [ref=e1437]:
+          - generic [ref=e1438]: Fussilat
+          - generic [ref=e1439]: Explained in Detail · 54 verses
+        - generic [ref=e1441]: فصلت
+      - generic [ref=e1442] [cursor=pointer]:
+        - generic [ref=e1443]: "42"
+        - generic [ref=e1444]:
+          - generic [ref=e1445]: Ash-Shura
+          - generic [ref=e1446]: The Consultation · 53 verses
+        - generic [ref=e1448]: الشورى
+      - generic [ref=e1449] [cursor=pointer]:
+        - generic [ref=e1450]: "43"
+        - generic [ref=e1451]:
+          - generic [ref=e1452]: Az-Zukhruf
+          - generic [ref=e1453]: The Ornaments of Gold · 89 verses
+        - generic [ref=e1455]: الزخرف
+      - generic [ref=e1456] [cursor=pointer]:
+        - generic [ref=e1457]: "44"
+        - generic [ref=e1458]:
+          - generic [ref=e1459]: Ad-Dukhan
+          - generic [ref=e1460]: The Smoke · 59 verses
+        - generic [ref=e1462]: الدخان
+      - generic [ref=e1463] [cursor=pointer]:
+        - generic [ref=e1464]: "45"
+        - generic [ref=e1465]:
+          - generic [ref=e1466]: Al-Jathiyah
+          - generic [ref=e1467]: The Crouching · 37 verses
+        - generic [ref=e1469]: الجاثية
+      - generic [ref=e1470] [cursor=pointer]:
+        - generic [ref=e1471]: "46"
+        - generic [ref=e1472]:
+          - generic [ref=e1473]: Al-Ahqaf
+          - generic [ref=e1474]: The Wind-Curved Sandhills · 35 verses
+        - generic [ref=e1476]: الأحقاف
+      - generic [ref=e1477] [cursor=pointer]:
+        - generic [ref=e1478]: "47"
+        - generic [ref=e1479]:
+          - generic [ref=e1480]: Muhammad
+          - generic [ref=e1481]: Muhammad · 38 verses
+        - generic [ref=e1483]: محمد
+      - generic [ref=e1484] [cursor=pointer]:
+        - generic [ref=e1485]: "48"
+        - generic [ref=e1486]:
+          - generic [ref=e1487]: Al-Fath
+          - generic [ref=e1488]: The Victory · 29 verses
+        - generic [ref=e1490]: الفتح
+      - generic [ref=e1491] [cursor=pointer]:
+        - generic [ref=e1492]: "49"
+        - generic [ref=e1493]:
+          - generic [ref=e1494]: Al-Hujurat
+          - generic [ref=e1495]: The Rooms · 18 verses
+        - generic [ref=e1497]: الحجرات
+      - generic [ref=e1498] [cursor=pointer]:
+        - generic [ref=e1499]: "50"
+        - generic [ref=e1500]:
+          - generic [ref=e1501]: Qaf
+          - generic [ref=e1502]: The Letter Qaf · 45 verses
+        - generic [ref=e1504]: ق
+      - generic [ref=e1505] [cursor=pointer]:
+        - generic [ref=e1506]: "51"
+        - generic [ref=e1507]:
+          - generic [ref=e1508]: Adh-Dhariyat
+          - generic [ref=e1509]: The Winnowing Winds · 60 verses
+        - generic [ref=e1511]: الذاريات
+      - generic [ref=e1512] [cursor=pointer]:
+        - generic [ref=e1513]: "52"
+        - generic [ref=e1514]:
+          - generic [ref=e1515]: At-Tur
+          - generic [ref=e1516]: The Mount · 49 verses
+        - generic [ref=e1518]: الطور
+      - generic [ref=e1519] [cursor=pointer]:
+        - generic [ref=e1520]: "53"
+        - generic [ref=e1521]:
+          - generic [ref=e1522]: An-Najm
+          - generic [ref=e1523]: The Star · 62 verses
+        - generic [ref=e1525]: النجم
+      - generic [ref=e1526] [cursor=pointer]:
+        - generic [ref=e1527]: "54"
+        - generic [ref=e1528]:
+          - generic [ref=e1529]: Al-Qamar
+          - generic [ref=e1530]: The Moon · 55 verses
+        - generic [ref=e1532]: القمر
+      - generic [ref=e1533] [cursor=pointer]:
+        - generic [ref=e1534]: "55"
+        - generic [ref=e1535]:
+          - generic [ref=e1536]: Ar-Rahman
+          - generic [ref=e1537]: The Beneficent · 78 verses
+        - generic [ref=e1539]: الرحمن
+      - generic [ref=e1540] [cursor=pointer]:
+        - generic [ref=e1541]: "56"
+        - generic [ref=e1542]:
+          - generic [ref=e1543]: Al-Waqi'ah
+          - generic [ref=e1544]: The Inevitable · 96 verses
+        - generic [ref=e1546]: الواقعة
+      - generic [ref=e1547] [cursor=pointer]:
+        - generic [ref=e1548]: "57"
+        - generic [ref=e1549]:
+          - generic [ref=e1550]: Al-Hadid
+          - generic [ref=e1551]: The Iron · 29 verses
+        - generic [ref=e1553]: الحديد
+      - generic [ref=e1554] [cursor=pointer]:
+        - generic [ref=e1555]: "58"
+        - generic [ref=e1556]:
+          - generic [ref=e1557]: Al-Mujadila
+          - generic [ref=e1558]: The Pleading Woman · 22 verses
+        - generic [ref=e1560]: المجادلة
+      - generic [ref=e1561] [cursor=pointer]:
+        - generic [ref=e1562]: "59"
+        - generic [ref=e1563]:
+          - generic [ref=e1564]: Al-Hashr
+          - generic [ref=e1565]: The Exile · 24 verses
+        - generic [ref=e1567]: الحشر
+      - generic [ref=e1568] [cursor=pointer]:
+        - generic [ref=e1569]: "60"
+        - generic [ref=e1570]:
+          - generic [ref=e1571]: Al-Mumtahanah
+          - generic [ref=e1572]: She That is to be Examined · 13 verses
+        - generic [ref=e1574]: الممتحنة
+      - generic [ref=e1575] [cursor=pointer]:
+        - generic [ref=e1576]: "61"
+        - generic [ref=e1577]:
+          - generic [ref=e1578]: As-Saf
+          - generic [ref=e1579]: The Ranks · 14 verses
+        - generic [ref=e1581]: الصف
+      - generic [ref=e1582] [cursor=pointer]:
+        - generic [ref=e1583]: "62"
+        - generic [ref=e1584]:
+          - generic [ref=e1585]: Al-Jumu'ah
+          - generic [ref=e1586]: The Congregation · 11 verses
+        - generic [ref=e1588]: الجمعة
+      - generic [ref=e1589] [cursor=pointer]:
+        - generic [ref=e1590]: "63"
+        - generic [ref=e1591]:
+          - generic [ref=e1592]: Al-Munafiqun
+          - generic [ref=e1593]: The Hypocrites · 11 verses
+        - generic [ref=e1595]: المنافقون
+      - generic [ref=e1596] [cursor=pointer]:
+        - generic [ref=e1597]: "64"
+        - generic [ref=e1598]:
+          - generic [ref=e1599]: At-Taghabun
+          - generic [ref=e1600]: The Mutual Disillusion · 18 verses
+        - generic [ref=e1602]: التغابن
+      - generic [ref=e1603] [cursor=pointer]:
+        - generic [ref=e1604]: "65"
+        - generic [ref=e1605]:
+          - generic [ref=e1606]: At-Talaq
+          - generic [ref=e1607]: The Divorce · 12 verses
+        - generic [ref=e1609]: الطلاق
+      - generic [ref=e1610] [cursor=pointer]:
+        - generic [ref=e1611]: "66"
+        - generic [ref=e1612]:
+          - generic [ref=e1613]: At-Tahrim
+          - generic [ref=e1614]: The Prohibition · 12 verses
+        - generic [ref=e1616]: التحريم
+      - generic [ref=e1617] [cursor=pointer]:
+        - generic [ref=e1618]: "67"
+        - generic [ref=e1619]:
+          - generic [ref=e1620]: Al-Mulk
+          - generic [ref=e1621]: The Sovereignty · 30 verses
+        - generic [ref=e1623]: الملك
+      - generic [ref=e1624] [cursor=pointer]:
+        - generic [ref=e1625]: "68"
+        - generic [ref=e1626]:
+          - generic [ref=e1627]: Al-Qalam
+          - generic [ref=e1628]: The Pen · 52 verses
+        - generic [ref=e1630]: القلم
+      - generic [ref=e1631] [cursor=pointer]:
+        - generic [ref=e1632]: "69"
+        - generic [ref=e1633]:
+          - generic [ref=e1634]: Al-Haqqah
+          - generic [ref=e1635]: The Reality · 52 verses
+        - generic [ref=e1637]: الحاقة
+      - generic [ref=e1638] [cursor=pointer]:
+        - generic [ref=e1639]: "70"
+        - generic [ref=e1640]:
+          - generic [ref=e1641]: Al-Ma'arij
+          - generic [ref=e1642]: The Ascending Stairways · 44 verses
+        - generic [ref=e1644]: المعارج
+      - generic [ref=e1645] [cursor=pointer]:
+        - generic [ref=e1646]: "71"
+        - generic [ref=e1647]:
+          - generic [ref=e1648]: Nuh
+          - generic [ref=e1649]: Noah · 28 verses
+        - generic [ref=e1651]: نوح
+      - generic [ref=e1652] [cursor=pointer]:
+        - generic [ref=e1653]: "72"
+        - generic [ref=e1654]:
+          - generic [ref=e1655]: Al-Jinn
+          - generic [ref=e1656]: The Jinn · 28 verses
+        - generic [ref=e1658]: الجن
+      - generic [ref=e1659] [cursor=pointer]:
+        - generic [ref=e1660]: "73"
+        - generic [ref=e1661]:
+          - generic [ref=e1662]: Al-Muzzammil
+          - generic [ref=e1663]: The Enshrouded One · 20 verses
+        - generic [ref=e1665]: المزمل
+      - generic [ref=e1666] [cursor=pointer]:
+        - generic [ref=e1667]: "74"
+        - generic [ref=e1668]:
+          - generic [ref=e1669]: Al-Muddaththir
+          - generic [ref=e1670]: The Cloaked One · 56 verses
+        - generic [ref=e1672]: المدثر
+      - generic [ref=e1673] [cursor=pointer]:
+        - generic [ref=e1674]: "75"
+        - generic [ref=e1675]:
+          - generic [ref=e1676]: Al-Qiyamah
+          - generic [ref=e1677]: The Resurrection · 40 verses
+        - generic [ref=e1679]: القيامة
+      - generic [ref=e1680] [cursor=pointer]:
+        - generic [ref=e1681]: "76"
+        - generic [ref=e1682]:
+          - generic [ref=e1683]: Al-Insan
+          - generic [ref=e1684]: The Human · 31 verses
+        - generic [ref=e1686]: الإنسان
+      - generic [ref=e1687] [cursor=pointer]:
+        - generic [ref=e1688]: "77"
+        - generic [ref=e1689]:
+          - generic [ref=e1690]: Al-Mursalat
+          - generic [ref=e1691]: The Emissaries · 50 verses
+        - generic [ref=e1693]: المرسلات
+      - generic [ref=e1694] [cursor=pointer]:
+        - generic [ref=e1695]: "78"
+        - generic [ref=e1696]:
+          - generic [ref=e1697]: An-Naba
+          - generic [ref=e1698]: The Tidings · 40 verses
+        - generic [ref=e1700]: النبأ
+      - generic [ref=e1701] [cursor=pointer]:
+        - generic [ref=e1702]: "79"
+        - generic [ref=e1703]:
+          - generic [ref=e1704]: An-Nazi'at
+          - generic [ref=e1705]: Those Who Drag Forth · 46 verses
+        - generic [ref=e1707]: النازعات
+      - generic [ref=e1708] [cursor=pointer]:
+        - generic [ref=e1709]: "80"
+        - generic [ref=e1710]:
+          - generic [ref=e1711]: Abasa
+          - generic [ref=e1712]: He Frowned · 42 verses
+        - generic [ref=e1714]: عبس
+      - generic [ref=e1715] [cursor=pointer]:
+        - generic [ref=e1716]: "81"
+        - generic [ref=e1717]:
+          - generic [ref=e1718]: At-Takwir
+          - generic [ref=e1719]: The Overthrowing · 29 verses
+        - generic [ref=e1721]: التكوير
+      - generic [ref=e1722] [cursor=pointer]:
+        - generic [ref=e1723]: "82"
+        - generic [ref=e1724]:
+          - generic [ref=e1725]: Al-Infitar
+          - generic [ref=e1726]: The Cleaving · 19 verses
+        - generic [ref=e1728]: الانفطار
+      - generic [ref=e1729] [cursor=pointer]:
+        - generic [ref=e1730]: "83"
+        - generic [ref=e1731]:
+          - generic [ref=e1732]: Al-Mutaffifin
+          - generic [ref=e1733]: The Defrauding · 36 verses
+        - generic [ref=e1735]: المطففين
+      - generic [ref=e1736] [cursor=pointer]:
+        - generic [ref=e1737]: "84"
+        - generic [ref=e1738]:
+          - generic [ref=e1739]: Al-Inshiqaq
+          - generic [ref=e1740]: The Sundering · 25 verses
+        - generic [ref=e1742]: الانشقاق
+      - generic [ref=e1743] [cursor=pointer]:
+        - generic [ref=e1744]: "85"
+        - generic [ref=e1745]:
+          - generic [ref=e1746]: Al-Buruj
+          - generic [ref=e1747]: The Mansions of the Stars · 22 verses
+        - generic [ref=e1749]: البروج
+      - generic [ref=e1750] [cursor=pointer]:
+        - generic [ref=e1751]: "86"
+        - generic [ref=e1752]:
+          - generic [ref=e1753]: At-Tariq
+          - generic [ref=e1754]: The Nightcomer · 17 verses
+        - generic [ref=e1756]: الطارق
+      - generic [ref=e1757] [cursor=pointer]:
+        - generic [ref=e1758]: "87"
+        - generic [ref=e1759]:
+          - generic [ref=e1760]: Al-A'la
+          - generic [ref=e1761]: The Most High · 19 verses
+        - generic [ref=e1763]: الأعلى
+      - generic [ref=e1764] [cursor=pointer]:
+        - generic [ref=e1765]: "88"
+        - generic [ref=e1766]:
+          - generic [ref=e1767]: Al-Ghashiyah
+          - generic [ref=e1768]: The Overwhelming · 26 verses
+        - generic [ref=e1770]: الغاشية
+      - generic [ref=e1771] [cursor=pointer]:
+        - generic [ref=e1772]: "89"
+        - generic [ref=e1773]:
+          - generic [ref=e1774]: Al-Fajr
+          - generic [ref=e1775]: The Dawn · 30 verses
+        - generic [ref=e1777]: الفجر
+      - generic [ref=e1778] [cursor=pointer]:
+        - generic [ref=e1779]: "90"
+        - generic [ref=e1780]:
+          - generic [ref=e1781]: Al-Balad
+          - generic [ref=e1782]: The City · 20 verses
+        - generic [ref=e1784]: البلد
+      - generic [ref=e1785] [cursor=pointer]:
+        - generic [ref=e1786]: "91"
+        - generic [ref=e1787]:
+          - generic [ref=e1788]: Ash-Shams
+          - generic [ref=e1789]: The Sun · 15 verses
+        - generic [ref=e1791]: الشمس
+      - generic [ref=e1792] [cursor=pointer]:
+        - generic [ref=e1793]: "92"
+        - generic [ref=e1794]:
+          - generic [ref=e1795]: Al-Layl
+          - generic [ref=e1796]: The Night · 21 verses
+        - generic [ref=e1798]: الليل
+      - generic [ref=e1799] [cursor=pointer]:
+        - generic [ref=e1800]: "93"
+        - generic [ref=e1801]:
+          - generic [ref=e1802]: Ad-Duha
+          - generic [ref=e1803]: The Morning Hours · 11 verses
+        - generic [ref=e1805]: الضحى
+      - generic [ref=e1806] [cursor=pointer]:
+        - generic [ref=e1807]: "94"
+        - generic [ref=e1808]:
+          - generic [ref=e1809]: Ash-Sharh
+          - generic [ref=e1810]: The Relief · 8 verses
+        - generic [ref=e1812]: الشرح
+      - generic [ref=e1813] [cursor=pointer]:
+        - generic [ref=e1814]: "95"
+        - generic [ref=e1815]:
+          - generic [ref=e1816]: At-Tin
+          - generic [ref=e1817]: The Fig · 8 verses
+        - generic [ref=e1819]: التين
+      - generic [ref=e1820] [cursor=pointer]:
+        - generic [ref=e1821]: "96"
+        - generic [ref=e1822]:
+          - generic [ref=e1823]: Al-Alaq
+          - generic [ref=e1824]: The Clot · 19 verses
+        - generic [ref=e1826]: العلق
+      - generic [ref=e1827] [cursor=pointer]:
+        - generic [ref=e1828]: "97"
+        - generic [ref=e1829]:
+          - generic [ref=e1830]: Al-Qadr
+          - generic [ref=e1831]: The Power · 5 verses
+        - generic [ref=e1833]: القدر
+      - generic [ref=e1834] [cursor=pointer]:
+        - generic [ref=e1835]: "98"
+        - generic [ref=e1836]:
+          - generic [ref=e1837]: Al-Bayyinah
+          - generic [ref=e1838]: The Clear Proof · 8 verses
+        - generic [ref=e1840]: البينة
+      - generic [ref=e1841] [cursor=pointer]:
+        - generic [ref=e1842]: "99"
+        - generic [ref=e1843]:
+          - generic [ref=e1844]: Az-Zalzalah
+          - generic [ref=e1845]: The Earthquake · 8 verses
+        - generic [ref=e1847]: الزلزلة
+      - generic [ref=e1848] [cursor=pointer]:
+        - generic [ref=e1849]: "100"
+        - generic [ref=e1850]:
+          - generic [ref=e1851]: Al-Adiyat
+          - generic [ref=e1852]: The Courser · 11 verses
+        - generic [ref=e1854]: العاديات
+      - generic [ref=e1855] [cursor=pointer]:
+        - generic [ref=e1856]: "101"
+        - generic [ref=e1857]:
+          - generic [ref=e1858]: Al-Qari'ah
+          - generic [ref=e1859]: The Calamity · 11 verses
+        - generic [ref=e1861]: القارعة
+      - generic [ref=e1862] [cursor=pointer]:
+        - generic [ref=e1863]: "102"
+        - generic [ref=e1864]:
+          - generic [ref=e1865]: At-Takathur
+          - generic [ref=e1866]: The Rivalry in World Increase · 8 verses
+        - generic [ref=e1868]: التكاثر
+      - generic [ref=e1869] [cursor=pointer]:
+        - generic [ref=e1870]: "103"
+        - generic [ref=e1871]:
+          - generic [ref=e1872]: Al-Asr
+          - generic [ref=e1873]: The Declining Day · 3 verses
+        - generic [ref=e1875]: العصر
+      - generic [ref=e1876] [cursor=pointer]:
+        - generic [ref=e1877]: "104"
+        - generic [ref=e1878]:
+          - generic [ref=e1879]: Al-Humazah
+          - generic [ref=e1880]: The Traducer · 9 verses
+        - generic [ref=e1882]: الهمزة
+      - generic [ref=e1883] [cursor=pointer]:
+        - generic [ref=e1884]: "105"
+        - generic [ref=e1885]:
+          - generic [ref=e1886]: Al-Fil
+          - generic [ref=e1887]: The Elephant · 5 verses
+        - generic [ref=e1889]: الفيل
+      - generic [ref=e1890] [cursor=pointer]:
+        - generic [ref=e1891]: "106"
+        - generic [ref=e1892]:
+          - generic [ref=e1893]: Quraysh
+          - generic [ref=e1894]: Quraysh · 4 verses
+        - generic [ref=e1896]: قريش
+      - generic [ref=e1897] [cursor=pointer]:
+        - generic [ref=e1898]: "107"
+        - generic [ref=e1899]:
+          - generic [ref=e1900]: Al-Ma'un
+          - generic [ref=e1901]: The Small Kindnesses · 7 verses
+        - generic [ref=e1903]: الماعون
+      - generic [ref=e1904] [cursor=pointer]:
+        - generic [ref=e1905]: "108"
+        - generic [ref=e1906]:
+          - generic [ref=e1907]: Al-Kawthar
+          - generic [ref=e1908]: The Abundance · 3 verses
+        - generic [ref=e1910]: الكوثر
+      - generic [ref=e1911] [cursor=pointer]:
+        - generic [ref=e1912]: "109"
+        - generic [ref=e1913]:
+          - generic [ref=e1914]: Al-Kafirun
+          - generic [ref=e1915]: The Disbelievers · 6 verses
+        - generic [ref=e1917]: الكافرون
+      - generic [ref=e1918] [cursor=pointer]:
+        - generic [ref=e1919]: "110"
+        - generic [ref=e1920]:
+          - generic [ref=e1921]: An-Nasr
+          - generic [ref=e1922]: The Divine Support · 3 verses
+        - generic [ref=e1924]: النصر
+      - generic [ref=e1925] [cursor=pointer]:
+        - generic [ref=e1926]: "111"
+        - generic [ref=e1927]:
+          - generic [ref=e1928]: Al-Masad
+          - generic [ref=e1929]: The Palm Fiber · 5 verses
+        - generic [ref=e1931]: المسد
+      - generic [ref=e1932] [cursor=pointer]:
+        - generic [ref=e1933]: "112"
+        - generic [ref=e1934]:
+          - generic [ref=e1935]: Al-Ikhlas
+          - generic [ref=e1936]: The Sincerity · 4 verses
+        - generic [ref=e1938]: الإخلاص
+      - generic [ref=e1939] [cursor=pointer]:
+        - generic [ref=e1940]: "113"
+        - generic [ref=e1941]:
+          - generic [ref=e1942]: Al-Falaq
+          - generic [ref=e1943]: The Daybreak · 5 verses
+        - generic [ref=e1945]: الفلق
+      - generic [ref=e1946] [cursor=pointer]:
+        - generic [ref=e1947]: "114"
+        - generic [ref=e1948]:
+          - generic [ref=e1949]: An-Nas
+          - generic [ref=e1950]: Mankind · 6 verses
+        - generic [ref=e1952]: الناس
+  - navigation [ref=e102]:
+    - button "🏠 Home" [ref=e103] [cursor=pointer]:
+      - generic [ref=e104]: 🏠
+      - generic [ref=e105]: Home
+    - button "📖 Quran" [active] [ref=e106] [cursor=pointer]:
+      - generic [ref=e107]: 📖
+      - generic [ref=e108]: Quran
+    - button "🕌 Prayer" [ref=e109] [cursor=pointer]:
+      - generic [ref=e110]: 🕌
+      - generic [ref=e111]: Prayer
+    - button "📿 Dhikr" [ref=e112] [cursor=pointer]:
+      - generic [ref=e113]: 📿
+      - generic [ref=e114]: Dhikr
+    - button "🤲 Duas" [ref=e115] [cursor=pointer]:
+      - generic [ref=e116]: 🤲
+      - generic [ref=e117]: Duas
+    - button "📚 Learn" [ref=e118] [cursor=pointer]:
+      - generic [ref=e119]: 📚
+      - generic [ref=e120]: Learn

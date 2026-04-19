@@ -1,0 +1,5 @@
+[     263ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ https://huda-six.vercel.app/:0
+[    3080ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ https://huda-six.vercel.app/:0
+[  119287ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://api.qurancdn.com/api/qdc/audio/reciters/7/audio_files?chapter_number=undefined&segments=true:0
+[  119355ms] [ERROR] Failed to load resource: the server responded with a status of 404 () @ https://download.quranicaudio.com/quran/maher_256/undefined.mp3:0
+[  621013ms] [INFO] Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner. @ https://huda-six.vercel.app/:0

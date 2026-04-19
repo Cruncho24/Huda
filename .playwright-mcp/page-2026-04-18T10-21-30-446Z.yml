@@ -1,0 +1,101 @@
+- generic [ref=e2]:
+  - generic [ref=e3]:
+    - generic [ref=e210]:
+      - button "Help" [ref=e211] [cursor=pointer]: "?"
+      - button "⚙️" [ref=e212] [cursor=pointer]
+      - generic [ref=e213]: Saturday · 1 Dhul Qa'dah 1447 AH
+      - generic [ref=e214]: السَّلَامُ عَلَيْكُمْ
+      - generic [ref=e215]: Peace be upon you
+      - generic [ref=e216]:
+        - generic [ref=e217]:
+          - generic [ref=e218]: Next Prayer
+          - generic [ref=e219]: Fajr
+        - generic [ref=e220]:
+          - generic [ref=e221]: 04:07 AM
+          - generic [ref=e222]: Soon
+    - generic [ref=e224]:
+      - generic [ref=e226]: Reading Plan · Day 1
+      - generic [ref=e227]: Al-Fatihah 1:1 → Al-Baqarah 2:97
+      - generic [ref=e228]:
+        - generic [ref=e229]: Stop at
+        - generic [ref=e230]: Al-Baqarah 2:97
+      - generic [ref=e232]: 0 of 104 ayahs today
+      - generic [ref=e234]:
+        - generic [ref=e237]: S
+        - generic [ref=e240]: M
+        - generic [ref=e243]: T
+        - generic [ref=e246]: W
+        - generic [ref=e249]: T
+        - generic [ref=e252]: F
+        - generic [ref=e255]: S
+      - generic [ref=e257]:
+        - generic [ref=e258]: 0% of Quran · 60d left
+        - generic [ref=e259]:
+          - button "⋯" [ref=e260] [cursor=pointer]
+          - button "Read ▶" [ref=e261] [cursor=pointer]
+          - button "✓ Done" [ref=e262] [cursor=pointer]
+    - generic [ref=e263]:
+      - generic [ref=e264]: Hadith of the Day
+      - paragraph [ref=e265]: "\"Every act of kindness is charity.\""
+      - generic [ref=e266]:
+        - generic [ref=e267]: Sahih Muslim 1005
+        - generic [ref=e268]: Sahih
+    - generic [ref=e270]: ✨ Ayatul Kursi
+    - generic [ref=e271]:
+      - generic [ref=e272]: اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ
+      - generic [ref=e273]: Allah — there is no deity except Him, the Ever-Living, the Sustainer of existence. Neither drowsiness overtakes Him nor sleep. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what will be after them, and they encompass not a thing of His knowledge except for what He wills. His Throne extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great.
+      - generic [ref=e274]:
+        - generic [ref=e275]: Quran 2:255
+        - button "▶ Play" [ref=e276] [cursor=pointer]
+        - button "🔁" [ref=e277] [cursor=pointer]
+        - combobox "Reciter" [ref=e278] [cursor=pointer]:
+          - option "Maher Al-Muqaili" [selected]
+          - option "Yasser Al-Dosari"
+          - option "Abdurrahman Al-Sudais"
+          - option "Saud Al-Shuraim"
+          - option "Abdullah Al-Juhani"
+    - generic [ref=e280]: 🌙 Your Islamic Companion
+    - generic [ref=e281]:
+      - generic [ref=e282] [cursor=pointer]:
+        - generic [ref=e283]: 📖
+        - generic [ref=e284]: Quran
+        - generic [ref=e285]: All 114 surahs
+      - generic [ref=e286] [cursor=pointer]:
+        - generic [ref=e287]: 🕌
+        - generic [ref=e288]: Prayer
+        - generic [ref=e289]: Times & Qibla
+      - generic [ref=e290] [cursor=pointer]:
+        - generic [ref=e291]: 📿
+        - generic [ref=e292]: Dhikr
+        - generic [ref=e293]: Daily remembrance
+      - generic [ref=e294] [cursor=pointer]:
+        - generic [ref=e295]: 🤲
+        - generic [ref=e296]: Duas
+        - generic [ref=e297]: Authenticated supplications
+      - generic [ref=e298] [cursor=pointer]:
+        - generic [ref=e299]: 📚
+        - generic [ref=e300]: Learn
+        - generic [ref=e301]: Islamic knowledge
+      - generic [ref=e302] [cursor=pointer]:
+        - generic [ref=e303]: 🌟
+        - generic [ref=e304]: 99 Names
+        - generic [ref=e305]: Asmaul Husna
+  - navigation [ref=e102]:
+    - button "🏠 Home" [ref=e103] [cursor=pointer]:
+      - generic [ref=e104]: 🏠
+      - generic [ref=e105]: Home
+    - button "📖 Quran" [ref=e106] [cursor=pointer]:
+      - generic [ref=e107]: 📖
+      - generic [ref=e108]: Quran
+    - button "🕌 Prayer" [ref=e109] [cursor=pointer]:
+      - generic [ref=e110]: 🕌
+      - generic [ref=e111]: Prayer
+    - button "📿 Dhikr" [ref=e112] [cursor=pointer]:
+      - generic [ref=e113]: 📿
+      - generic [ref=e114]: Dhikr
+    - button "🤲 Duas" [ref=e115] [cursor=pointer]:
+      - generic [ref=e116]: 🤲
+      - generic [ref=e117]: Duas
+    - button "📚 Learn" [ref=e118] [cursor=pointer]:
+      - generic [ref=e119]: 📚
+      - generic [ref=e120]: Learn

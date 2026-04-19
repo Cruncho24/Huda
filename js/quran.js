@@ -963,11 +963,12 @@ function playMushafAyah(globalNum, surahNum, ayahNum, _skipSurahSeek = false) {
   }
   if (state.audio.player || _surahAudio) mushafStop();
 
-  // Reciters with full-surah URL + timing data: seek within the surah file
-  // rather than chaining per-ayah files (smoother, no gaps between ayahs).
+  // Gapless surah playback: use surahUrl when playing from start OR when timing
+  // data is available to seek accurately. Without qurancdnId, "play from here"
+  // (ayahNum > 1) falls through to per-ayah mode — each file is the exact ayah.
   // _skipSurahSeek=true is passed from onerror to avoid an infinite loop.
   const _r = RECITERS.find(r => r.id === state.reciter);
-  if (!_skipSurahSeek && _r?.surahUrl && _r?.qurancdnId) {
+  if (!_skipSurahSeek && _r?.surahUrl && (_r?.qurancdnId || ayahNum === 1)) {
     mushafPlayAll(surahNum, ayahNum);
     return;
   }
@@ -1074,6 +1075,18 @@ function mushafPlayAll(surahNum, startAyah = 1) {
   // play() must be called synchronously from the user gesture — iOS blocks
   // play() inside any async callback (Promise .then, setTimeout, etc.)
   _applyPlaybackSpeed(_surahAudio);
+  // Seek before play() when timing is already cached — prevents briefly playing
+  // from ayah 1 while the timing fetch is in-flight
+  if (startAyah > 1) {
+    const _rr = RECITERS.find(r => r.id === state.reciter);
+    if (_rr?.qurancdnId) {
+      const _ct = _surahTimingsCache[`${_rr.qurancdnId}_${surahNum}`];
+      if (_ct) {
+        const _ce = _ct[`${surahNum}:${startAyah}`];
+        if (_ce) _surahAudio.currentTime = _ce.from / 1000;
+      }
+    }
+  }
   _surahAudio.play().catch(() => mushafStop());
   _surahAudio.onended = () => advanceToNextSurah();
   _seekbarStart();
