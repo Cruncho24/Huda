@@ -55,12 +55,13 @@ function renderDhikr() {
 
     let _holdTimer = null;
     const tapBtn = tab.querySelector('.dhikr-tap-btn');
-    tapBtn.addEventListener('pointerdown', () => {
+    tapBtn.addEventListener('pointerdown', e => {
+      tapBtn.setPointerCapture(e.pointerId);
       tapBtn.classList.add('dhikr-hold');
       _holdTimer = setTimeout(() => { tapBtn.classList.remove('dhikr-hold'); _clearTasbeeh(); renderDhikr(); }, 700);
     });
     tapBtn.addEventListener('pointerup', () => { clearTimeout(_holdTimer); tapBtn.classList.remove('dhikr-hold'); });
-    tapBtn.addEventListener('pointerleave', () => { clearTimeout(_holdTimer); tapBtn.classList.remove('dhikr-hold'); });
+    tapBtn.addEventListener('pointercancel', () => { clearTimeout(_holdTimer); tapBtn.classList.remove('dhikr-hold'); });
 
     const counterArea = tab.querySelector('.dhikr-counter-area');
     let _sx = 0, _sy = 0;
@@ -112,12 +113,13 @@ function renderDhikr() {
   // Long-press reset on tap button
   let _holdTimer = null;
   const tapBtn = tab.querySelector('.dhikr-tap-btn');
-  tapBtn.addEventListener('pointerdown', () => {
+  tapBtn.addEventListener('pointerdown', e => {
+    tapBtn.setPointerCapture(e.pointerId);
     tapBtn.classList.add('dhikr-hold');
     _holdTimer = setTimeout(() => { tapBtn.classList.remove('dhikr-hold'); resetDhikr(_dhikrTab); renderDhikr(); }, 700);
   });
   tapBtn.addEventListener('pointerup', () => { clearTimeout(_holdTimer); tapBtn.classList.remove('dhikr-hold'); });
-  tapBtn.addEventListener('pointerleave', () => { clearTimeout(_holdTimer); tapBtn.classList.remove('dhikr-hold'); });
+  tapBtn.addEventListener('pointercancel', () => { clearTimeout(_holdTimer); tapBtn.classList.remove('dhikr-hold'); });
 
   // Swipe left/right on counter area to navigate dhikrs
   const counterArea = tab.querySelector('.dhikr-counter-area');

@@ -330,7 +330,7 @@ async function fetchZakatPrices() {
     zakatPrices.gold = (goldData.price || goldData.bid || 0) / 31.1035;
     zakatPrices.silver = (silverData.price || silverData.bid || 0) / 31.1035;
     zakatPrices.rates = ratesData.rates || { USD: 1 };
-    if (statusEl) statusEl.textContent = `✓ Live prices loaded · Gold: $${zakatPrices.gold.toFixed(2)}/g · Silver: $${zakatPrices.silver.toFixed(4)}/g`;
+    if (statusEl) { statusEl.textContent = `✓ Live prices loaded · Gold: $${zakatPrices.gold.toFixed(2)}/g · Silver: $${zakatPrices.silver.toFixed(4)}/g`; statusEl.style.color = ''; }
   } catch(e) {
     // Fallback prices — approximate as of mid-2025 (~$96/g gold, ~$1.00/g silver)
     zakatPrices.gold = 96;

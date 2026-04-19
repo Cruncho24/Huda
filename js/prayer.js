@@ -428,7 +428,13 @@ function openQiblaCompass() {
       if (r === 'granted') start();
       else {
         const st = document.getElementById('qibla-status');
-        if (st) { st.innerHTML = 'Permission denied &mdash; <a href="app-settings:" style="color:#059669">Open Settings</a> → Safari → Motion &amp; Orientation'; st.className = 'qibla-status qibla-off'; }
+        if (st) {
+          const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+          st.innerHTML = isIOS
+            ? 'Permission denied &mdash; <a href="app-settings:" style="color:#059669">Open Settings</a> → Safari → Motion &amp; Orientation'
+            : 'Permission denied — enable Motion &amp; Orientation access in your browser settings';
+          st.className = 'qibla-status qibla-off';
+        }
         wrap.style.display = 'block';
         const section = document.getElementById('qibla-section');
         if (section) section.style.display = 'block';

@@ -3346,6 +3346,7 @@ html.dark .settings-value-off { color: #f87171; }
 #reader-content { padding: 8px; background: #f8fafc; }
 html.dark #reader-content { background: #0f172a; }
 #surah-search::placeholder { color: rgba(255,255,255,0.5); }
+#dua-search::placeholder { color: rgba(255,255,255,0.6); }
 
 /* ── Dhikr Counter Redesign ────────────────────────────────── */
 .dhikr-header-new {

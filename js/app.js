@@ -764,11 +764,15 @@ function changeFontSize(delta) {
   state.fontSize = Math.max(18, Math.min(42, state.fontSize + delta));
   localStorage.setItem('huda_fontsize', state.fontSize);
   debouncedPush();
-  // Re-render mushaf if open
   const n = state.quran.currentSurah;
-  if (n && state.quran.viewMode === 'page' && state.quran.cache[n]) {
+  if (!n) return;
+  if (state.quran.viewMode === 'page' && state.quran.cache[n]) {
     const { arData, enData } = state.quran.cache[n];
     renderMushafPage(n, arData, enData);
+  } else if (state.quran.viewMode === 'verse') {
+    document.querySelectorAll('.ayah-arabic-card').forEach(el => {
+      el.style.fontSize = state.fontSize + 'px';
+    });
   }
 }
 
