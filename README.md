@@ -6,14 +6,26 @@ A free, offline-first Progressive Web App (PWA) for Muslims. Built with vanilla 
 
 ---
 
+## Screenshots
+
+| Home | Quran | Prayer |
+|------|-------|--------|
+| ![Home](screenshots/home.png) | ![Quran](screenshots/quran.png) | ![Prayer](screenshots/prayer.png) |
+
+| Dhikr | Duas | Learn |
+|-------|------|-------|
+| ![Dhikr](screenshots/dhikr.png) | ![Duas](screenshots/duas.png) | ![Learn](screenshots/learn.png) |
+
+---
+
 ## Features
 
-- **Quran** — Full Arabic text with English translation, gapless audio playback, auto-scroll, ayah highlighting, bookmarks, tafsir, offline download
-- **Prayer Times** — Accurate times based on your location, countdown to next prayer, Qibla compass
-- **Dhikr** — Customisable counter with streak tracking
-- **Duas** — Categorised collection of authentic duas
+- **Quran** — Full Arabic text with English translation, gapless audio playback, auto-scroll, ayah highlighting, bookmarks, tafsir, offline download for all 114 surahs
+- **Prayer Times** — Accurate times based on your location, countdown to next prayer, Qibla compass, prayer notification reminders
+- **Dhikr** — Free counter + daily guided dhikr with streak tracking
+- **Duas** — 200+ authentic duas from Hisnul Muslim, categorised and searchable. Includes prophetic duas for 9 prophets
 - **Reading Plan** — 30-day, 3-month, or 1-year Quran completion plans with progress tracking and streak calendar
-- **Learn** — Zakat calculator, Islamic glossary, and more
+- **Learn** — New Muslim Guide, 99 Names of Allah, Children's Quran (Arabic alphabet), Hajj & Umrah Guide, Zakat Calculator, Islamic Calendar
 - **Dark mode** — Full dark theme support
 - **Offline** — Works without internet after first load
 

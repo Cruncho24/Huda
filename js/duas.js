@@ -13,6 +13,8 @@ const DUA_ICONS = {
 };
 
 function renderDuasHome() {
+  state.learn.currentDuaCategory = null;
+  state.learn.currentProphet = null;
   const tab = document.getElementById('tab-duas');
   tab.innerHTML = `
     <div style="background:var(--emerald);padding:16px 20px;padding-top:calc(16px + env(safe-area-inset-top,0px));color:white">

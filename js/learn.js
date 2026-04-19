@@ -5,6 +5,7 @@
 // ── LEARN TAB ─────────────────────────────────────────────────
 function renderLearnHub() {
   state.learn.currentSection = null;
+  state.learn.currentTopSection = null;
   const tab = document.getElementById('tab-learn');
   tab.innerHTML = `
     <div class="learn-hero" style="padding-top:calc(24px + env(safe-area-inset-top,0px))">
@@ -40,6 +41,8 @@ function renderLearnHub() {
 
 // ── A) New Muslim Guide ───────────────────────────────────────
 function openNewMuslimGuide() {
+  state.learn.currentTopSection = 'newmuslim';
+  state.learn.currentSection = null;
   const tab = document.getElementById('tab-learn');
   tab.innerHTML = `
     <div class="page-header">
@@ -84,6 +87,8 @@ function openLesson(i) {
 
 // ── B) Children's Quran ───────────────────────────────────────
 function openChildrensQuran() {
+  state.learn.currentTopSection = 'childrensquran';
+  state.learn.currentSection = null;
   const tab = document.getElementById('tab-learn');
   tab.innerHTML = `
     <div class="page-header">
@@ -164,6 +169,8 @@ function openChildSurah(n) {
 
 // ── C) 99 Names of Allah ──────────────────────────────────────
 function openNamesOfAllah() {
+  state.learn.currentTopSection = 'names';
+  state.learn.currentSection = null;
   const tab = document.getElementById('tab-learn');
   tab.innerHTML = `
     <div class="page-header">
@@ -225,6 +232,8 @@ function openNameDetail(i) {
 
 // ── D) Hajj & Umrah Guide ─────────────────────────────────────
 function openHajjGuide() {
+  state.learn.currentTopSection = 'hajj';
+  state.learn.currentSection = null;
   renderHajjGuide(state.learn.hajjTab);
 }
 
@@ -263,6 +272,8 @@ function renderHajjGuide(tab) {
 
 // ── E) Zakat Calculator ───────────────────────────────────────
 function openZakatCalc() {
+  state.learn.currentTopSection = 'zakat';
+  state.learn.currentSection = null;
   const tab = document.getElementById('tab-learn');
   tab.innerHTML = `
     <div class="page-header">

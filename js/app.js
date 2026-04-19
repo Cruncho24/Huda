@@ -104,6 +104,7 @@ const state = {
     currentDuaCategory: null, currentDuaIndex: 0, currentProphet: null,
     currentNameIndex: null, currentLetterIndex: null, hajjTab: 'umrah',
     zakat: { currency: 'USD', nisab: 'gold' },
+    currentTopSection: null,
   },
   tasbeeh: parseInt(localStorage.getItem('huda_tasbeeh') || '0') || 0,
   plan: (() => { try { return JSON.parse(localStorage.getItem('huda_plan') || 'null'); } catch(e) { return null; } })(),
@@ -689,6 +690,37 @@ function setupNav() {
 }
 
 const _tabScrollY = {};
+function _restoreTab(tab) {
+  if (tab === 'quran') {
+    if (state.quran.currentSurah) { _tabScrollY['quran'] = 0; openSurah(state.quran.currentSurah); return; }
+    renderQuranList();
+  } else if (tab === 'duas') {
+    if (state.learn.currentProphet) { renderProphetDuaReader(); return; }
+    if (state.learn.currentDuaCategory === 'Prophetic Duas ﷺ') { renderProphetList(); return; }
+    if (state.learn.currentDuaCategory && DUAS[state.learn.currentDuaCategory]) { renderDuaReader(); return; }
+    renderDuasHome();
+  } else if (tab === 'learn') {
+    const ts = state.learn.currentTopSection;
+    const cs = state.learn.currentSection;
+    if (!ts) { renderLearnHub(); return; }
+    if (ts === 'newmuslim') {
+      if (cs === 'lesson') { openLesson(state.learn.currentLesson); return; }
+      openNewMuslimGuide();
+    } else if (ts === 'childrensquran') {
+      if (cs === 'letter') { showLetterDetail(state.learn.currentLetterIndex); return; }
+      openChildrensQuran();
+    } else if (ts === 'names') {
+      if (cs === 'name') { openNameDetail(state.learn.currentNameIndex); return; }
+      openNamesOfAllah();
+    } else if (ts === 'hajj') { openHajjGuide(); }
+    else if (ts === 'zakat') { openZakatCalc(); }
+    else if (ts === 'calendar') { openCalendar(); }
+    else { renderLearnHub(); }
+  } else {
+    ({ home: renderHome, prayer: renderPrayer, dhikr: renderDhikr })[tab]?.();
+  }
+}
+
 function switchTab(tab) {
   // Preserve scroll position of current tab before hiding it
   if (state.activeTab) _tabScrollY[state.activeTab] = window.scrollY;
@@ -699,16 +731,8 @@ function switchTab(tab) {
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   document.getElementById(`tab-${tab}`).classList.add('active');
   document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
-  // Lazy-render tabs
-  const renderers = {
-    home: renderHome,
-    quran: renderQuranList,
-    prayer: renderPrayer,
-    dhikr: renderDhikr,
-    duas: renderDuasHome,
-    learn: renderLearnHub,
-  };
-  if (renderers[tab]) renderers[tab]();
+  // Lazy-render tabs — restore to last sub-screen where applicable
+  _restoreTab(tab);
 
   // Restore scroll position after repaint (display:none→block needs a frame)
   requestAnimationFrame(() => window.scrollTo(0, _tabScrollY[tab] || 0));

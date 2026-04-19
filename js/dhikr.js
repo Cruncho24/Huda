@@ -488,6 +488,7 @@ function saveTasbeeh() {
 const WEEKDAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
 async function openCalendar() {
+  state.learn.currentTopSection = 'calendar';
   const tab = document.getElementById('tab-learn');
   tab.innerHTML = `
     <div class="page-header">
