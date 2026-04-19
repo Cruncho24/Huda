@@ -111,6 +111,7 @@ function renderProphetDuaReader() {
     </div>
     <div class="dua-card fade-in">
       <div class="dua-counter">${i + 1} of ${duas.length}</div>
+      <div class="dua-prophet">${PROPHET_ICONS[prophet] || '🤲'} ${prophet}</div>
       <div class="dua-arabic">${dua.arabic}</div>
       <div class="dua-transliteration">${dua.transliteration}</div>
       <div class="dua-meaning">${dua.meaning}</div>
