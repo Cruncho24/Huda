@@ -221,7 +221,10 @@ function renderHome() {
     </div>` : ''}
 
     <div class="hadith-card" id="hadith-card">
-      <div class="card-section-label">Hadith of the Day</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div class="card-section-label" style="margin-bottom:0">Hadith of the Day</div>
+        <button onclick="rotateHadith()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1" title="Next hadith">↻</button>
+      </div>
       <p class="hadith-text">"${esc(h.text)}"</p>
       <div class="hadith-source">
         <span class="badge badge-emerald">${esc(h.source)}</span>
@@ -286,7 +289,10 @@ function rotateHadith() {
   card.style.opacity = '0';
   setTimeout(() => {
     card.innerHTML = `
-      <div class="card-section-label">Hadith of the Day</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <div class="card-section-label" style="margin-bottom:0">Hadith of the Day</div>
+        <button onclick="rotateHadith()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1" title="Next hadith">↻</button>
+      </div>
       <p class="hadith-text">"${esc(h.text)}"</p>
       <div class="hadith-source">
         <span class="badge badge-emerald">${esc(h.source)}</span>

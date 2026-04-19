@@ -99,7 +99,7 @@ function renderQuranList() {
         <div class="reader-toolbar">
           <button class="view-toggle-btn active" id="btn-verse" onclick="setQuranView('verse')">Study</button>
           <button class="view-toggle-btn" id="btn-page" onclick="setQuranView('page')">📖 Mushaf</button>
-          <div class="font-size-ctrl" id="font-ctrl" style="display:none">
+          <div class="font-size-ctrl" id="font-ctrl">
             <button class="font-btn" onclick="changeFontSize(-2)">A−</button>
             <button class="font-btn" onclick="changeFontSize(2)">A+</button>
           </div>
@@ -156,7 +156,7 @@ function _renderOfflineBanner() {
         <span class="offline-banner-icon">📥</span>
         <div>
           <div class="offline-banner-title">Download for offline reading</div>
-          <div class="offline-banner-sub">Save all 114 surahs to your device</div>
+          <div class="offline-banner-sub">Saves Arabic text + translations for all 114 surahs — works without internet</div>
         </div>
       </div>
       <button class="offline-banner-btn" onclick="downloadQuranOffline()">Download</button>
@@ -338,7 +338,7 @@ function setQuranView(mode) {
   document.getElementById('btn-verse')?.classList.toggle('active', mode === 'verse');
   document.getElementById('btn-page')?.classList.toggle('active', mode === 'page');
   const fontCtrl = document.getElementById('font-ctrl');
-  if (fontCtrl) fontCtrl.style.display = mode === 'page' ? 'flex' : 'none';
+  if (fontCtrl) fontCtrl.style.display = 'flex';
   const n = state.quran.currentSurah;
   if (!n || !state.quran.cache[n]) return;
   const { arData, enData } = state.quran.cache[n];

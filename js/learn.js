@@ -185,7 +185,7 @@ function renderNamesGrid(names) {
       <div class="name-num">${n.n}</div>
       <div class="name-arabic">${n.arabic}</div>
       <div class="name-trans">${n.transliteration}</div>
-      <div class="name-meaning">${n.meaning.substring(0, 40)}...</div>
+      <div class="name-meaning">${n.meaning}</div>
     </div>
   `).join('');
 }
@@ -336,7 +336,7 @@ async function fetchZakatPrices() {
     zakatPrices.gold = 96;
     zakatPrices.silver = 1.00;
     zakatPrices.rates = { USD:1, GBP:0.79, EUR:0.92, AED:3.67 };
-    if (statusEl) statusEl.textContent = '⚠️ Using approximate prices (offline)';
+    if (statusEl) { statusEl.textContent = '⚠️ Could not load live prices — using estimates from mid-2025. Results may be inaccurate.'; statusEl.style.color = '#d97706'; }
   }
 }
 

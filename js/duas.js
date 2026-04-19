@@ -16,18 +16,38 @@ function renderDuasHome() {
   const tab = document.getElementById('tab-duas');
   tab.innerHTML = `
     <div style="background:var(--emerald);padding:16px 20px;padding-top:calc(16px + env(safe-area-inset-top,0px));color:white">
-      <h1 style="font-size:22px;font-weight:800;margin-bottom:2px">الأَدْعِيَة</h1>
-      <p style="font-size:13px;opacity:0.8">Authenticated Duas · Hisnul Muslim</p>
+      <h1 style="font-size:22px;font-weight:800;margin-bottom:6px">الأَدْعِيَة</h1>
+      <p style="font-size:13px;opacity:0.8;margin-bottom:10px">Authenticated Duas · Hisnul Muslim</p>
+      <div style="display:flex;align-items:center;background:rgba(255,255,255,0.15);border-radius:10px;padding:8px 12px;gap:8px">
+        <span style="opacity:0.7;font-size:14px">🔍</span>
+        <input id="dua-search" placeholder="Search duas..." oninput="filterDuas(this.value)"
+          style="background:none;border:none;outline:none;color:white;font-size:14px;flex:1;caret-color:white;"
+          autocomplete="off" spellcheck="false">
+      </div>
     </div>
-    <div class="category-grid">
-      ${Object.keys(DUAS).map(cat => `
-        <div class="category-card" onclick="openDuaCategory('${cat.replace(/'/g,"\\'")}')">
-          <div class="category-icon">${DUA_ICONS[cat] || '🤲'}</div>
-          <div class="category-name">${cat}</div>
-        </div>
-      `).join('')}
+    <div class="category-grid" id="dua-category-grid">
+      ${_renderDuaCategories(Object.keys(DUAS))}
     </div>
   `;
+}
+
+function _renderDuaCategories(cats) {
+  return cats.map(cat => `
+    <div class="category-card" onclick="openDuaCategory('${cat.replace(/'/g,"\\'")}')">
+      <div class="category-icon">${DUA_ICONS[cat] || '🤲'}</div>
+      <div class="category-name">${cat}</div>
+    </div>
+  `).join('');
+}
+
+function filterDuas(q) {
+  const query = q.trim().toLowerCase();
+  const grid = document.getElementById('dua-category-grid');
+  if (!grid) return;
+  if (!query) { grid.innerHTML = _renderDuaCategories(Object.keys(DUAS)); return; }
+  const filtered = Object.keys(DUAS).filter(cat => cat.toLowerCase().includes(query));
+  grid.innerHTML = filtered.length ? _renderDuaCategories(filtered)
+    : `<div style="padding:32px 16px;text-align:center;color:var(--gray-400);grid-column:1/-1">No categories found</div>`;
 }
 
 function openDuaCategory(cat) {

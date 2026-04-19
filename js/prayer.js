@@ -244,7 +244,7 @@ function renderPrayerTimes() {
   }
   if (!nextPrayer) { nextPrayer = PRAYER_NAMES[0]; nextTime = new Date(times.fajr); }
 
-  const notifBanner = ('Notification' in window && Notification.permission === 'default') ? `
+  const notifBanner = ('Notification' in window && Notification.permission === 'default' && !localStorage.getItem('huda_notif_dismissed')) ? `
     <div class="notif-banner" id="notif-banner">
       <span class="notif-banner-text">🔔 Get notified at each prayer time</span>
       <button class="notif-banner-btn" onclick="requestNotifPermission()">Enable</button>
@@ -428,7 +428,7 @@ function openQiblaCompass() {
       if (r === 'granted') start();
       else {
         const st = document.getElementById('qibla-status');
-        if (st) { st.textContent = 'Permission denied — check iOS Settings → Safari → Motion & Orientation'; st.className = 'qibla-status qibla-off'; }
+        if (st) { st.innerHTML = 'Permission denied &mdash; <a href="app-settings:" style="color:#059669">Open Settings</a> → Safari → Motion &amp; Orientation'; st.className = 'qibla-status qibla-off'; }
         wrap.style.display = 'block';
         const section = document.getElementById('qibla-section');
         if (section) section.style.display = 'block';
@@ -478,7 +478,7 @@ function _startQiblaListener() {
   if (_noSensorTimeout) { clearTimeout(_noSensorTimeout); _noSensorTimeout = null; }
   _noSensorTimeout = setTimeout(() => {
     if (smoothedHeading === null && status && status.isConnected) {
-      status.textContent = 'No compass sensor detected on this device';
+      status.textContent = 'No compass sensor detected — try on a mobile device';
       status.className = 'qibla-status qibla-off';
     }
   }, 3000);
@@ -583,6 +583,7 @@ async function requestNotifPermission() {
 }
 
 function dismissNotifBanner() {
+  localStorage.setItem('huda_notif_dismissed', '1');
   const el = document.getElementById('notif-banner');
   if (el) el.remove();
 }
