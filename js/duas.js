@@ -55,13 +55,9 @@ const PROPHET_ICONS = {
 
 function renderProphetList() {
   const all = DUAS['Prophetic Duas ﷺ'];
-  // Preserve insertion order
-  const seen = [];
+  const seen = _prophetOrder();
   const counts = {};
-  all.forEach(d => {
-    if (!counts[d.prophet]) { counts[d.prophet] = 0; seen.push(d.prophet); }
-    counts[d.prophet]++;
-  });
+  all.forEach(d => { counts[d.prophet] = (counts[d.prophet] || 0) + 1; });
   const tab = document.getElementById('tab-duas');
   tab.innerHTML = `
     <div class="page-header">
@@ -96,9 +92,7 @@ function openProphetDuas(prophet) {
 }
 
 function _prophetOrder() {
-  const seen = [];
-  DUAS['Prophetic Duas ﷺ'].forEach(d => { if (!seen.includes(d.prophet)) seen.push(d.prophet); });
-  return seen;
+  return [...new Set(DUAS['Prophetic Duas ﷺ'].map(d => d.prophet))];
 }
 
 function renderProphetDuaReader() {

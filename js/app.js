@@ -101,7 +101,7 @@ const state = {
   },
   learn: {
     currentSection: null, currentLesson: null,
-    currentDuaCategory: null, currentDuaIndex: 0,
+    currentDuaCategory: null, currentDuaIndex: 0, currentProphet: null,
     currentNameIndex: null, currentLetterIndex: null, hajjTab: 'umrah',
     zakat: { currency: 'USD', nisab: 'gold' },
   },
@@ -657,9 +657,14 @@ function setupNav() {
     }
 
     // ── Duas tab ──
-    if (state.activeTab === 'duas' && state.learn.currentDuaCategory) {
-      if (e.key === 'ArrowRight') { e.preventDefault(); changeDua(1); }
-      if (e.key === 'ArrowLeft')  { e.preventDefault(); changeDua(-1); }
+    if (state.activeTab === 'duas') {
+      if (state.learn.currentProphet) {
+        if (e.key === 'ArrowRight') { e.preventDefault(); changeProphetDua(1); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); changeProphetDua(-1); }
+      } else if (state.learn.currentDuaCategory) {
+        if (e.key === 'ArrowRight') { e.preventDefault(); changeDua(1); }
+        if (e.key === 'ArrowLeft')  { e.preventDefault(); changeDua(-1); }
+      }
     }
 
     // ── Learn tab — detail views ──
