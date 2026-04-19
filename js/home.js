@@ -305,19 +305,39 @@ function openHelpScreen() {
         <div class="help-title">About Huda</div>
       </div>
       <div class="help-body">
-        <p class="help-intro">Huda is your all-in-one Islamic companion. Here's what's inside.</p>
+        <p class="help-intro">Huda is your free, offline-ready Islamic companion. Here's everything inside.</p>
+
+        <div class="help-section">
+          <div class="help-section-title">🏠 Home</div>
+          <ul class="help-list">
+            <li>Continue reading — picks up where you left off</li>
+            <li>Reading plan progress card</li>
+            <li>Bookmarked ayahs and saved surahs</li>
+            <li>Hadith of the Day</li>
+            <li>Ayatul Kursi with audio and loop playback</li>
+            <li>Jumu'ah reminder every Friday</li>
+            <li>Hijri (Islamic) date display</li>
+          </ul>
+        </div>
 
         <div class="help-section">
           <div class="help-section-title">📖 Quran</div>
           <ul class="help-list">
             <li>Browse all 114 surahs</li>
             <li>Verse view or Mushaf (page) view</li>
-            <li>Audio playback with 5 reciters</li>
-            <li>Bookmarks — save ayahs and surahs</li>
+            <li>Gapless audio with 5 reciters</li>
+            <li>Play from any ayah, loop a surah, adjust playback speed</li>
+            <li>Auto-scroll in Mushaf view while audio plays</li>
+            <li>Sleep timer — audio stops after a set time</li>
+            <li>Ayah highlighting synced to audio</li>
             <li>Tafsir — tap any ayah for commentary</li>
+            <li>Bookmarks — save ayahs and surahs</li>
             <li>Share any ayah (Arabic + translation)</li>
-            <li>Download all surahs for offline reading</li>
+            <li>Search surahs by name or number</li>
             <li>Search the Quran by English keyword</li>
+            <li>Download all 114 surahs for offline reading</li>
+            <li>Adjustable Arabic font size</li>
+            <li>Reading plan — track your Quran completion goal</li>
           </ul>
         </div>
 
@@ -326,6 +346,7 @@ function openHelpScreen() {
           <ul class="help-list">
             <li>GPS-based prayer times for your location</li>
             <li>Live countdown to the next prayer</li>
+            <li>Prayer notifications (Fajr, Dhuhr, Asr, Maghrib, Isha)</li>
             <li>Qibla compass with live needle</li>
           </ul>
         </div>
@@ -333,8 +354,10 @@ function openHelpScreen() {
         <div class="help-section">
           <div class="help-section-title">📿 Dhikr</div>
           <ul class="help-list">
-            <li>Daily dhikr cards with tap counter</li>
-            <li>Tasbeeh counter</li>
+            <li>Morning and evening adhkar with tap counter</li>
+            <li>Free tasbeeh counter</li>
+            <li>Daily streak tracking</li>
+            <li>Dhikr history and lifetime stats</li>
           </ul>
         </div>
 
@@ -351,21 +374,22 @@ function openHelpScreen() {
           <div class="help-section-title">📚 Learn</div>
           <ul class="help-list">
             <li>New Muslim Guide — essentials of Islam</li>
-            <li>Children's Quran — Arabic alphabet + short surahs</li>
-            <li>99 Names of Allah (Asmaul Husna)</li>
+            <li>Children's Quran — Arabic alphabet + short surahs with audio</li>
+            <li>99 Names of Allah (Asmaul Husna) with meanings</li>
             <li>Hajj & Umrah Guide — step-by-step rituals</li>
-            <li>Zakat Calculator</li>
+            <li>Zakat Calculator — gold, silver, cash, and livestock</li>
             <li>Islamic (Hijri) calendar</li>
           </ul>
         </div>
 
         <div class="help-section">
-          <div class="help-section-title">🏠 Home</div>
+          <div class="help-section-title">⚙️ Settings</div>
           <ul class="help-list">
-            <li>Continue reading — picks up where you left off</li>
-            <li>Bookmarked ayahs and saved surahs</li>
-            <li>Hadith of the Day</li>
-            <li>Ayatul Kursi with audio playback</li>
+            <li>Sign in / Sign up — sync progress across devices</li>
+            <li>Choose your preferred reciter</li>
+            <li>Dark mode</li>
+            <li>Arabic font size control</li>
+            <li>Prayer notifications toggle</li>
           </ul>
         </div>
       </div>
@@ -465,7 +489,7 @@ function openSettings() {
           </div>
           <div class="settings-row">
             <span class="settings-label" style="color:#6b7280">Version</span>
-            <span class="settings-value" style="color:#9ca3af">v209</span>
+            <span class="settings-value" style="color:#9ca3af">v210</span>
           </div>
         </div>
 
