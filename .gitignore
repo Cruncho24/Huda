@@ -45,3 +45,16 @@ yarn-error.*
 # Dev artifacts not for production
 generate-icons.html
 App.js
+
+# Claude Code & tooling artifacts
+.claude/
+.playwright-mcp/
+.superpowers/
+
+# Test screenshots
+*.png
+*.jpg
+*.jpeg
+
+# Docs/plans (internal)
+docs/

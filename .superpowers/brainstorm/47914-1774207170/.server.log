@@ -1,7 +1,0 @@
-{"type":"server-started","port":54947,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:54947","screen_dir":"/Users/hash/huda/.superpowers/brainstorm/47914-1774207170"}
-{"type":"screen-added","file":"/Users/hash/huda/.superpowers/brainstorm/47914-1774207170/settings-entry.html"}
-{"source":"user-event","type":"click","text":"B\n    \n      🔑 Account button becomes Settings\n      The existing account/key button already lives in the hero. Rename it to ⚙️ Settings and put account + preferences all in one place. One icon, one destination, less clutter in the hero.","choice":"b","id":null,"timestamp":1774207221297}
-{"type":"screen-added","file":"/Users/hash/huda/.superpowers/brainstorm/47914-1774207170/settings-content.html"}
-{"type":"screen-added","file":"/Users/hash/huda/.superpowers/brainstorm/47914-1774207170/onboarding-style.html"}
-{"type":"screen-added","file":"/Users/hash/huda/.superpowers/brainstorm/47914-1774207170/waiting-1.html"}
-{"type":"server-stopped","reason":"idle timeout"}
