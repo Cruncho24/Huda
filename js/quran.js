@@ -444,12 +444,20 @@ function renderMushafPage(n, arData, enData) {
       if (!firstWrap) return;
       const ayah = parseInt(firstWrap.dataset.ayah, 10);
       if (isNaN(ayah)) return;
+      // For furthest-read, use the last ayah in the bottommost visible block
+      // so all visible ayahs count toward plan progress
+      const bottomBlock = visibleBlocks.reduce((bot, cur) =>
+        cur.getBoundingClientRect().bottom > bot.getBoundingClientRect().bottom ? cur : bot
+      );
+      const allWraps = bottomBlock.querySelectorAll('.mushaf-ayah-wrap[data-ayah]');
+      const lastWrap = allWraps[allWraps.length - 1] || firstWrap;
+      const furthestAyah = parseInt(lastWrap.dataset.ayah, 10) || ayah;
       try {
         const lr = JSON.parse(localStorage.getItem('huda_last_read') || 'null');
         if (lr) {
           lr.ayah = ayah;
           localStorage.setItem('huda_last_read', JSON.stringify(lr));
-          const _g = globalAyahNum(lr.surah, ayah);
+          const _g = globalAyahNum(lr.surah, furthestAyah);
           const _pf = parseInt(localStorage.getItem('huda_furthest_read') || '0', 10);
           if (_g > _pf) localStorage.setItem('huda_furthest_read', String(_g));
         }
