@@ -1037,6 +1037,8 @@ function mushafPlayAll(surahNum, startAyah = 1) {
     return;
   }
   _surahAudio = new Audio(url);
+  // Native loop — browser handles this even in background without JS re-trigger
+  _surahAudio.loop = _loopSurah;
   // Keep UI state in sync when system interrupts playback (calls, Bluetooth, Siri)
   _surahAudio.onpause = () => {
     if (!_surahAudio) return;
@@ -1389,6 +1391,8 @@ function toggleLoopSurah() {
   _loopSurah = !_loopSurah;
   const btn = document.getElementById('mpb-loop-btn');
   if (btn) btn.style.opacity = _loopSurah ? '1' : '0.45';
+  // Sync the native loop flag on the live element so background looping works
+  if (_surahAudio) _surahAudio.loop = _loopSurah;
 }
 
 function toggleMushafPlayback() {

@@ -9,6 +9,7 @@ const DUA_ICONS = {
   'For Anxiety & Distress':'💚','After Prayer':'📿','Entering & Leaving Home':'🏠',
   'Entering & Leaving Masjid':'🕌','Entering & Leaving Toilet':'🚻','Travelling':'✈️','For Parents':'❤️',
   'Seeking Forgiveness':'🌿','For Guidance & Knowledge':'📚',
+  'For Provision & Rizq':'🌾',
   'Essential Duas ⭐':'⭐','Prophetic Duas ﷺ':'🌙'
 };
 

@@ -619,6 +619,45 @@ const DUAS = {
     }
   ],
 
+  "For Provision & Rizq": [
+    {
+      arabic: "اللّٰهُمَّ اكْفِنِي بِحَلَالِكَ عَنْ حَرَامِكَ، وَأَغْنِنِي بِفَضْلِكَ عَمَّنْ سِوَاكَ",
+      transliteration: "Allahumma-kfini bi-halalika 'an haramika, wa aghnini bi-fadlika 'amman siwak",
+      meaning: "O Allah, suffice me with what You have made lawful against what You have made forbidden, and make me self-sufficient through Your bounty from all others.",
+      source: "Hisnul Muslim 118", grade: "Hasan — Tirmidhi 3563 · Dua for halal rizq and freedom from depending on anyone but Allah"
+    },
+    {
+      arabic: "اللّٰهُمَّ إِنِّي أَسْأَلُكَ الهُدَى وَالتُّقَى وَالْعَفَافَ وَالغِنَى",
+      transliteration: "Allahumma inni as'alukal-huda wat-tuqa wal-'afafa wal-ghina",
+      meaning: "O Allah, I ask You for guidance, piety, chastity, and self-sufficiency.",
+      source: "Hisnul Muslim 93", grade: "Sahih — Muslim 2721 · The Prophet ﷺ taught this dua regularly"
+    },
+    {
+      arabic: "اللّٰهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلًا مُتَقَبَّلًا",
+      transliteration: "Allahumma inni as'aluka ilman nafi'an, wa rizqan tayyiban, wa amalan mutaqabbalan",
+      meaning: "O Allah, I ask You for beneficial knowledge, good and lawful provision, and accepted deeds.",
+      source: "Hisnul Muslim 94", grade: "Sahih — Ibn Majah 925 · A morning dua of the Prophet ﷺ"
+    },
+    {
+      arabic: "رَبِّ إِنِّي لِمَا أَنزَلْتَ إِلَيَّ مِنْ خَيْرٍ فَقِيرٌ",
+      transliteration: "Rabbi inni lima anzalta ilayya min khayrin faqir",
+      meaning: "My Lord, indeed I am in desperate need of whatever good You send down to me.",
+      source: "Hisnul Muslim — Quran 28:24", grade: "Quranic · Dua of Musa ﷺ — he had nothing when he said this; shortly after, Allah gave him a home, a wife, and a new life"
+    },
+    {
+      arabic: "اللّٰهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْفَقْرِ وَالْقِلَّةِ وَالذِّلَّةِ، وَأَعُوذُ بِكَ مِنْ أَنْ أَظْلِمَ أَوْ أُظْلَمَ",
+      transliteration: "Allahumma inni a'udhu bika minal-faqri wal-qillati wadh-dhillah, wa a'udhu bika min an azlima aw uzlam",
+      meaning: "O Allah, I seek refuge in You from poverty, scarcity, and humiliation, and I seek refuge in You from wronging others or being wronged.",
+      source: "Hisnul Muslim 119", grade: "Sahih — Abu Dawud 1544, Ibn Majah 3842"
+    },
+    {
+      arabic: "اللّٰهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ، وَالْعَجْزِ وَالْكَسَلِ، وَالْبُخْلِ وَالْجُبْنِ، وَضَلَعِ الدَّيْنِ وَغَلَبَةِ الرِّجَالِ",
+      transliteration: "Allahumma inni a'udhu bika minal-hammi wal-hazan, wal-'ajzi wal-kasal, wal-bukhli wal-jubn, wa dhala'id-dayni wa ghalabatir-rijal",
+      meaning: "O Allah, I seek refuge in You from worry and grief, from incapacity and laziness, from miserliness and cowardice, from being overwhelmed by debt and overpowered by people.",
+      source: "Hisnul Muslim 120", grade: "Sahih — Bukhari 6363 · Comprehensive dua covering all causes of poverty and hardship"
+    }
+  ],
+
   "Essential Duas ⭐": [
     {
       arabic: "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلٰهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ",
