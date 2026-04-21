@@ -25,6 +25,9 @@ const PLAN_OPTIONS = [
 
 const TOTAL_AYAHS = 6236;
 
+// Official juz starting global ayah numbers (1-indexed)
+const JUZ_STARTS = [1,149,260,386,517,641,751,900,1042,1201,1328,1479,1649,1803,2030,2215,2484,2674,2876,3215,3386,3564,3733,4090,4265,4511,4706,5105,5242,5673];
+
 // ── Helpers ───────────────────────────────────────────────────
 
 function _todayStr() {
@@ -66,6 +69,75 @@ function _savePlan(plan) {
 // Used for today's progress — never goes backward unlike huda_last_read.
 function _getFurthestRead() {
   try { return parseInt(localStorage.getItem('huda_furthest_read') || '0', 10) || 0; } catch(e) { return 0; }
+}
+
+function _getJuzProgress(completedThrough) {
+  return JUZ_STARTS.map((start, i) => {
+    const end = i < 29 ? JUZ_STARTS[i + 1] - 1 : TOTAL_AYAHS;
+    const total = end - start + 1;
+    if (completedThrough >= end) return { juz: i + 1, status: 'done', pct: 100 };
+    if (completedThrough >= start) return { juz: i + 1, status: 'partial', pct: Math.round((completedThrough - start + 1) / total * 100) };
+    return { juz: i + 1, status: 'upcoming', pct: 0 };
+  });
+}
+
+function _getLongestStreak(plan) {
+  if (!plan.log) return 0;
+  const dates = Object.keys(plan.log).filter(k => plan.log[k] === true).sort();
+  let longest = 0, current = 0, prev = null;
+  for (const dateStr of dates) {
+    if (prev) {
+      const d = new Date(prev + 'T12:00:00');
+      d.setDate(d.getDate() + 1);
+      const expected = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+      current = expected === dateStr ? current + 1 : 1;
+    } else { current = 1; }
+    if (current > longest) longest = current;
+    prev = dateStr;
+  }
+  return longest;
+}
+
+function _getProjectedDate(plan) {
+  const d = new Date();
+  d.setDate(d.getDate() + getPlanDaysRemaining(plan));
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function _renderHeatmap(plan) {
+  const log = plan.log || {};
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+  const WEEKS = 13;
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const dow = (today.getDay() + 6) % 7;
+  const thisMonday = new Date(today); thisMonday.setDate(today.getDate() - dow);
+  const weeks = [];
+  for (let w = WEEKS - 1; w >= 0; w--) {
+    const days = []; let monthLabel = '';
+    for (let d = 0; d < 7; d++) {
+      const date = new Date(thisMonday); date.setDate(thisMonday.getDate() - w * 7 + d);
+      const isFuture = date > today;
+      const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+      if (d === 0 && date.getDate() <= 7) monthLabel = MONTHS[date.getMonth()];
+      days.push({ done: !isFuture && !!log[key], isFuture, isToday: date.getTime() === today.getTime() });
+    }
+    weeks.push({ days, monthLabel });
+  }
+  return `
+    <div class="plan-heatmap-wrap">
+      <div class="hm-row-labels">
+        <div class="hm-row-lbl">M</div><div class="hm-row-lbl"></div><div class="hm-row-lbl">W</div>
+        <div class="hm-row-lbl"></div><div class="hm-row-lbl">F</div><div class="hm-row-lbl"></div><div class="hm-row-lbl">S</div>
+      </div>
+      <div style="flex:1;overflow-x:auto">
+        <div class="plan-heatmap-months">${weeks.map(w => `<div class="hm-month-lbl">${w.monthLabel}</div>`).join('')}</div>
+        <div class="plan-heatmap-grid">${weeks.map(w =>
+          `<div class="hm-col">${w.days.map(d =>
+            `<div class="hm-cell${d.done ? ' hm-done' : d.isFuture ? ' hm-future' : ''}${d.isToday ? ' hm-today' : ''}"></div>`
+          ).join('')}</div>`
+        ).join('')}</div>
+      </div>
+    </div>`;
 }
 
 // ── Public API ────────────────────────────────────────────────
@@ -187,6 +259,41 @@ function markPlanDone() {
   _savePlan(plan);
   haptic(80);
   setTimeout(renderHome, 350);
+}
+
+function markPlanDoneNoNav() {
+  const plan = _loadPlan();
+  if (!plan || isPlanTodayDone(plan)) return;
+  if (!plan.log) plan.log = {};
+  if (!plan.logPrev) plan.logPrev = {};
+  const range = getPlanTodayRange(plan);
+  plan.logPrev[_todayStr()] = plan.completedThrough || 0;
+  plan.completedThrough = range.toGlobal;
+  plan.log[_todayStr()] = true;
+  if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) plan.completedDate = _todayStr();
+  _savePlan(plan);
+  haptic(80);
+}
+
+function markReadAheadDoneNoNav() {
+  const plan = _loadPlan();
+  if (!plan || !isPlanTodayDone(plan)) return;
+  if (!plan.log) plan.log = {};
+  if (!plan.logPrev) plan.logPrev = {};
+  const nextFrom = (plan.completedThrough || 0) + 1;
+  const nextTo = Math.min(nextFrom + plan.ayahsPerDay - 1, TOTAL_AYAHS);
+  const furthest = _getFurthestRead();
+  if (furthest < nextTo) return;
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth()+1).padStart(2,'0')}-${String(tomorrow.getDate()).padStart(2,'0')}`;
+  if (plan.log[tomorrowStr]) return;
+  plan.logPrev[tomorrowStr] = plan.completedThrough || 0;
+  plan.completedThrough = nextTo;
+  plan.log[tomorrowStr] = true;
+  if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) plan.completedDate = _todayStr();
+  _savePlan(plan);
+  haptic(80);
 }
 
 // Change pace while keeping progress and log intact
@@ -348,6 +455,8 @@ function keepReadingPlan() {
     const range = getPlanTodayRange(plan);
     const furthest = _getFurthestRead();
     if (furthest < range.toGlobal) return;
+    if (!plan.logPrev) plan.logPrev = {};
+    plan.logPrev[_todayStr()] = plan.completedThrough || 0;
     plan.completedThrough = range.toGlobal;
     plan.log[_todayStr()] = true;
     if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) {
@@ -429,10 +538,10 @@ function markReadAheadDone() {
   const nextTo = Math.min(nextFrom + plan.ayahsPerDay - 1, TOTAL_AYAHS);
   const furthest = _getFurthestRead();
   if (furthest < nextTo) return; // guard: user hasn't actually read through the range
-  // Snapshot before advancing so goBackADay can restore exactly
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth()+1).padStart(2,'0')}-${String(tomorrow.getDate()).padStart(2,'0')}`;
+  if (plan.log[tomorrowStr]) return; // spam guard: already marked for tomorrow
   plan.logPrev[tomorrowStr] = plan.completedThrough || 0;
   plan.completedThrough = nextTo;
   // Log tomorrow as done so it counts toward the streak
@@ -455,6 +564,133 @@ function markReadAheadDoneFromReader() {
       injectPlanTargetMarker(surah, state.quran?.viewMode === 'verse');
     }
   }, 400);
+}
+
+function redistributePlan() {
+  const plan = _loadPlan();
+  if (!plan) return;
+  const schedule = getPlanScheduleStatus(plan);
+  if (schedule.status !== 'behind') return;
+  const remaining = TOTAL_AYAHS - (plan.completedThrough || 0);
+  const newDays = getPlanDaysRemaining(plan) + schedule.daysBehind;
+  plan.ayahsPerDay = Math.ceil(remaining / newDays);
+  plan.startDate = _todayStr();
+  _savePlan(plan);
+  renderHome();
+  showToast('Plan extended — no days skipped ✓');
+}
+
+function openPlanDetail() {
+  const plan = _loadPlan();
+  if (!plan) return;
+  const done = isPlanTodayDone(plan);
+  const range = getPlanTodayRange(plan);
+  const streak = getPlanStreak(plan);
+  const longestStreak = _getLongestStreak(plan);
+  const pct = getPlanPct(plan);
+  const daysLeft = getPlanDaysRemaining(plan);
+  const dayNum = getPlanDayNumber(plan);
+  const schedule = getPlanScheduleStatus(plan);
+  const juzProgress = _getJuzProgress(plan.completedThrough || 0);
+  const projectedDate = _getProjectedDate(plan);
+  const totalDaysLogged = Object.keys(plan.log || {}).filter(k => (plan.log||{})[k] === true).length;
+  const _rl = (f, t) => f.surah === t.surah
+    ? `${f.name} ${f.surah}:${f.ayah}–${t.ayah}`
+    : `${f.name} ${f.surah}:${f.ayah} → ${t.name} ${t.surah}:${t.ayah}`;
+
+  let todaySec;
+  if (done) {
+    const nextFrom = (plan.completedThrough || 0) + 1;
+    const hasNext = nextFrom <= TOTAL_AYAHS;
+    const nextRef = hasNext ? _globalToRef(nextFrom) : null;
+    const nextTo = hasNext ? Math.min(nextFrom + plan.ayahsPerDay - 1, TOTAL_AYAHS) : 0;
+    const nextRef2 = hasNext ? _globalToRef(nextTo) : null;
+    const raComplete = hasNext && _getFurthestRead() >= nextTo;
+    todaySec = `
+      <div class="pd-today pd-today-done">
+        <div class="pd-today-tick">✓</div>
+        <div style="flex:1">
+          <div class="pd-today-title">Today's reading complete</div>
+          ${hasNext ? `<div class="pd-today-sub">Tomorrow: ${_rl(nextRef, nextRef2)}</div>` : '<div class="pd-today-sub">Quran complete!</div>'}
+        </div>
+        ${hasNext && !raComplete ? `<button class="pd-read-btn" style="flex:0;white-space:nowrap;padding:8px 14px;font-size:13px" onclick="jumpToPlanReading(true)">Read ahead ›</button>` : ''}
+      </div>
+      ${raComplete ? `<div style="padding:0 16px 4px"><button class="pd-done-btn" style="width:100%;padding:11px" onclick="markReadAheadDoneNoNav();setTimeout(openPlanDetail,150)">✓ Mark read-ahead done</button></div>` : ''}`;
+  } else {
+    const ayahsDone = getPlanTodayAyahsDone(plan);
+    const total = range.toGlobal - range.fromGlobal + 1;
+    const dayPct = total > 0 ? Math.round(ayahsDone / total * 100) : 0;
+    todaySec = `
+      <div class="pd-today">
+        <div class="pd-today-label">TODAY · DAY ${dayNum}</div>
+        <div class="pd-today-range">${_rl(range.from, range.to)}</div>
+        <div class="pd-today-bar-wrap"><div class="pd-today-bar-fill" style="width:${ayahsDone > 0 ? Math.max(3, dayPct) : 0}%"></div></div>
+        <div class="pd-today-meta">${ayahsDone} of ${total} ayahs read${schedule.status === 'behind' ? ` · <span style="color:#ef4444">${schedule.daysBehind}d behind</span>` : ''}</div>
+        <div class="pd-today-actions">
+          <button class="pd-read-btn" onclick="jumpToPlanReading()">▶ Read</button>
+          <button class="pd-done-btn" onclick="markPlanDoneNoNav();setTimeout(openPlanDetail,150)">✓ Mark done</button>
+        </div>
+      </div>`;
+  }
+
+  const juzSec = `
+    <div class="pd-section">
+      <div class="pd-section-label">Quran Progress</div>
+      <div class="plan-juz-grid">${juzProgress.map(j => `
+        <div class="plan-juz-cell juz-${j.status}">
+          <span class="juz-num">${j.juz}</span>
+          ${j.status === 'partial' ? `<div class="juz-bar"><div class="juz-bar-fill" style="width:${j.pct}%"></div></div>` : ''}
+          ${j.status === 'done' ? `<span class="juz-check">✓</span>` : ''}
+        </div>`).join('')}
+      </div>
+    </div>`;
+
+  const statsSec = `
+    <div class="pd-section">
+      <div class="pd-section-label">Stats</div>
+      <div class="pd-stats-row">
+        <div class="pd-stat"><div class="pd-stat-value">${streak > 0 ? '🔥&nbsp;' + streak : streak}</div><div class="pd-stat-label">Streak</div></div>
+        <div class="pd-stat"><div class="pd-stat-value">${longestStreak}</div><div class="pd-stat-label">Best streak</div></div>
+        <div class="pd-stat"><div class="pd-stat-value">${totalDaysLogged}</div><div class="pd-stat-label">Days done</div></div>
+        <div class="pd-stat"><div class="pd-stat-value">${pct}%</div><div class="pd-stat-label">Quran done</div></div>
+        <div class="pd-stat"><div class="pd-stat-value">${daysLeft}d</div><div class="pd-stat-label">Days left</div></div>
+        <div class="pd-stat"><div class="pd-stat-value pd-stat-date">${projectedDate}</div><div class="pd-stat-label">Est. finish</div></div>
+      </div>
+    </div>`;
+
+  const heatmapSec = `
+    <div class="pd-section">
+      <div class="pd-section-label">Reading History</div>
+      ${_renderHeatmap(plan)}
+    </div>`;
+
+  const settingsSec = `
+    <div class="pd-section pd-section-last">
+      <div class="pd-section-label">Settings</div>
+      <div class="pd-settings-list">
+        ${schedule.status === 'behind' ? `
+          <button class="pd-setting-btn" onclick="catchUpPlan()">⚡ Skip to today's position</button>
+          <button class="pd-setting-btn" onclick="redistributePlan()">📅 Extend plan — absorb missed days</button>
+        ` : `
+          <button class="pd-setting-btn" onclick="openChangePaceSheet()">⚡ Change pace</button>
+        `}
+        <button class="pd-setting-btn" onclick="goBackADay()">↩ Go back a day</button>
+        <button class="pd-setting-btn" onclick="confirmRestartPlan()">↺ Restart from beginning</button>
+        <button class="pd-setting-btn pd-setting-danger" onclick="confirmCancelPlan()">🗑 Remove plan</button>
+      </div>
+    </div>`;
+
+  document.getElementById('tab-home').innerHTML = `
+    <div class="page-header">
+      <button class="back-btn" onclick="renderHome()">←</button>
+      <div>
+        <h2>Reading Plan</h2>
+        <div style="font-size:11px;opacity:0.8">Day ${dayNum} · ${plan.label}</div>
+      </div>
+    </div>
+    <div style="overflow-y:auto;padding-bottom:80px">
+      ${todaySec}${juzSec}${statsSec}${heatmapSec}${settingsSec}
+    </div>`;
 }
 
 function cancelPlan() {
@@ -667,13 +903,12 @@ function renderPlanCard() {
 
   if (finished) {
     return `
-      <div class="plan-card plan-card-done">
-        <div class="plan-done-icon">🎉</div>
-        <div style="flex:1">
-          <div class="plan-done-title">Quran Complete!</div>
-          <div class="plan-done-sub">MashAllah — completed ${plan.completedDate ? 'on ' + plan.completedDate : 'the full Quran'}</div>
-        </div>
-        <button class="plan-cancel-btn" onclick="event.stopPropagation();cancelPlan()">✕</button>
+      <div class="plan-card plan-card-khatm" onclick="openPlanDetail()">
+        <div class="plan-khatm-star">✦</div>
+        <div class="plan-khatm-title">Khatm al-Quran</div>
+        <div class="plan-khatm-arabic">اللّٰهُمَّ ارْحَمْنِي بِالقُرْآنِ</div>
+        <div class="plan-khatm-sub">MashAllah — you completed the Quran${plan.completedDate ? ' on ' + plan.completedDate : ''}</div>
+        <button class="plan-read-btn" style="margin-top:14px" onclick="event.stopPropagation();confirmRestartPlan()">Start again ↺</button>
       </div>`;
   }
 
@@ -685,7 +920,7 @@ function renderPlanCard() {
     const nextLabel = hasNext ? _rangeLabel(nextRef, _globalToRef(nextTo)) : null;
     const readAheadComplete = hasNext && _getFurthestRead() >= nextTo;
     return `
-      <div class="plan-card plan-card-today-done">
+      <div class="plan-card plan-card-today-done" onclick="openPlanDetail()">
         <div class="plan-card-header">
           <div class="plan-label">Reading Plan · Day ${dayNum}</div>
           ${streak > 1 ? `<div class="plan-streak">🔥 ${streak}</div>` : ''}
@@ -696,10 +931,9 @@ function renderPlanCard() {
         <div class="plan-progress-wrap" style="margin-bottom:6px">
           <div class="plan-progress-fill" style="width:${pct}%"></div>
         </div>
-        <div class="plan-footer-row">
+        <div class="plan-footer-row" onclick="event.stopPropagation()">
           <span class="plan-pct">${pct}% complete · ${daysLeft}d left</span>
           <div style="display:flex;gap:8px;align-items:center">
-            <button class="plan-cancel-btn" onclick="event.stopPropagation();cancelPlan()">⋯</button>
             ${hasNext && !readAheadComplete ? `<button class="plan-read-btn plan-read-ahead-btn" onclick="jumpToPlanReading(true)">Read ahead ›</button>` : ''}
             ${readAheadComplete ? `<button class="plan-done-btn" onclick="markReadAheadDone()">✓ Mark done</button>` : ''}
           </div>
@@ -720,11 +954,11 @@ function renderPlanCard() {
   }
 
   const catchUpBtn = schedule.status === 'behind'
-    ? `<button class="plan-catchup-btn" onclick="catchUpPlan()">Skip to today's position</button>`
+    ? `<button class="plan-catchup-btn" onclick="event.stopPropagation();catchUpPlan()">Skip to today's position</button>`
     : '';
 
   return `
-    <div class="plan-card">
+    <div class="plan-card" onclick="openPlanDetail()">
       <div class="plan-card-header">
         <div class="plan-label">Reading Plan · Day ${dayNum}</div>
         ${badgeHtml}
@@ -746,10 +980,9 @@ function renderPlanCard() {
       <div class="plan-progress-wrap" style="margin-bottom:6px">
         <div class="plan-progress-fill plan-fill-overall" style="width:${pct}%"></div>
       </div>
-      <div class="plan-footer-row">
+      <div class="plan-footer-row" onclick="event.stopPropagation()">
         <span class="plan-pct">${pct}% of Quran · ${daysLeft}d left</span>
         <div style="display:flex;gap:8px;align-items:center">
-          <button class="plan-cancel-btn" onclick="event.stopPropagation();cancelPlan()">⋯</button>
           <button class="plan-read-btn" onclick="jumpToPlanReading()">Read ▶</button>
           <button class="plan-done-btn" onclick="markPlanDone()">✓ Done</button>
         </div>

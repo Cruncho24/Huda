@@ -4543,3 +4543,342 @@ html.dark .plan-custom-input:focus { border-color: #059669; }
 /* ── Sleep timer button — active state ───────────────────── */
 #mpb-sleep-btn { font-size: 12px; min-width: 32px; letter-spacing: -0.3px; }
 #mpb-sleep-btn.sleep-active { color: #fbbf24; }
+
+/* ── Plan: Khatm card ────────────────────────────────────── */
+.plan-card-khatm {
+  background: linear-gradient(135deg, #064e3b 0%, #065f46 60%, #047857 100%);
+  border-radius: 16px;
+  padding: 22px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+.plan-khatm-star {
+  font-size: 28px;
+  color: #fbbf24;
+  margin-bottom: 6px;
+  line-height: 1;
+}
+.plan-khatm-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 4px;
+}
+.plan-khatm-arabic {
+  font-size: 19px;
+  color: #a7f3d0;
+  font-family: 'Noto Naskh Arabic', serif;
+  direction: rtl;
+  margin: 6px 0 10px;
+  line-height: 1.5;
+}
+.plan-khatm-sub {
+  font-size: 13px;
+  color: #6ee7b7;
+  margin-bottom: 2px;
+}
+
+/* ── Plan: detail page sections ──────────────────────────── */
+.pd-today {
+  background: #fff;
+  border-radius: 14px;
+  padding: 16px;
+  margin: 12px 14px 6px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+}
+.pd-today-done {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+.pd-today-tick {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #059669;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.pd-today-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #059669;
+}
+.pd-today-sub {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+.pd-today-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+.pd-today-range {
+  font-size: 16px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 10px;
+}
+.pd-today-bar-wrap {
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 5px;
+}
+.pd-today-bar-fill {
+  height: 100%;
+  background: #059669;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+.pd-today-meta {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+.pd-today-actions {
+  display: flex;
+  gap: 8px;
+}
+.pd-read-btn {
+  flex: 1;
+  padding: 11px 0;
+  border: none;
+  border-radius: 10px;
+  background: #059669;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.pd-read-btn:active { background: #047857; }
+.pd-done-btn {
+  flex: 1;
+  padding: 11px 0;
+  border: 2px solid #059669;
+  border-radius: 10px;
+  background: transparent;
+  color: #059669;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.pd-done-btn:active { background: #f0fdf4; }
+
+/* ── Plan: section wrappers ──────────────────────────────── */
+.pd-section {
+  background: #fff;
+  border-radius: 14px;
+  padding: 14px 16px 12px;
+  margin: 6px 14px;
+  box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+}
+.pd-section-last { margin-bottom: 6px; }
+.pd-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+/* ── Plan: juz progress grid ─────────────────────────────── */
+.plan-juz-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+}
+.plan-juz-cell {
+  border-radius: 8px;
+  padding: 6px 4px 5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  min-height: 44px;
+  justify-content: center;
+  position: relative;
+}
+.juz-done {
+  background: #059669;
+}
+.juz-partial {
+  background: #d1fae5;
+  border: 1.5px solid #6ee7b7;
+}
+.juz-upcoming {
+  background: #f1f5f9;
+  border: 1.5px solid #e2e8f0;
+}
+.juz-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+}
+.juz-done .juz-num { color: rgba(255,255,255,0.7); }
+.juz-check {
+  font-size: 13px;
+  color: #fff;
+  font-weight: 700;
+}
+.juz-bar {
+  width: 80%;
+  height: 3px;
+  background: #a7f3d0;
+  border-radius: 99px;
+  overflow: hidden;
+}
+.juz-bar-fill {
+  height: 100%;
+  background: #059669;
+  border-radius: 99px;
+}
+
+/* ── Plan: stats row ─────────────────────────────────────── */
+.pd-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+.pd-stat {
+  background: #f8fafc;
+  border-radius: 10px;
+  padding: 10px 8px 8px;
+  text-align: center;
+}
+.pd-stat-value {
+  font-size: 18px;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.1;
+}
+.pd-stat-date {
+  font-size: 11px !important;
+}
+.pd-stat-label {
+  font-size: 10px;
+  color: #94a3b8;
+  margin-top: 3px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+/* ── Plan: heatmap ───────────────────────────────────────── */
+.plan-heatmap-wrap {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+  overflow-x: auto;
+}
+.hm-row-labels {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding-top: 18px;
+  flex-shrink: 0;
+}
+.hm-row-lbl {
+  font-size: 9px;
+  color: #94a3b8;
+  height: 11px;
+  line-height: 11px;
+  text-align: right;
+  width: 12px;
+}
+.plan-heatmap-months {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 3px;
+  height: 15px;
+}
+.hm-month-lbl {
+  width: 11px;
+  font-size: 9px;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: visible;
+}
+.plan-heatmap-grid {
+  display: flex;
+  gap: 3px;
+}
+.hm-col {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.hm-cell {
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  background: #e2e8f0;
+}
+.hm-done { background: #059669; }
+.hm-future { background: #f1f5f9; opacity: 0.5; }
+.hm-today { outline: 2px solid #059669; outline-offset: 1px; }
+
+/* ── Plan: settings list ─────────────────────────────────── */
+.pd-settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.pd-setting-btn {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  color: #334155;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.pd-setting-btn:active { background: #f8fafc; }
+.pd-setting-danger {
+  color: #ef4444;
+  border-color: #fecaca;
+}
+.pd-setting-danger:active { background: #fff5f5; }
+
+/* ── Dark mode: plan detail ──────────────────────────────── */
+html.dark .pd-today { background: #1e293b; box-shadow: none; }
+html.dark .pd-today-range { color: #f1f5f9; }
+html.dark .pd-today-meta { color: #64748b; }
+html.dark .pd-today-bar-wrap { background: #334155; }
+html.dark .pd-done-btn { border-color: #059669; color: #34d399; }
+html.dark .pd-done-btn:active { background: #0f2d1e; }
+html.dark .pd-section { background: #1e293b; box-shadow: none; }
+html.dark .pd-section-label { color: #475569; }
+html.dark .juz-upcoming { background: #0f172a; border-color: #334155; }
+html.dark .juz-num { color: #94a3b8; }
+html.dark .juz-partial { background: #0f2d1e; border-color: #059669; }
+html.dark .juz-bar { background: #064e3b; }
+html.dark .pd-stat { background: #0f172a; }
+html.dark .pd-stat-value { color: #f1f5f9; }
+html.dark .hm-cell { background: #334155; }
+html.dark .hm-done { background: #059669; }
+html.dark .hm-future { background: #1e293b; }
+html.dark .hm-today { outline-color: #34d399; }
+html.dark .pd-setting-btn { background: #1e293b; border-color: #334155; color: #cbd5e1; }
+html.dark .pd-setting-btn:active { background: #0f172a; }
+html.dark .pd-setting-danger { color: #f87171; border-color: #7f1d1d; }
+html.dark .pd-setting-danger:active { background: #1e0909; }
