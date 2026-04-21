@@ -633,12 +633,6 @@ const DUAS = {
       source: "Hisnul Muslim 93", grade: "Sahih — Muslim 2721 · The Prophet ﷺ taught this dua regularly"
     },
     {
-      arabic: "اللّٰهُمَّ إِنِّي أَسْأَلُكَ عِلْمًا نَافِعًا، وَرِزْقًا طَيِّبًا، وَعَمَلًا مُتَقَبَّلًا",
-      transliteration: "Allahumma inni as'aluka ilman nafi'an, wa rizqan tayyiban, wa amalan mutaqabbalan",
-      meaning: "O Allah, I ask You for beneficial knowledge, good and lawful provision, and accepted deeds.",
-      source: "Hisnul Muslim 94", grade: "Sahih — Ibn Majah 925 · A morning dua of the Prophet ﷺ"
-    },
-    {
       arabic: "رَبِّ إِنِّي لِمَا أَنزَلْتَ إِلَيَّ مِنْ خَيْرٍ فَقِيرٌ",
       transliteration: "Rabbi inni lima anzalta ilayya min khayrin faqir",
       meaning: "My Lord, indeed I am in desperate need of whatever good You send down to me.",
