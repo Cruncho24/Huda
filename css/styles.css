@@ -2288,10 +2288,12 @@ html.dark .share-dua-btn { background: #334155; border-color: #475569; color: #9
   font-size: 14px;
   line-height: 1.85;
   color: var(--gray-700);
+  white-space: normal;
 }
 .dua-adab-body em { font-style: italic; color: var(--emerald-dark); }
 .dua-adab-body strong { color: var(--emerald-dark); font-weight: 700; }
 html.dark .dua-adab-section { background: #1e293b; }
+html.dark .dua-adab-header { background: #1e3a5f !important; }
 html.dark .dua-adab-title { color: #f1f5f9; }
 html.dark .dua-adab-body { color: #cbd5e1; }
 html.dark .dua-adab-body strong { color: #34d399; }

@@ -419,7 +419,7 @@ function calculateZakat() {
 
 
 
-// ── F) Proper Way of Making Dua ───────────────────────────────
+// ── F) The Etiquette of Dua ───────────────────────────────────
 const DUA_ADAB_SECTIONS = [
   {
     icon: '📖',
@@ -448,13 +448,10 @@ The Prophet ﷺ said: "Call upon Allah while being certain of a response." (Tirm
 He ﷺ said: "When one of you makes dua, let him not say: 'O Allah, forgive me if You wish' — but rather be earnest in his request." (Bukhari 6338)
 
 **5. Be in a state of wudu if possible**
-The Prophet ﷺ performed wudu before raising his hands in dua. (Abu Dawud — Sahih)
+Scholars classify wudu before dua as mustahabb (recommended), derived from the Prophet's ﷺ general practice of maintaining purity before acts of worship. It is not obligatory, but it is a mark of reverence.
 
 **6. Use Allah's Names and attributes**
-"And to Allah belong the best names, so invoke Him by them." (Quran 7:180)
-
-**7. Wipe your face after dua**
-Ibn Umar reported the Prophet ﷺ would wipe his face with his hands after raising them in dua. (Tirmidhi 3386)`
+"And to Allah belong the best names, so invoke Him by them." (Quran 7:180)`
   },
   {
     icon: '⏰',
@@ -476,10 +473,7 @@ He ﷺ said: "On Friday there is an hour during which no Muslim asks Allah for s
 "Three supplications are not rejected: the supplication of the fasting person when breaking his fast..." (Tirmidhi 3598 — Hasan)
 
 **6. While travelling**
-He ﷺ said: "Three duas are answered without doubt: the dua of the oppressed, the dua of the traveller, and the dua of a parent for his child." (Tirmidhi 1905 — Hasan)
-
-**7. When it rains**
-"Seek dua at two times when rain falls." (Abu Dawud 2540)`
+He ﷺ said: "Three duas are answered without doubt: the dua of the oppressed, the dua of the traveller, and the dua of a parent for his child." (Tirmidhi 1905 — Hasan)`
   },
   {
     icon: '✅',

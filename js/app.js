@@ -715,6 +715,7 @@ function _restoreTab(tab) {
     } else if (ts === 'hajj') { openHajjGuide(); }
     else if (ts === 'zakat') { openZakatCalc(); }
     else if (ts === 'calendar') { openCalendar(); }
+    else if (ts === 'duaadab') { openDuaAdab(); }
     else { renderLearnHub(); }
   } else {
     ({ home: renderHome, prayer: renderPrayer, dhikr: renderDhikr })[tab]?.();
