@@ -832,16 +832,21 @@ function jumpToPlanReading(readAhead = false) {
     surah = ref.surah; ayah = ref.ayah;
   } else {
     const range = getPlanTodayRange(plan);
-    // Resume from last read position if it falls within today's range
-    try {
-      const lr = JSON.parse(localStorage.getItem('huda_last_read') || 'null');
-      if (lr?.surah && lr?.ayah) {
-        const cur = globalAyahNum(lr.surah, lr.ayah);
-        if (cur >= range.fromGlobal && cur <= range.toGlobal) {
-          surah = lr.surah; ayah = lr.ayah;
+    // Only resume from last-read position if user has already logged at least one day.
+    // On day 1 (no log entries), huda_last_read may point anywhere in the Quran from
+    // prior browsing — always start at the beginning of today's range instead.
+    const hasPriorLog = Object.keys(plan.log || {}).length > 0;
+    if (hasPriorLog) {
+      try {
+        const lr = JSON.parse(localStorage.getItem('huda_last_read') || 'null');
+        if (lr?.surah && lr?.ayah) {
+          const cur = globalAyahNum(lr.surah, lr.ayah);
+          if (cur >= range.fromGlobal && cur <= range.toGlobal) {
+            surah = lr.surah; ayah = lr.ayah;
+          }
         }
-      }
-    } catch(e) {}
+      } catch(e) {}
+    }
     // Fallback: start of today's range
     if (!surah) { surah = range.from.surah; ayah = range.from.ayah; }
   }
