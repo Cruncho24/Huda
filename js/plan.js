@@ -179,9 +179,7 @@ function markPlanDone() {
   const range = getPlanTodayRange(plan);
   // Snapshot current completedThrough so goBackADay can restore it exactly
   plan.logPrev[_todayStr()] = plan.completedThrough || 0;
-  // Credit any extra ayahs read beyond today's target
-  const furthest = _getFurthestRead();
-  plan.completedThrough = Math.max(range.toGlobal, Math.min(furthest, TOTAL_AYAHS));
+  plan.completedThrough = range.toGlobal;
   plan.log[_todayStr()] = true;
   if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) {
     plan.completedDate = _todayStr();
@@ -350,7 +348,7 @@ function keepReadingPlan() {
     const range = getPlanTodayRange(plan);
     const furthest = _getFurthestRead();
     if (furthest < range.toGlobal) return;
-    plan.completedThrough = Math.max(range.toGlobal, Math.min(furthest, TOTAL_AYAHS));
+    plan.completedThrough = range.toGlobal;
     plan.log[_todayStr()] = true;
     if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) {
       plan.completedDate = _todayStr();
@@ -436,7 +434,7 @@ function markReadAheadDone() {
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth()+1).padStart(2,'0')}-${String(tomorrow.getDate()).padStart(2,'0')}`;
   plan.logPrev[tomorrowStr] = plan.completedThrough || 0;
-  plan.completedThrough = Math.max(nextTo, Math.min(furthest, TOTAL_AYAHS));
+  plan.completedThrough = nextTo;
   // Log tomorrow as done so it counts toward the streak
   plan.log[tomorrowStr] = true;
   if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) {
