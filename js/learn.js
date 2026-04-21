@@ -22,6 +22,7 @@ function renderLearnHub() {
         { icon:'🕌', bg:'#d1fae5', title:'New Muslim Guide', desc:'8 essential lessons for new Muslims', fn:'openNewMuslimGuide' },
         { icon:'🔤', bg:'#dbeafe', title:"Children's Quran", desc:'Arabic alphabet & short surahs', fn:'openChildrensQuran' },
         { icon:'✨', bg:'#fef3c7', title:'99 Names of Allah', desc:'Asmaul Husna — all 99 names', fn:'openNamesOfAllah' },
+        { icon:'🤲', bg:'#f0fdf4', title:'Proper Way of Making Dua', desc:'Etiquette, best times & conditions for accepted dua', fn:'openDuaAdab' },
         { icon:'🕋', bg:'#ede9fe', title:'Hajj & Umrah Guide', desc:'Complete step-by-step guide', fn:'openHajjGuide' },
         { icon:'💰', bg:'#fce7f3', title:'Zakat Calculator', desc:'Calculate your obligatory charity', fn:'openZakatCalc' },
         { icon:'🗓️', bg:'#e0f2fe', title:'Islamic Calendar', desc:'Hijri calendar with key Islamic dates', fn:'openCalendar' },
@@ -417,6 +418,154 @@ function calculateZakat() {
 }
 
 
+
+// ── F) Proper Way of Making Dua ───────────────────────────────
+const DUA_ADAB_SECTIONS = [
+  {
+    icon: '📖',
+    title: 'Dua is Worship',
+    color: '#d1fae5',
+    content: `**"And your Lord said: Call upon Me, I will respond to you. Verily, those who are arrogant about My worship will enter Hell in humiliation."** (Quran 40:60)
+
+The Prophet ﷺ said: **"Dua is worship."** (Abu Dawud 1479 — Sahih)
+
+Dua is one of the most beloved acts to Allah. It is the direct line between the servant and his Lord — no intermediary, no barrier. Allah hears every whisper, sees every tear, knows every need before you even ask.`
+  },
+  {
+    icon: '🌟',
+    title: 'Etiquette (Adab) of Dua',
+    color: '#fef3c7',
+    content: `**1. Begin with praise and salah on the Prophet ﷺ**
+The Prophet ﷺ heard someone making dua without praising Allah or sending salah on the Prophet. He said: "This one was hasty." Then he said: "When one of you makes dua, let him begin with praise of Allah, then send salah on the Prophet, then ask whatever he wishes." (Abu Dawud 1481 — Sahih)
+
+**2. Face the Qibla and raise your hands**
+The Prophet ﷺ raised his hands in dua. He said: "Allah is Generous and Shy — He is ashamed to return the hands of His servant empty when he raises them to Him." (Abu Dawud 1488 — Hasan)
+
+**3. Have certainty Allah will respond**
+The Prophet ﷺ said: "Call upon Allah while being certain of a response." (Tirmidhi 3479 — Hasan)
+
+**4. Be earnest and repeat your dua**
+He ﷺ said: "When one of you makes dua, let him not say: 'O Allah, forgive me if You wish' — but rather be earnest in his request." (Bukhari 6338)
+
+**5. Be in a state of wudu if possible**
+The Prophet ﷺ performed wudu before raising his hands in dua. (Abu Dawud — Sahih)
+
+**6. Use Allah's Names and attributes**
+"And to Allah belong the best names, so invoke Him by them." (Quran 7:180)
+
+**7. Wipe your face after dua**
+Ibn Umar reported the Prophet ﷺ would wipe his face with his hands after raising them in dua. (Tirmidhi 3386)`
+  },
+  {
+    icon: '⏰',
+    title: 'Best Times for Dua',
+    color: '#dbeafe',
+    content: `**1. Last third of the night (Tahajjud time)**
+The Prophet ﷺ said: "Our Lord descends every night to the lowest heaven when the last third of the night remains and says: Who is calling upon Me that I may answer him? Who is asking from Me that I may give him? Who is seeking forgiveness from Me that I may forgive him?" (Bukhari 1145)
+
+**2. In sujood (prostration)**
+He ﷺ said: "The closest a servant is to his Lord is when he is in sujood, so make plentiful dua." (Muslim 482)
+
+**3. Between the adhan and iqamah**
+"Dua is not rejected between the adhan and the iqamah." (Abu Dawud 521 — Sahih)
+
+**4. The last hour of Friday (after Asr)**
+He ﷺ said: "On Friday there is an hour during which no Muslim asks Allah for something good except that Allah gives it to him." (Bukhari 935)
+
+**5. When fasting, at the time of breaking fast**
+"Three supplications are not rejected: the supplication of the fasting person when breaking his fast..." (Tirmidhi 3598 — Hasan)
+
+**6. While travelling**
+He ﷺ said: "Three duas are answered without doubt: the dua of the oppressed, the dua of the traveller, and the dua of a parent for his child." (Tirmidhi 1905 — Hasan)
+
+**7. When it rains**
+"Seek dua at two times when rain falls." (Abu Dawud 2540)`
+  },
+  {
+    icon: '✅',
+    title: 'Conditions for Accepted Dua',
+    color: '#f0fdf4',
+    content: `**1. Halal income and food**
+The Prophet ﷺ mentioned a man who travels far, dishevelled and dusty, raising his hands to the sky: "O Lord! O Lord!" — but his food is haram, his drink is haram, his clothing is haram, and he was nourished with haram. **"How can his dua be answered?"** (Muslim 1015)
+
+**2. Sincerity and presence of heart**
+Make dua with full attention and intention. The Prophet ﷺ said: "Know that Allah does not respond to a dua from a heedless, inattentive heart." (Tirmidhi 3479 — Hasan)
+
+**3. Obedience to Allah and avoiding haram**
+Allah said: **"And when My servants ask about Me — I am near. I respond to the call of the caller when he calls upon Me. So let them respond to Me and believe in Me, so they may be guided."** (Quran 2:186)
+
+**4. Asking for something permissible**
+The Prophet ﷺ said dua will be answered "as long as he does not ask for something sinful or the severing of family ties." (Muslim 2735)
+
+**5. Persistence — do not give up**
+He ﷺ said: "The dua of any of you will be answered so long as he is not hasty — meaning he says: I made dua but it was not answered." (Bukhari 6340)`
+  },
+  {
+    icon: '💡',
+    title: 'How Allah Responds',
+    color: '#ede9fe',
+    content: `The Prophet ﷺ said: **"There is no Muslim who calls upon Allah with any dua that does not contain sin or severance of family ties, except that Allah gives him one of three things: either He hastens the response in this world, or He stores it for him in the Hereafter, or He diverts from him an equivalent evil."**
+
+They said: "Then we will make a lot of dua!" He said: "Allah is more than that." (Ahmad 10749 — Sahih)
+
+**This means your dua is never wasted.** If you do not see it answered in this world, know it is stored as an immense treasure waiting for you on the Day of Judgement — or Allah protected you from a harm you never even knew was coming.
+
+Make dua for others too — the Prophet ﷺ said: "When a Muslim supplicates for his absent brother, the angel says: Ameen, and may you have likewise." (Muslim 2733)`
+  },
+  {
+    icon: '🤲',
+    title: 'Recommended Opening Duas',
+    color: '#fce7f3',
+    content: `**Begin your dua with praise:**
+اللّٰهُمَّ لَكَ الْحَمْدُ أَنْتَ نُورُ السَّمَاوَاتِ وَالأَرْضِ
+*Allahumma lakal-hamdu anta nurus-samawati wal-ard*
+"O Allah, all praise is Yours. You are the Light of the heavens and the earth." (Bukhari 1120)
+
+**Or start with:**
+اللّٰهُمَّ رَبَّ جِبْرَائِيلَ وَمِيكَائِيلَ وَإِسْرَافِيلَ، فَاطِرَ السَّمَاوَاتِ وَالأَرْضِ
+*Allahumma Rabba Jibraila wa Mikaila wa Israfila, fatiras-samawati wal-ard*
+"O Allah, Lord of Jibreel, Mikail and Israfil, Creator of the heavens and earth." (Muslim 770)
+
+**Send salah on the Prophet ﷺ:**
+اللّٰهُمَّ صَلِّ عَلَى مُحَمَّدٍ وَعَلَى آلِ مُحَمَّدٍ
+*Allahumma salli 'ala Muhammadin wa 'ala ali Muhammad*
+(Bukhari 3370)
+
+**Close with:**
+رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّارِ
+*Rabbana atina fid-dunya hasanatan wa fil-akhirati hasanatan wa qina 'adhaban-nar*
+"Our Lord, give us good in this world and good in the Hereafter and protect us from the punishment of the Fire." (Quran 2:201 — the most complete dua)`
+  },
+];
+
+function openDuaAdab() {
+  state.learn.currentTopSection = 'duaadab';
+  state.learn.currentSection = null;
+  const tab = document.getElementById('tab-learn');
+  tab.innerHTML = `
+    <div class="page-header">
+      <button class="back-btn" onclick="renderLearnHub()">←</button>
+      <div>
+        <h2>Proper Way of Making Dua</h2>
+        <div style="font-size:11px;opacity:0.8">🤲 Etiquette, times & conditions</div>
+      </div>
+    </div>
+    <div style="padding:12px 16px 4px">
+      <div class="disclaimer">Based on authentic hadith from Bukhari, Muslim, Abu Dawud, and Tirmidhi.</div>
+    </div>
+    <div style="padding:12px 16px 80px">
+      ${DUA_ADAB_SECTIONS.map(s => `
+        <div class="dua-adab-section fade-in">
+          <div class="dua-adab-header" style="background:${s.color}">
+            <span class="dua-adab-icon">${s.icon}</span>
+            <span class="dua-adab-title">${s.title}</span>
+          </div>
+          <div class="dua-adab-body lesson-body">${s.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/\n/g, '<br>')}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
 
 // showToast is defined globally in app.js
 
