@@ -572,7 +572,12 @@ function goBackADay() {
   _savePlan(plan);
   closePlanCancelSheet();
   haptic(40);
-  renderHome();
+  // Navigate directly to the start of the restored day so the user
+  // lands at the "Today starts here" / "Stop here today" markers
+  const restored = getPlanTodayRange(plan);
+  state.quran.viewMode = 'page';
+  switchTab('quran');
+  setTimeout(() => openSurah(restored.from.surah, restored.from.ayah), 150);
 }
 
 function confirmCancelPlan() {
