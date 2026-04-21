@@ -175,7 +175,10 @@ function markPlanDone() {
   const plan = _loadPlan();
   if (!plan || isPlanTodayDone(plan)) return;
   if (!plan.log) plan.log = {};
+  if (!plan.logPrev) plan.logPrev = {};
   const range = getPlanTodayRange(plan);
+  // Snapshot current completedThrough so goBackADay can restore it exactly
+  plan.logPrev[_todayStr()] = plan.completedThrough || 0;
   // Credit any extra ayahs read beyond today's target
   const furthest = _getFurthestRead();
   plan.completedThrough = Math.max(range.toGlobal, Math.min(furthest, TOTAL_AYAHS));
@@ -423,15 +426,18 @@ function markReadAheadDone() {
   const plan = _loadPlan();
   if (!plan || !isPlanTodayDone(plan)) return;
   if (!plan.log) plan.log = {};
+  if (!plan.logPrev) plan.logPrev = {};
   const nextFrom = (plan.completedThrough || 0) + 1;
   const nextTo = Math.min(nextFrom + plan.ayahsPerDay - 1, TOTAL_AYAHS);
   const furthest = _getFurthestRead();
   if (furthest < nextTo) return; // guard: user hasn't actually read through the range
-  plan.completedThrough = Math.max(nextTo, Math.min(furthest, TOTAL_AYAHS));
-  // Log tomorrow as done so it counts toward the streak
+  // Snapshot before advancing so goBackADay can restore exactly
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth()+1).padStart(2,'0')}-${String(tomorrow.getDate()).padStart(2,'0')}`;
+  plan.logPrev[tomorrowStr] = plan.completedThrough || 0;
+  plan.completedThrough = Math.max(nextTo, Math.min(furthest, TOTAL_AYAHS));
+  // Log tomorrow as done so it counts toward the streak
   plan.log[tomorrowStr] = true;
   if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) {
     plan.completedDate = _todayStr();
@@ -517,6 +523,7 @@ function confirmRestartPlan() {
   if (!plan) return;
   plan.completedThrough = 0;
   plan.log = {};
+  plan.logPrev = {};
   plan.startDate = _todayStr();
   delete plan.completedDate;
   _savePlan(plan);
@@ -536,15 +543,31 @@ function goBackADay() {
   const todayStr = _todayStr();
   const yd = new Date(); yd.setDate(yd.getDate() - 1);
   const yStr = `${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
-  if (plan.log && plan.log[todayStr]) {
-    delete plan.log[todayStr];
-  } else if (plan.log && plan.log[yStr]) {
-    delete plan.log[yStr];
-  } else {
+  // Find which day to undo — prefer today, fall back to yesterday
+  let dayToUndo = null;
+  if (plan.log && plan.log[todayStr]) dayToUndo = todayStr;
+  else if (plan.log && plan.log[yStr]) dayToUndo = yStr;
+  if (!dayToUndo) {
     closePlanCancelSheet();
+    showToast('Nothing to undo — no recent day was marked done');
     return;
   }
-  plan.completedThrough = Math.max(0, (plan.completedThrough || 0) - plan.ayahsPerDay);
+  delete plan.log[dayToUndo];
+  // Also clear any read-ahead (tomorrow) log entry so it doesn't become a ghost
+  const td = new Date(); td.setDate(td.getDate() + 1);
+  const tmrStr = `${td.getFullYear()}-${String(td.getMonth()+1).padStart(2,'0')}-${String(td.getDate()).padStart(2,'0')}`;
+  if (plan.log && plan.log[tmrStr]) {
+    delete plan.log[tmrStr];
+    if (plan.logPrev) delete plan.logPrev[tmrStr];
+  }
+  // Restore completedThrough to what it was before this day was marked done.
+  // logPrev stores the exact pre-mark-done value; fall back to flat decrement for old data.
+  if (plan.logPrev && plan.logPrev[dayToUndo] !== undefined) {
+    plan.completedThrough = plan.logPrev[dayToUndo];
+    delete plan.logPrev[dayToUndo];
+  } else {
+    plan.completedThrough = Math.max(0, (plan.completedThrough || 0) - plan.ayahsPerDay);
+  }
   if (plan.completedDate) delete plan.completedDate;
   _savePlan(plan);
   closePlanCancelSheet();
