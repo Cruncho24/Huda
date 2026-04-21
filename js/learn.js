@@ -22,7 +22,7 @@ function renderLearnHub() {
         { icon:'🕌', bg:'#d1fae5', title:'New Muslim Guide', desc:'8 essential lessons for new Muslims', fn:'openNewMuslimGuide' },
         { icon:'🔤', bg:'#dbeafe', title:"Children's Quran", desc:'Arabic alphabet & short surahs', fn:'openChildrensQuran' },
         { icon:'✨', bg:'#fef3c7', title:'99 Names of Allah', desc:'Asmaul Husna — all 99 names', fn:'openNamesOfAllah' },
-        { icon:'🤲', bg:'#f0fdf4', title:'Proper Way of Making Dua', desc:'Etiquette, best times & conditions for accepted dua', fn:'openDuaAdab' },
+        { icon:'🤲', bg:'#f0fdf4', title:'The Etiquette of Dua', desc:'Adab, best times & conditions for accepted dua', fn:'openDuaAdab' },
         { icon:'🕋', bg:'#ede9fe', title:'Hajj & Umrah Guide', desc:'Complete step-by-step guide', fn:'openHajjGuide' },
         { icon:'💰', bg:'#fce7f3', title:'Zakat Calculator', desc:'Calculate your obligatory charity', fn:'openZakatCalc' },
         { icon:'🗓️', bg:'#e0f2fe', title:'Islamic Calendar', desc:'Hijri calendar with key Islamic dates', fn:'openCalendar' },
@@ -546,8 +546,8 @@ function openDuaAdab() {
     <div class="page-header">
       <button class="back-btn" onclick="renderLearnHub()">←</button>
       <div>
-        <h2>Proper Way of Making Dua</h2>
-        <div style="font-size:11px;opacity:0.8">🤲 Etiquette, times & conditions</div>
+        <h2>The Etiquette of Dua</h2>
+        <div style="font-size:11px;opacity:0.8">🤲 Adab, times & conditions</div>
       </div>
     </div>
     <div style="padding:12px 16px 4px">
