@@ -130,11 +130,13 @@ function getPlanTodayAyahsDone(plan) {
   return Math.min(range.toGlobal - range.fromGlobal + 1, furthest - range.fromGlobal + 1);
 }
 
-function startPlan(type, fromCurrent) {
+let _planStartGlobal = 0; // global ayah to start from (0 = Al-Fatihah 1:1)
+
+function startPlan(type) {
   if (type === 'custom') { openCustomPlanSetup(); return; }
   const opt = PLAN_OPTIONS.find(o => o.type === type);
   if (!opt) return;
-  const completedThrough = fromCurrent ? Math.min(_getFurthestRead(), TOTAL_AYAHS - 1) : 0;
+  const completedThrough = Math.max(0, _planStartGlobal - 1);
   const remaining = TOTAL_AYAHS - completedThrough;
   const plan = {
     type,
@@ -145,14 +147,15 @@ function startPlan(type, fromCurrent) {
     log: {},
   };
   _savePlan(plan);
+  _planStartGlobal = 0;
   closePlanSetup();
   renderHome();
 }
 
-function startCustomPlan(days, fromCurrent) {
+function startCustomPlan(days) {
   const d = parseInt(days, 10);
   if (!d || d < 1 || d > 3650) return;
-  const completedThrough = fromCurrent ? Math.min(_getFurthestRead(), TOTAL_AYAHS - 1) : 0;
+  const completedThrough = Math.max(0, _planStartGlobal - 1);
   const remaining = TOTAL_AYAHS - completedThrough;
   const plan = {
     type: 'custom',
@@ -163,6 +166,7 @@ function startCustomPlan(days, fromCurrent) {
     log: {},
   };
   _savePlan(plan);
+  _planStartGlobal = 0;
   closePlanSetup();
   renderHome();
 }
@@ -385,15 +389,17 @@ function updateReaderPlanBar() {
     : 0;
 
   const pct = Math.round((done / total) * 100);
-  const reached = !range.isAhead && done >= total;
+  const reached = done >= total;
 
   bar.style.display = 'flex';
   document.getElementById('reader-plan-fill').style.width = (pct > 0 ? Math.max(3, pct) : 0) + '%';
   document.getElementById('reader-plan-fill').className = 'reader-plan-fill' + (reached ? ' reader-plan-fill-done' : '');
 
   const labelEl = document.getElementById('reader-plan-label');
-  if (reached) {
+  if (reached && !range.isAhead) {
     labelEl.innerHTML = `Target reached &nbsp;<button class="reader-plan-done-btn" onclick="markPlanDoneFromReader()">✓ Mark done</button>`;
+  } else if (reached && range.isAhead) {
+    labelEl.innerHTML = `Read ahead complete! &nbsp;<button class="reader-plan-done-btn" onclick="markReadAheadDoneFromReader()">✓ Mark done</button>`;
   } else if (range.isAhead) {
     labelEl.textContent = `Tomorrow: ${done} / ${total} ayahs`;
   } else {
@@ -403,7 +409,40 @@ function updateReaderPlanBar() {
 
 function markPlanDoneFromReader() {
   markPlanDone();
-  // Short delay gives renderHome's internal setTimeout (350ms) time to complete
+  setTimeout(() => {
+    updateReaderPlanBar();
+    const surah = state.quran?.currentSurah;
+    if (surah) {
+      document.querySelectorAll('.plan-target-marker').forEach(el => el.remove());
+      injectPlanTargetMarker(surah, state.quran?.viewMode === 'verse');
+    }
+  }, 400);
+}
+
+function markReadAheadDone() {
+  const plan = _loadPlan();
+  if (!plan || !isPlanTodayDone(plan)) return;
+  if (!plan.log) plan.log = {};
+  const nextFrom = (plan.completedThrough || 0) + 1;
+  const nextTo = Math.min(nextFrom + plan.ayahsPerDay - 1, TOTAL_AYAHS);
+  const furthest = _getFurthestRead();
+  if (furthest < nextTo) return; // guard: user hasn't actually read through the range
+  plan.completedThrough = Math.max(nextTo, Math.min(furthest, TOTAL_AYAHS));
+  // Log tomorrow as done so it counts toward the streak
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth()+1).padStart(2,'0')}-${String(tomorrow.getDate()).padStart(2,'0')}`;
+  plan.log[tomorrowStr] = true;
+  if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) {
+    plan.completedDate = _todayStr();
+  }
+  _savePlan(plan);
+  haptic(80);
+  setTimeout(renderHome, 350);
+}
+
+function markReadAheadDoneFromReader() {
+  markReadAheadDone();
   setTimeout(() => {
     updateReaderPlanBar();
     const surah = state.quran?.currentSurah;
@@ -428,6 +467,7 @@ function cancelPlan() {
       <div class="plan-cancel-sub">What would you like to do?</div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-top:20px">
         <button class="plan-change-pace-btn" onclick="openChangePaceSheet()">⚡ Change pace</button>
+        <button class="plan-goback-btn" onclick="goBackADay()">↩ Go back a day</button>
         <button class="plan-restart-btn" onclick="confirmRestartPlan()">↺ Restart from beginning</button>
         <button class="plan-cancel-confirm-btn" onclick="confirmCancelPlan()">Remove plan</button>
         <button class="plan-setup-cancel" onclick="closePlanCancelSheet()">Keep my plan</button>
@@ -487,6 +527,28 @@ function confirmRestartPlan() {
     if (lr) { lr.ayah = null; localStorage.setItem('huda_last_read', JSON.stringify(lr)); }
   } catch(e) {}
   haptic(60);
+  renderHome();
+}
+
+function goBackADay() {
+  const plan = _loadPlan();
+  if (!plan) return;
+  const todayStr = _todayStr();
+  const yd = new Date(); yd.setDate(yd.getDate() - 1);
+  const yStr = `${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
+  if (plan.log && plan.log[todayStr]) {
+    delete plan.log[todayStr];
+  } else if (plan.log && plan.log[yStr]) {
+    delete plan.log[yStr];
+  } else {
+    closePlanCancelSheet();
+    return;
+  }
+  plan.completedThrough = Math.max(0, (plan.completedThrough || 0) - plan.ayahsPerDay);
+  if (plan.completedDate) delete plan.completedDate;
+  _savePlan(plan);
+  closePlanCancelSheet();
+  haptic(40);
   renderHome();
 }
 
@@ -593,10 +655,9 @@ function renderPlanCard() {
     const nextFrom = (plan.completedThrough || 0) + 1;
     const hasNext = nextFrom <= TOTAL_AYAHS;
     const nextRef = hasNext ? _globalToRef(nextFrom) : null;
-    const nextLabel = hasNext ? (() => {
-      const nextTo = Math.min(nextFrom + plan.ayahsPerDay - 1, TOTAL_AYAHS);
-      return _rangeLabel(nextRef, _globalToRef(nextTo));
-    })() : null;
+    const nextTo = hasNext ? Math.min(nextFrom + plan.ayahsPerDay - 1, TOTAL_AYAHS) : 0;
+    const nextLabel = hasNext ? _rangeLabel(nextRef, _globalToRef(nextTo)) : null;
+    const readAheadComplete = hasNext && _getFurthestRead() >= nextTo;
     return `
       <div class="plan-card plan-card-today-done">
         <div class="plan-card-header">
@@ -613,7 +674,8 @@ function renderPlanCard() {
           <span class="plan-pct">${pct}% complete · ${daysLeft}d left</span>
           <div style="display:flex;gap:8px;align-items:center">
             <button class="plan-cancel-btn" onclick="event.stopPropagation();cancelPlan()">⋯</button>
-            ${hasNext ? `<button class="plan-read-btn plan-read-ahead-btn" onclick="jumpToPlanReading(true)">Read ahead ›</button>` : ''}
+            ${hasNext && !readAheadComplete ? `<button class="plan-read-btn plan-read-ahead-btn" onclick="jumpToPlanReading(true)">Read ahead ›</button>` : ''}
+            ${readAheadComplete ? `<button class="plan-done-btn" onclick="markReadAheadDone()">✓ Mark done</button>` : ''}
           </div>
         </div>
       </div>`;
@@ -670,26 +732,35 @@ function renderPlanCard() {
 }
 
 function openPlanSetup() {
+  _planStartGlobal = 0;
+  _renderPlanSetupModal();
+}
+
+function _planStartLabel() {
+  if (_planStartGlobal <= 0) return 'Al-Fatihah (1)';
+  const ref = _globalToRef(_planStartGlobal);
+  return `${ref.name} (${ref.surah})`;
+}
+
+function _renderPlanSetupModal() {
   let modal = document.getElementById('plan-setup-modal');
   if (!modal) {
     modal = document.createElement('div');
     modal.id = 'plan-setup-modal';
     document.body.appendChild(modal);
   }
-  const hasFurthest = _getFurthestRead() > 0;
   modal.innerHTML = `
     <div class="plan-setup-overlay" onclick="closePlanSetup()"></div>
     <div class="plan-setup-box">
       <div class="plan-setup-title">📅 Start a Reading Plan</div>
       <div class="plan-setup-sub">Complete the entire Quran at your own pace</div>
-      ${hasFurthest ? `
-        <label class="plan-from-current-row">
-          <input type="checkbox" id="plan-from-current">
-          <span>Start from where I left off</span>
-        </label>` : ''}
+      <div class="plan-start-from-row">
+        <span class="plan-start-from-label">Start from</span>
+        <button class="plan-start-from-btn" onclick="openSurahPickerForPlan()">${_planStartLabel()} ▾</button>
+      </div>
       <div class="plan-setup-options">
         ${PLAN_OPTIONS.map(o => `
-          <div class="plan-option" onclick="startPlan('${o.type}', ${hasFurthest ? "document.getElementById('plan-from-current')?.checked||false" : 'false'})">
+          <div class="plan-option" onclick="startPlan('${o.type}')">
             <div class="plan-option-label">${o.label}</div>
             <div class="plan-option-sub">${o.sub}</div>
           </div>
@@ -704,6 +775,54 @@ function openPlanSetup() {
   modal.style.display = 'block';
 }
 
+function openSurahPickerForPlan() {
+  let modal = document.getElementById('plan-setup-modal');
+  if (!modal) return;
+  modal.innerHTML = `
+    <div class="plan-setup-overlay" onclick="closePlanSetup()"></div>
+    <div class="plan-setup-box">
+      <div class="plan-setup-title">Choose Starting Surah</div>
+      <input class="plan-surah-search" id="plan-surah-search" placeholder="🔍 Search surah..."
+        oninput="_filterPlanSurahs(this.value)" autocomplete="off">
+      <div class="plan-surah-list" id="plan-surah-list">
+        ${_renderPlanSurahList(_allSurahEntries())}
+      </div>
+      <button class="plan-setup-cancel" onclick="_renderPlanSetupModal()">← Back</button>
+    </div>`;
+  modal.style.display = 'block';
+  document.getElementById('plan-surah-search').focus();
+}
+
+function _renderPlanSurahList(entries) {
+  return entries.map(({ s, num }) => {
+    const globalStart = globalAyahNum(num, 1);
+    return `<div class="plan-surah-row" onclick="_selectPlanSurah(${globalStart})">
+      <span class="plan-surah-num">${num}</span>
+      <span class="plan-surah-name">${s[2]}</span>
+      <span class="plan-surah-arabic">${s[1]}</span>
+    </div>`;
+  }).join('');
+}
+
+function _allSurahEntries() {
+  return SURAHS.map((s, i) => ({ s, num: i + 1 }));
+}
+
+function _filterPlanSurahs(q) {
+  const list = document.getElementById('plan-surah-list');
+  if (!list) return;
+  const all = _allSurahEntries();
+  const filtered = !q.trim() ? all : all.filter(({ s }) =>
+    s[2].toLowerCase().includes(q.toLowerCase()) || s[1].includes(q)
+  );
+  list.innerHTML = _renderPlanSurahList(filtered);
+}
+
+function _selectPlanSurah(globalAyah) {
+  _planStartGlobal = globalAyah;
+  _renderPlanSetupModal();
+}
+
 function openCustomPlanSetup(isChangePace) {
   let modal = document.getElementById('plan-setup-modal');
   if (!modal) {
@@ -711,29 +830,25 @@ function openCustomPlanSetup(isChangePace) {
     modal.id = 'plan-setup-modal';
     document.body.appendChild(modal);
   }
-  const hasFurthest = !isChangePace && _getFurthestRead() > 0;
   const submitFn = isChangePace
     ? `changeCustomPlan(document.getElementById('plan-custom-days').value)`
-    : `startCustomPlan(document.getElementById('plan-custom-days').value, ${hasFurthest ? "document.getElementById('plan-from-current')?.checked||false" : 'false'})`;
+    : `startCustomPlan(document.getElementById('plan-custom-days').value)`;
   modal.innerHTML = `
     <div class="plan-setup-overlay" onclick="closePlanSetup()"></div>
     <div class="plan-setup-box">
       <div class="plan-setup-title">📅 Custom Plan</div>
       <div class="plan-setup-sub">How many days to complete the Quran?</div>
+      ${!isChangePace ? `<div class="plan-start-from-row"><span class="plan-start-from-label">Start from</span><span style="font-size:13px;font-weight:600;color:#059669">${_planStartLabel()}</span></div>` : ''}
       <input type="number" id="plan-custom-days" class="plan-custom-input"
         placeholder="e.g. 60" min="1" max="3650">
-      ${hasFurthest ? `
-        <label class="plan-from-current-row" style="margin-bottom:12px">
-          <input type="checkbox" id="plan-from-current">
-          <span>Start from where I left off</span>
-        </label>` : ''}
       <button class="plan-read-btn" style="width:100%;margin-bottom:8px" onclick="${submitFn}">Start Plan</button>
-      <button class="plan-setup-cancel" onclick="closePlanSetup()">Cancel</button>
+      <button class="plan-setup-cancel" onclick="${isChangePace ? 'closePlanSetup()' : '_renderPlanSetupModal()'}">← Back</button>
     </div>`;
   modal.style.display = 'block';
 }
 
 function closePlanSetup() {
+  _planStartGlobal = 0;
   const modal = document.getElementById('plan-setup-modal');
   if (modal) modal.style.display = 'none';
 }

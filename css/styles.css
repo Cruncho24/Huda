@@ -4031,6 +4031,8 @@ html.dark .plan-next-label { color: #64748b; }
 html.dark .plan-cancel-box { background: #1e293b; }
 html.dark .plan-cancel-title { color: #f1f5f9; }
 html.dark .plan-cancel-sub { color: #64748b; }
+html.dark .plan-goback-btn { background: #1e293b; border-color: #334155; color: #94a3b8; }
+html.dark .plan-goback-btn:active { background: #0f172a; }
 html.dark .plan-restart-btn { background: #0f2d1e; border-color: #065f46; color: #34d399; }
 html.dark .plan-restart-btn:active { background: #064e3b; }
 html.dark .plan-cancel-confirm-btn { background: #2d0f0f; border-color: #7f1d1d; color: #f87171; }
@@ -4296,6 +4298,19 @@ html.dark .dhikr-week-col.today .dhikr-week-dot { outline-color: #34d399; }
 }
 .plan-cancel-title { font-size: 18px; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
 .plan-cancel-sub { font-size: 13px; color: #64748b; }
+.plan-goback-btn {
+  width: 100%;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.plan-goback-btn:active { background: #e2e8f0; }
 .plan-restart-btn {
   width: 100%;
   padding: 14px;
@@ -4404,20 +4419,60 @@ html.dark .dhikr-week-col.today .dhikr-week-dot { outline-color: #34d399; }
 .plan-change-pace-btn:active { background: #d1fae5; }
 
 /* ── Plan: "start from current" checkbox row ─────────────── */
-.plan-from-current-row {
+.plan-start-from-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: space-between;
   font-size: 13px;
   color: #475569;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  gap: 8px;
+}
+.plan-start-from-label { font-weight: 600; color: #334155; }
+.plan-start-from-btn {
+  background: #f1f5f9;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #059669;
   cursor: pointer;
+  flex-shrink: 0;
 }
-.plan-from-current-row input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  accent-color: #059669;
+.plan-start-from-btn:active { background: #e2e8f0; }
+.plan-surah-search {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+  outline: none;
 }
+.plan-surah-search:focus { border-color: #059669; }
+.plan-surah-list {
+  max-height: 320px;
+  overflow-y: auto;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  margin-bottom: 12px;
+}
+.plan-surah-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.15s;
+}
+.plan-surah-row:last-child { border-bottom: none; }
+.plan-surah-row:active { background: #f0fdf4; }
+.plan-surah-num { font-size: 12px; color: #94a3b8; width: 24px; flex-shrink: 0; }
+.plan-surah-name { font-size: 14px; font-weight: 600; flex: 1; }
+.plan-surah-arabic { font-size: 16px; color: #059669; direction: rtl; }
 
 /* ── Plan: custom days input ─────────────────────────────── */
 .plan-custom-input {
@@ -4442,7 +4497,14 @@ html.dark .plan-week-today .plan-week-name { color: #34d399; }
 html.dark .plan-catchup-btn { background: #2d2106; border-color: #92400e; color: #fbbf24; }
 html.dark .plan-catchup-btn:active { background: #3d2e0a; }
 html.dark .plan-change-pace-btn { background: #0f2d1e; border-color: #065f46; color: #34d399; }
-html.dark .plan-from-current-row { color: #94a3b8; }
+html.dark .plan-start-from-label { color: #94a3b8; }
+html.dark .plan-start-from-btn { background: #1e293b; border-color: #334155; color: #34d399; }
+html.dark .plan-surah-search { background: #0f172a; border-color: #334155; color: #f1f5f9; }
+html.dark .plan-surah-list { border-color: #334155; }
+html.dark .plan-surah-row { border-bottom-color: #1e293b; }
+html.dark .plan-surah-row:active { background: #0f2d1e; }
+html.dark .plan-surah-name { color: #f1f5f9; }
+html.dark .plan-surah-arabic { color: #34d399; }
 html.dark .plan-custom-input { background: #0f172a; border-color: #334155; color: #f1f5f9; }
 html.dark .plan-custom-input:focus { border-color: #059669; }
 
