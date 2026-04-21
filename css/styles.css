@@ -4862,6 +4862,7 @@ html.dark .plan-custom-input:focus { border-color: #059669; }
 /* ── Dark mode: plan detail ──────────────────────────────── */
 html.dark .pd-today { background: #1e293b; box-shadow: none; }
 html.dark .pd-today-range { color: #f1f5f9; }
+html.dark .pd-today-sub { color: #94a3b8; }
 html.dark .pd-today-meta { color: #64748b; }
 html.dark .pd-today-bar-wrap { background: #334155; }
 html.dark .pd-done-btn { border-color: #059669; color: #34d399; }

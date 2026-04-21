@@ -329,7 +329,7 @@ function changeCustomPlan(days) {
 }
 
 // Skip ahead to today's expected position when behind schedule
-function catchUpPlan() {
+function catchUpPlan(fromDetail = false) {
   const plan = _loadPlan();
   if (!plan) return;
   if (!plan.log) plan.log = {};
@@ -350,7 +350,7 @@ function catchUpPlan() {
   }
   _savePlan(plan);
   haptic(40);
-  renderHome();
+  if (fromDetail) { setTimeout(openPlanDetail, 150); } else { renderHome(); }
 }
 
 function _insertMarker(html, ayahId, isVerse, position = 'afterend') {
@@ -566,7 +566,7 @@ function markReadAheadDoneFromReader() {
   }, 400);
 }
 
-function redistributePlan() {
+function redistributePlan(fromDetail = false) {
   const plan = _loadPlan();
   if (!plan) return;
   const schedule = getPlanScheduleStatus(plan);
@@ -576,8 +576,8 @@ function redistributePlan() {
   plan.ayahsPerDay = Math.ceil(remaining / newDays);
   plan.startDate = _todayStr();
   _savePlan(plan);
-  renderHome();
   showToast('Plan extended — no days skipped ✓');
+  if (fromDetail) { setTimeout(openPlanDetail, 150); } else { renderHome(); }
 }
 
 function openPlanDetail() {
@@ -594,6 +594,7 @@ function openPlanDetail() {
   const juzProgress = _getJuzProgress(plan.completedThrough || 0);
   const projectedDate = _getProjectedDate(plan);
   const totalDaysLogged = Object.keys(plan.log || {}).filter(k => (plan.log||{})[k] === true).length;
+  const daysLeftDisplay = pct >= 100 ? '—' : daysLeft + 'd';
   const _rl = (f, t) => f.surah === t.surah
     ? `${f.name} ${f.surah}:${f.ayah}–${t.ayah}`
     : `${f.name} ${f.surah}:${f.ayah} → ${t.name} ${t.surah}:${t.ayah}`;
@@ -653,7 +654,7 @@ function openPlanDetail() {
         <div class="pd-stat"><div class="pd-stat-value">${longestStreak}</div><div class="pd-stat-label">Best streak</div></div>
         <div class="pd-stat"><div class="pd-stat-value">${totalDaysLogged}</div><div class="pd-stat-label">Days done</div></div>
         <div class="pd-stat"><div class="pd-stat-value">${pct}%</div><div class="pd-stat-label">Quran done</div></div>
-        <div class="pd-stat"><div class="pd-stat-value">${daysLeft}d</div><div class="pd-stat-label">Days left</div></div>
+        <div class="pd-stat"><div class="pd-stat-value">${daysLeftDisplay}</div><div class="pd-stat-label">Days left</div></div>
         <div class="pd-stat"><div class="pd-stat-value pd-stat-date">${projectedDate}</div><div class="pd-stat-label">Est. finish</div></div>
       </div>
     </div>`;
@@ -669,8 +670,8 @@ function openPlanDetail() {
       <div class="pd-section-label">Settings</div>
       <div class="pd-settings-list">
         ${schedule.status === 'behind' ? `
-          <button class="pd-setting-btn" onclick="catchUpPlan()">⚡ Skip to today's position</button>
-          <button class="pd-setting-btn" onclick="redistributePlan()">📅 Extend plan — absorb missed days</button>
+          <button class="pd-setting-btn" onclick="catchUpPlan(true)">⚡ Skip to today's position</button>
+          <button class="pd-setting-btn" onclick="redistributePlan(true)">📅 Extend plan — absorb missed days</button>
         ` : `
           <button class="pd-setting-btn" onclick="openChangePaceSheet()">⚡ Change pace</button>
         `}
@@ -688,7 +689,7 @@ function openPlanDetail() {
         <div style="font-size:11px;opacity:0.8">Day ${dayNum} · ${plan.label}</div>
       </div>
     </div>
-    <div style="overflow-y:auto;padding-bottom:80px">
+    <div style="padding-bottom:80px">
       ${todaySec}${juzSec}${statsSec}${heatmapSec}${settingsSec}
     </div>`;
 }
