@@ -614,7 +614,7 @@ function openPlanDetail() {
           <div class="pd-today-title">Today's reading complete</div>
           ${hasNext ? `<div class="pd-today-sub">Tomorrow: ${_rl(nextRef, nextRef2)}</div>` : '<div class="pd-today-sub">Quran complete!</div>'}
         </div>
-        ${hasNext && !raComplete ? `<button class="pd-read-btn" style="flex:0;white-space:nowrap;padding:8px 14px;font-size:13px" onclick="jumpToPlanReading(true)">Read ahead ›</button>` : ''}
+        ${hasNext ? `<button class="pd-read-btn" style="flex:0;white-space:nowrap;padding:8px 14px;font-size:13px" onclick="jumpToPlanReading(true)">Read ahead ›</button>` : ''}
       </div>
       ${raComplete ? `<div style="padding:0 16px 4px"><button class="pd-done-btn" style="width:100%;padding:11px" onclick="markReadAheadDoneNoNav();setTimeout(openPlanDetail,150)">✓ Mark read-ahead done</button></div>` : ''}`;
   } else {
@@ -935,7 +935,7 @@ function renderPlanCard() {
         <div class="plan-footer-row" onclick="event.stopPropagation()">
           <span class="plan-pct">${pct}% complete · ${daysLeft}d left</span>
           <div style="display:flex;gap:8px;align-items:center">
-            ${hasNext && !readAheadComplete ? `<button class="plan-read-btn plan-read-ahead-btn" onclick="jumpToPlanReading(true)">Read ahead ›</button>` : ''}
+            ${hasNext ? `<button class="plan-read-btn plan-read-ahead-btn" onclick="jumpToPlanReading(true)">Read ahead ›</button>` : ''}
             ${readAheadComplete ? `<button class="plan-done-btn" onclick="markReadAheadDone()">✓ Mark done</button>` : ''}
           </div>
         </div>
