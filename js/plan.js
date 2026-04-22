@@ -365,8 +365,9 @@ function _insertMarker(html, ayahId, isVerse, position = 'afterend') {
     // of the preceding page, not sandwiched between the divider and the text.
     if (position === 'beforebegin') {
       const block = wrap.closest('.mushaf-page-block');
-      const isFirstInBlock = wrap === block?.querySelector('.mushaf-ayah-wrap');
-      if (isFirstInBlock && block) { block.insertAdjacentHTML('beforebegin', html); return; }
+      if (block && wrap === block.querySelector('.mushaf-ayah-wrap')) {
+        block.insertAdjacentHTML('beforebegin', html); return;
+      }
     }
     wrap.insertAdjacentHTML(position, html);
   }
@@ -780,11 +781,11 @@ function confirmRestartPlan() {
 function goBackADay() {
   const plan = _loadPlan();
   if (!plan) return;
-  const todayStr = _todayStr();
-  const yd = new Date(); yd.setDate(yd.getDate() - 1);
-  const yStr = `${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
-  const td = new Date(); td.setDate(td.getDate() + 1);
-  const tmrStr = `${td.getFullYear()}-${String(td.getMonth()+1).padStart(2,'0')}-${String(td.getDate()).padStart(2,'0')}`;
+  const now = new Date();
+  const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const todayStr = fmt(now);
+  const yd = new Date(now); yd.setDate(now.getDate() - 1); const yStr = fmt(yd);
+  const td = new Date(now); td.setDate(now.getDate() + 1); const tmrStr = fmt(td);
   // Undo one entry at a time — read-ahead (tomorrow) takes priority over today,
   // today takes priority over yesterday. Each click = exactly one day back.
   let dayToUndo = null;
