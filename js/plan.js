@@ -777,9 +777,13 @@ function goBackADay() {
   const todayStr = _todayStr();
   const yd = new Date(); yd.setDate(yd.getDate() - 1);
   const yStr = `${yd.getFullYear()}-${String(yd.getMonth()+1).padStart(2,'0')}-${String(yd.getDate()).padStart(2,'0')}`;
-  // Find which day to undo — prefer today, fall back to yesterday
+  const td = new Date(); td.setDate(td.getDate() + 1);
+  const tmrStr = `${td.getFullYear()}-${String(td.getMonth()+1).padStart(2,'0')}-${String(td.getDate()).padStart(2,'0')}`;
+  // Undo one entry at a time — read-ahead (tomorrow) takes priority over today,
+  // today takes priority over yesterday. Each click = exactly one day back.
   let dayToUndo = null;
-  if (plan.log && plan.log[todayStr]) dayToUndo = todayStr;
+  if (plan.log && plan.log[tmrStr]) dayToUndo = tmrStr;
+  else if (plan.log && plan.log[todayStr]) dayToUndo = todayStr;
   else if (plan.log && plan.log[yStr]) dayToUndo = yStr;
   if (!dayToUndo) {
     closePlanCancelSheet();
@@ -787,13 +791,6 @@ function goBackADay() {
     return;
   }
   delete plan.log[dayToUndo];
-  // Also clear any read-ahead (tomorrow) log entry so it doesn't become a ghost
-  const td = new Date(); td.setDate(td.getDate() + 1);
-  const tmrStr = `${td.getFullYear()}-${String(td.getMonth()+1).padStart(2,'0')}-${String(td.getDate()).padStart(2,'0')}`;
-  if (plan.log && plan.log[tmrStr]) {
-    delete plan.log[tmrStr];
-    if (plan.logPrev) delete plan.logPrev[tmrStr];
-  }
   // Restore completedThrough to what it was before this day was marked done.
   // logPrev stores the exact pre-mark-done value; fall back to flat decrement for old data.
   if (plan.logPrev && plan.logPrev[dayToUndo] !== undefined) {
