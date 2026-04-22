@@ -307,7 +307,7 @@ async function openSurah(n, targetAyah = null, { keepAudio = false } = {}) {
             // inserted inline), scroll to it so the badge is visible at the top.
             const scrollTarget = wrap?.previousElementSibling?.classList?.contains('plan-target-marker')
               ? wrap.previousElementSibling
-              : wrap?.closest('.mushaf-page-block');
+              : wrap;
             scrollTarget?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           } else {
             const el = document.getElementById(`ayah-${targetAyah}`);
