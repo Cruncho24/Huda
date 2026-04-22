@@ -144,7 +144,10 @@ function _renderHeatmap(plan) {
 
 function getPlanTodayRange(plan) {
   const from = (plan.completedThrough || 0) + 1;
-  const to   = Math.min(from + plan.ayahsPerDay - 1, TOTAL_AYAHS);
+  // currentDayEnd is set when pace changes mid-day so today's target doesn't shift
+  const to = (plan.currentDayEnd !== undefined && plan.currentDayEnd >= from)
+    ? plan.currentDayEnd
+    : Math.min(from + plan.ayahsPerDay - 1, TOTAL_AYAHS);
   return { fromGlobal: from, toGlobal: to, from: _globalToRef(from), to: _globalToRef(to) };
 }
 
@@ -249,9 +252,9 @@ function markPlanDone() {
   if (!plan.log) plan.log = {};
   if (!plan.logPrev) plan.logPrev = {};
   const range = getPlanTodayRange(plan);
-  // Snapshot current completedThrough so goBackADay can restore it exactly
   plan.logPrev[_todayStr()] = plan.completedThrough || 0;
   plan.completedThrough = range.toGlobal;
+  delete plan.currentDayEnd;
   plan.log[_todayStr()] = true;
   if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) {
     plan.completedDate = _todayStr();
@@ -269,6 +272,7 @@ function markPlanDoneNoNav() {
   const range = getPlanTodayRange(plan);
   plan.logPrev[_todayStr()] = plan.completedThrough || 0;
   plan.completedThrough = range.toGlobal;
+  delete plan.currentDayEnd;
   plan.log[_todayStr()] = true;
   if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) plan.completedDate = _todayStr();
   _savePlan(plan);
@@ -303,14 +307,7 @@ function changePlan(type) {
   if (!opt) return;
   const plan = _loadPlan();
   if (!plan) return;
-  const remaining = TOTAL_AYAHS - (plan.completedThrough || 0);
-  plan.type = type;
-  plan.label = opt.label;
-  plan.ayahsPerDay = Math.ceil(remaining / opt.days);
-  plan.startDate = _todayStr();
-  _savePlan(plan);
-  closePlanSetup();
-  renderHome();
+  _applyPaceChange(plan, opt.days, type, opt.label);
 }
 
 function changeCustomPlan(days) {
@@ -318,11 +315,28 @@ function changeCustomPlan(days) {
   if (!d || d < 1 || d > 3650) return;
   const plan = _loadPlan();
   if (!plan) return;
-  const remaining = TOTAL_AYAHS - (plan.completedThrough || 0);
-  plan.type = 'custom';
-  plan.label = `${d} days`;
-  plan.ayahsPerDay = Math.ceil(remaining / d);
-  plan.startDate = _todayStr();
+  _applyPaceChange(plan, d, 'custom', `${d} days`);
+}
+
+function _applyPaceChange(plan, requestedDays, type, label) {
+  let remaining, days;
+  if (!isPlanTodayDone(plan)) {
+    // Lock today's target at the old pace — new pace applies from tomorrow
+    const todayEnd = Math.min(
+      (plan.completedThrough || 0) + (plan.ayahsPerDay || 1), TOTAL_AYAHS
+    );
+    plan.currentDayEnd = todayEnd;
+    remaining = TOTAL_AYAHS - todayEnd;
+    days = Math.max(1, requestedDays - 1);
+  } else {
+    delete plan.currentDayEnd;
+    remaining = TOTAL_AYAHS - (plan.completedThrough || 0);
+    days = requestedDays;
+  }
+  plan.type = type;
+  plan.label = label;
+  plan.ayahsPerDay = Math.ceil(remaining / days);
+  // startDate intentionally not reset — keeps heatmap and day numbers intact
   _savePlan(plan);
   closePlanSetup();
   renderHome();
@@ -337,6 +351,7 @@ function catchUpPlan(fromDetail = false) {
   const expected = Math.min(Math.max(0, (dayNum - 1) * plan.ayahsPerDay), TOTAL_AYAHS);
   if (expected <= (plan.completedThrough || 0)) return;
   plan.completedThrough = expected;
+  delete plan.currentDayEnd;
   // Fill in all skipped days so the streak is preserved after catching up
   const start = new Date(plan.startDate + 'T12:00:00');
   for (let d = 0; d < dayNum; d++) {
@@ -464,6 +479,7 @@ function keepReadingPlan() {
     if (!plan.logPrev) plan.logPrev = {};
     plan.logPrev[_todayStr()] = plan.completedThrough || 0;
     plan.completedThrough = range.toGlobal;
+    delete plan.currentDayEnd;
     plan.log[_todayStr()] = true;
     if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) {
       plan.completedDate = _todayStr();
