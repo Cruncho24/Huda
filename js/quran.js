@@ -303,7 +303,13 @@ async function openSurah(n, targetAyah = null, { keepAudio = false } = {}) {
         setTimeout(() => {
           if (state.quran.viewMode === 'page') {
             const wrap = document.querySelector(`#mushaf-page .mushaf-ayah-wrap[data-ayah="${targetAyah}"]`);
-            wrap?.closest('.mushaf-page-block')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const block = wrap?.closest('.mushaf-page-block');
+            // If a plan marker sits just before this page-block, scroll to it so
+            // "Today/Tomorrow starts here" is visible at the top, not cut off above.
+            const scrollTarget = block?.previousElementSibling?.classList?.contains('plan-target-marker')
+              ? block.previousElementSibling
+              : block;
+            scrollTarget?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           } else {
             const el = document.getElementById(`ayah-${targetAyah}`);
             if (el) {
