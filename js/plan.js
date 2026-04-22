@@ -360,10 +360,9 @@ function _insertMarker(html, ayahId, isVerse, position = 'afterend') {
   } else {
     const wrap = document.querySelector(`#mushaf-page .mushaf-ayah-wrap[data-ayah="${ayahId}"]`);
     if (!wrap) return;
-    // Always insert at page-block level — inserting a div inline inside
-    // flowing Arabic <span> elements breaks the text layout
-    const block = wrap.closest('.mushaf-page-block');
-    if (block) block.insertAdjacentHTML(position, html);
+    // Insert directly on the ayah-wrap span — a block <div> sibling among
+    // inline spans forces a flow-break at exactly the right ayah.
+    wrap.insertAdjacentHTML(position, html);
   }
 }
 
