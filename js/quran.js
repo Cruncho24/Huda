@@ -303,11 +303,15 @@ async function openSurah(n, targetAyah = null, { keepAudio = false } = {}) {
         setTimeout(() => {
           if (state.quran.viewMode === 'page') {
             const wrap = document.querySelector(`#mushaf-page .mushaf-ayah-wrap[data-ayah="${targetAyah}"]`);
-            // If a plan "starts here" marker sits just before this ayah-wrap (now
-            // inserted inline), scroll to it so the badge is visible at the top.
-            const scrollTarget = wrap?.previousElementSibling?.classList?.contains('plan-target-marker')
-              ? wrap.previousElementSibling
-              : wrap;
+            const block = wrap?.closest('.mushaf-page-block');
+            // Marker may be: (a) before the page-block (first ayah of block), or
+            // (b) inline before the ayah-wrap (mid-page). Check both.
+            const scrollTarget =
+              block?.previousElementSibling?.classList?.contains('plan-target-marker')
+                ? block.previousElementSibling
+                : wrap?.previousElementSibling?.classList?.contains('plan-target-marker')
+                  ? wrap.previousElementSibling
+                  : wrap;
             scrollTarget?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           } else {
             const el = document.getElementById(`ayah-${targetAyah}`);

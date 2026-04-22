@@ -360,8 +360,14 @@ function _insertMarker(html, ayahId, isVerse, position = 'afterend') {
   } else {
     const wrap = document.querySelector(`#mushaf-page .mushaf-ayah-wrap[data-ayah="${ayahId}"]`);
     if (!wrap) return;
-    // Insert directly on the ayah-wrap span — a block <div> sibling among
-    // inline spans forces a flow-break at exactly the right ayah.
+    // For a "beforebegin" (starts-here) marker on the first ayah of a page-block,
+    // insert before the page-block itself so the marker sits above the page divider
+    // of the preceding page, not sandwiched between the divider and the text.
+    if (position === 'beforebegin') {
+      const block = wrap.closest('.mushaf-page-block');
+      const isFirstInBlock = wrap === block?.querySelector('.mushaf-ayah-wrap');
+      if (isFirstInBlock && block) { block.insertAdjacentHTML('beforebegin', html); return; }
+    }
     wrap.insertAdjacentHTML(position, html);
   }
 }
