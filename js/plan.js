@@ -5,11 +5,15 @@
    {
      type: '30' | '90' | '365' | 'custom',
      label: '30 days',
-     startDate: 'YYYY-MM-DD',
+     startDate: 'YYYY-MM-DD',     // never reset mid-plan; anchors heatmap + day numbers
      ayahsPerDay: number,
-     completedThrough: number,  // cumulative ayahs marked done (0–6236)
-     log: { 'YYYY-MM-DD': true },  // one entry per day marked complete
-     completedDate: 'YYYY-MM-DD',  // set when Quran is finished
+     completedThrough: number,    // cumulative ayahs marked done (0–6236)
+     log: { 'YYYY-MM-DD': true }, // one entry per day marked complete
+     logPrev: { 'YYYY-MM-DD': completedThrough_before_mark }, // snapshot for goBackADay undo
+     currentDayEnd?: number,      // set by _applyPaceChange when today not yet done;
+                                  // locks today's toGlobal so mid-day pace change doesn't
+                                  // shift the mark-done threshold. Cleared on any mark-done.
+     completedDate: 'YYYY-MM-DD', // set when Quran is finished
    }
 
    huda_furthest_read (localStorage, number): highest global ayah
@@ -294,6 +298,7 @@ function markReadAheadDoneNoNav() {
   if (plan.log[tomorrowStr]) return;
   plan.logPrev[tomorrowStr] = plan.completedThrough || 0;
   plan.completedThrough = nextTo;
+  delete plan.currentDayEnd;
   plan.log[tomorrowStr] = true;
   if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) plan.completedDate = _todayStr();
   _savePlan(plan);
@@ -321,12 +326,14 @@ function changeCustomPlan(days) {
 function _applyPaceChange(plan, requestedDays, type, label) {
   let remaining, days;
   if (!isPlanTodayDone(plan)) {
-    // Lock today's target at the old pace — new pace applies from tomorrow
-    const todayEnd = Math.min(
-      (plan.completedThrough || 0) + (plan.ayahsPerDay || 1), TOTAL_AYAHS
-    );
-    plan.currentDayEnd = todayEnd;
-    remaining = TOTAL_AYAHS - todayEnd;
+    // Lock today's target at the original pace — preserve existing lock on multiple
+    // same-day changes so the target doesn't drift with each recalculation.
+    if (plan.currentDayEnd === undefined) {
+      plan.currentDayEnd = Math.min(
+        (plan.completedThrough || 0) + (plan.ayahsPerDay || 1), TOTAL_AYAHS
+      );
+    }
+    remaining = TOTAL_AYAHS - plan.currentDayEnd;
     days = Math.max(1, requestedDays - 1);
   } else {
     delete plan.currentDayEnd;
@@ -566,6 +573,7 @@ function markReadAheadDone() {
   if (plan.log[tomorrowStr]) return; // spam guard: already marked for tomorrow
   plan.logPrev[tomorrowStr] = plan.completedThrough || 0;
   plan.completedThrough = nextTo;
+  delete plan.currentDayEnd;
   // Log tomorrow as done so it counts toward the streak
   plan.log[tomorrowStr] = true;
   if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) {
@@ -596,7 +604,8 @@ function redistributePlan(fromDetail = false) {
   const remaining = TOTAL_AYAHS - (plan.completedThrough || 0);
   const newDays = getPlanDaysRemaining(plan) + schedule.daysBehind;
   plan.ayahsPerDay = Math.ceil(remaining / newDays);
-  plan.startDate = _todayStr();
+  delete plan.currentDayEnd;
+  // startDate intentionally not reset — keeps heatmap and day numbers intact
   _savePlan(plan);
   showToast('Plan extended — no days skipped ✓');
   if (fromDetail) { setTimeout(openPlanDetail, 150); } else { renderHome(); }
@@ -822,6 +831,7 @@ function goBackADay() {
   } else {
     plan.completedThrough = Math.max(0, (plan.completedThrough || 0) - plan.ayahsPerDay);
   }
+  delete plan.currentDayEnd;
   if (plan.completedDate) delete plan.completedDate;
   _savePlan(plan);
   closePlanCancelSheet();
