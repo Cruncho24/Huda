@@ -280,9 +280,29 @@ document.addEventListener('DOMContentLoaded', () => {
   // When returning to the app while Quran is playing (or paused mid-surah),
   // navigate to the exact ayah so user can see + control what's playing.
   // Guard: only navigate after 5s hidden to avoid interrupting quick app switches.
+  // Day-change detection — re-renders home when the calendar date rolls over,
+  // so the plan card updates to the new day without requiring an app restart.
+  const _todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; };
+  let _lastRenderedDay = _todayKey();
+  function _scheduleMidnightRefresh() {
+    const now = new Date();
+    const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now + 500;
+    setTimeout(() => {
+      _lastRenderedDay = _todayKey();
+      if (typeof renderHome === 'function') renderHome();
+      _scheduleMidnightRefresh();
+    }, msUntilMidnight);
+  }
+  _scheduleMidnightRefresh();
+
   let _hiddenAt = 0;
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') { _hiddenAt = Date.now(); return; }
+    // If the calendar day changed while the app was in the background, refresh home
+    if (_todayKey() !== _lastRenderedDay) {
+      _lastRenderedDay = _todayKey();
+      if (typeof renderHome === 'function') renderHome();
+    }
     if (Date.now() - _hiddenAt < 5000) return; // brief switch — don't navigate
 
     if (!state.audio.playingSurah) return; // nothing ever played — nothing to surface
