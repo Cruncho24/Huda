@@ -1503,6 +1503,7 @@ function renderSurahContent(n, arData, enData) {
         </button>
         <button class="ayah-card-btn tafsir-btn" id="tafsir-btn-${n}-${a.numberInSurah}"
           onclick="toggleTafsir(${n},${a.numberInSurah})">Tafsir</button>
+        <button class="ayah-card-btn explain-btn" onclick="showExplanationSheet(${a.number},${n},${a.numberInSurah})" title="Explain">✦</button>
         <button class="ayah-card-btn" onclick="shareAyah(${n},${a.numberInSurah})" aria-label="Share">📤</button>
       </div>
     </div>
@@ -2144,14 +2145,11 @@ async function showExplanationSheet(globalNum, surahNum, ayahNum) {
     `;
   } catch(e) {
     if (callId !== _explainCallId) return;
-    let isRateLimited = false;
+    let msg = 'Unable to load explanation. Please check your connection and try again.';
     try {
       const body = typeof e?.context?.body === 'string' ? JSON.parse(e.context.body) : e?.context?.body;
-      isRateLimited = body?.error === 'rate_limited';
+      if (body?.message) msg = body.message;
     } catch (_) {}
-    const msg = isRateLimited
-      ? 'Daily limit reached. Sign in for more explanations, or try again tomorrow.'
-      : 'Unable to load explanation. Please check your connection and try again.';
     document.getElementById('explain-body').innerHTML = `<div class="explain-error">${esc(msg)}</div>`;
   }
 }

@@ -1726,6 +1726,20 @@ html.dark .mword.active {
 }
 .ak-play-btn:active { background: var(--emerald-dark); }
 html.dark .ak-play-btn { background: var(--emerald-dark); }
+.ak-explain-btn {
+  background: transparent;
+  border: 1.5px solid #ddd6fe;
+  color: #7c3aed;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.ak-explain-btn:active { background: #f5f3ff; }
+html.dark .ak-explain-btn { color: #a78bfa; border-color: #4c1d95; }
+html.dark .ak-explain-btn:active { background: #1e1040; }
 .ak-loop-btn {
   background: transparent;
   border: 1.5px solid var(--emerald);
@@ -1882,7 +1896,7 @@ html.dark .ayah-popup-explain:active { background: #1e1040; }
   margin-bottom: 4px;
 }
 .explain-arabic {
-  font-family: 'Amiri Quran', 'UthmanicHafs1Ver13', serif;
+  font-family: 'UthmanicHafs', 'Amiri Quran', serif;
   font-size: 22px;
   direction: rtl;
   line-height: 1.7;
@@ -1931,7 +1945,7 @@ html.dark .ayah-popup-explain:active { background: #1e1040; }
 }
 .explain-word-row:last-child { border-bottom: none; }
 .explain-word-ar {
-  font-family: 'Amiri Quran', serif;
+  font-family: 'UthmanicHafs', 'Amiri Quran', serif;
   font-size: 20px;
   color: var(--gray-800);
   flex-shrink: 0;
@@ -3528,6 +3542,10 @@ html.dark .settings-value-off { color: #f87171; }
   color: #059669;
 }
 .ayah-card-btn.bookmarked { background: #d1fae5; }
+.ayah-card-btn.explain-btn { background: #f5f3ff; color: #7c3aed; }
+.ayah-card-btn.explain-btn:active { background: #ede9fe; }
+html.dark .ayah-card-btn.explain-btn { background: #1e1040; color: #a78bfa; }
+html.dark .ayah-card-btn.explain-btn:active { background: #2e1065; }
 .ayah-arabic-card {
   font-size: 22px;
   text-align: right;
