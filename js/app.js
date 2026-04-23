@@ -282,14 +282,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // Guard: only navigate after 5s hidden to avoid interrupting quick app switches.
   // Day-change detection — re-renders home when the calendar date rolls over,
   // so the plan card updates to the new day without requiring an app restart.
-  const _todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; };
+  const _todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`; };
   let _lastRenderedDay = _todayKey();
   function _scheduleMidnightRefresh() {
     const now = new Date();
     const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now + 500;
     setTimeout(() => {
-      _lastRenderedDay = _todayKey();
-      if (typeof renderHome === 'function') renderHome();
+      const newDay = _todayKey();
+      if (newDay !== _lastRenderedDay) {
+        _lastRenderedDay = newDay;
+        if (typeof renderHome === 'function') renderHome();
+      } else {
+        _lastRenderedDay = newDay; // keep in sync even if visibility guard already ran
+      }
       _scheduleMidnightRefresh();
     }, msUntilMidnight);
   }
