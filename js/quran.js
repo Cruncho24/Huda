@@ -1718,10 +1718,11 @@ function showAyahPopup(globalNum, surahNum, ayahNum, anchorEl) {
     <div class="ayah-popup-label">Ayah ${ayahNum}</div>
     <button class="ayah-popup-play" onclick="confirmPlayMushafAyah()">▶&nbsp; Play from here</button>
     <button class="ayah-popup-study" onclick="confirmViewMushafAyah()">☰&nbsp; View translation</button>
+    <button class="ayah-popup-explain" onclick="showExplanationSheet(${globalNum},${surahNum},${ayahNum})">✦&nbsp; Explain</button>
   `;
   popup.style.display = 'block';
   const rect = anchorEl.getBoundingClientRect();
-  const pw = 180, ph = 110;
+  const pw = 180, ph = 140;
   let top = rect.top - ph - 10;
   let left = rect.left + rect.width / 2 - pw / 2;
   if (top < 8) top = rect.bottom + 10;
@@ -2048,5 +2049,118 @@ function resetAllDhikr() {
   state.dhikrCounts = {};
   saveDhikr();
   renderDhikr();
+}
+
+// ── Ayah Explanation Sheet ────────────────────────────────────
+
+let _explainCallId = 0;
+let _explainHideTimer = null;
+
+async function showExplanationSheet(globalNum, surahNum, ayahNum) {
+  hideAyahPopup();
+  if (_explainHideTimer) { clearTimeout(_explainHideTimer); _explainHideTimer = null; }
+
+  const callId = ++_explainCallId;
+
+  const cache = state.quran.cache[surahNum];
+  const arAyah = cache?.arData?.ayahs?.find(a => a.numberInSurah === ayahNum);
+  const enAyah = cache?.enData?.ayahs?.find(a => a.numberInSurah === ayahNum);
+  const surahInfo = SURAHS[surahNum - 1];
+  const surahName = surahInfo?.[2] || `Surah ${surahNum}`;
+
+  let sheet = document.getElementById('explain-sheet');
+  if (!sheet) {
+    sheet = document.createElement('div');
+    sheet.id = 'explain-sheet';
+    document.body.appendChild(sheet);
+  }
+  sheet.innerHTML = `
+    <div class="explain-overlay" onclick="hideExplanationSheet()"></div>
+    <div class="explain-box" id="explain-box">
+      <div class="explain-drag-handle"></div>
+      <div class="explain-header">
+        <div>
+          <div class="explain-ref">${esc(surahName)} ${surahNum}:${ayahNum}</div>
+          ${arAyah?.text ? `<div class="explain-arabic">${esc(arAyah.text)}</div>` : ''}
+        </div>
+        <button class="explain-close" onclick="hideExplanationSheet()">✕</button>
+      </div>
+      <div class="explain-body" id="explain-body">
+        <div class="explain-loading">
+          <div class="explain-skel" style="width:92%"></div>
+          <div class="explain-skel" style="width:75%"></div>
+          <div class="explain-skel" style="width:85%"></div>
+          <div class="explain-skel" style="width:60%"></div>
+          <div class="explain-skel" style="width:88%"></div>
+          <div class="explain-skel" style="width:70%"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  sheet.style.display = 'block';
+  requestAnimationFrame(() => document.getElementById('explain-box')?.classList.add('explain-box-open'));
+
+  try {
+    const sb = authGetSupabaseClient();
+    const session = (await sb.auth.getSession()).data.session;
+    const { data, error } = await sb.functions.invoke('explain-ayah', {
+      body: { globalAyahNum: globalNum, surahNum, ayahNum, surahName, arabicText: arAyah?.text || '', englishText: enAyah?.text || '' },
+      headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+    });
+
+    if (callId !== _explainCallId) return;
+    if (error) throw error;
+
+    const ex = data.explanation;
+    const wordStudyHtml = Array.isArray(ex.wordStudy) && ex.wordStudy.length
+      ? `<div class="explain-section">
+          <div class="explain-section-label">Word Study</div>
+          ${ex.wordStudy.map(w => `
+            <div class="explain-word-row">
+              <span class="explain-word-ar" dir="rtl">${esc(w.arabic)}</span>
+              <span class="explain-word-root">${esc(w.root)}</span>
+              <span class="explain-word-def">${esc(w.meaning)}</span>
+            </div>`).join('')}
+        </div>` : '';
+
+    document.getElementById('explain-body').innerHTML = `
+      <div class="explain-section">
+        <div class="explain-section-label">Meaning</div>
+        <div class="explain-section-text">${esc(ex.meaning)}</div>
+      </div>
+      <div class="explain-section">
+        <div class="explain-section-label">Context</div>
+        <div class="explain-section-text">${esc(ex.context)}</div>
+      </div>
+      ${wordStudyHtml}
+      <div class="explain-section">
+        <div class="explain-section-label">Scholar Insight</div>
+        <div class="explain-section-text">${esc(ex.scholarInsight)}</div>
+      </div>
+      <div class="explain-disclaimer">
+        AI-generated educational summary based on classical tafsir (Ibn Kathir, Al-Tabari, Maududi).
+        For religious guidance, consult a qualified scholar.
+      </div>
+    `;
+  } catch(e) {
+    if (callId !== _explainCallId) return;
+    let isRateLimited = false;
+    try {
+      const body = typeof e?.context?.body === 'string' ? JSON.parse(e.context.body) : e?.context?.body;
+      isRateLimited = body?.error === 'rate_limited';
+    } catch (_) {}
+    const msg = isRateLimited
+      ? 'Daily limit reached. Sign in for more explanations, or try again tomorrow.'
+      : 'Unable to load explanation. Please check your connection and try again.';
+    document.getElementById('explain-body').innerHTML = `<div class="explain-error">${esc(msg)}</div>`;
+  }
+}
+
+function hideExplanationSheet() {
+  const sheet = document.getElementById('explain-sheet');
+  const box = document.getElementById('explain-box');
+  if (!sheet) return;
+  box?.classList.remove('explain-box-open');
+  _explainHideTimer = setTimeout(() => { sheet.style.display = 'none'; _explainHideTimer = null; }, 280);
 }
 
