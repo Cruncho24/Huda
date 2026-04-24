@@ -341,6 +341,7 @@ function openHelpScreen() {
           <div class="help-section-title">📖 Quran</div>
           <ul class="help-list">
             <li>Browse all 114 surahs</li>
+            <li>Browse by theme — Mercy, Patience, Guidance, and more</li>
             <li>Verse view or Mushaf (page) view</li>
             <li>Gapless audio with 5 reciters</li>
             <li>Play from any ayah, loop a surah, adjust playback speed</li>
@@ -382,7 +383,8 @@ function openHelpScreen() {
         <div class="help-section">
           <div class="help-section-title">🤲 Duas</div>
           <ul class="help-list">
-            <li>Categorised duas for everyday situations</li>
+            <li>200+ duas from Hisnul Muslim, categorised by situation</li>
+            <li>Search duas by keyword</li>
             <li>Duas from the Prophets</li>
             <li>Share any dua</li>
           </ul>
@@ -394,6 +396,7 @@ function openHelpScreen() {
             <li>New Muslim Guide — essentials of Islam</li>
             <li>Children's Quran — Arabic alphabet + short surahs with audio</li>
             <li>99 Names of Allah (Asmaul Husna) with meanings</li>
+            <li>The Etiquette of Dua — adab, best times, and conditions</li>
             <li>Hajj & Umrah Guide — step-by-step rituals</li>
             <li>Zakat Calculator — gold, silver, cash, and livestock</li>
             <li>Islamic (Hijri) calendar</li>
