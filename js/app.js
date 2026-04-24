@@ -775,11 +775,13 @@ function registerSW() {
     // Also check every 30s while app is in foreground
     setInterval(() => { if (document.visibilityState === 'visible') reg.update(); }, 30000);
   }).catch(() => {});
-  // New SW activated → reload so users get the latest version
-  navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
-  // Handle notification tap when app is already open
+  // Guard against double-reload when both SW file and index.html change in the same deploy
+  let _reloading = false;
+  const _reload = () => { if (_reloading) return; _reloading = true; window.location.reload(); };
+
+  navigator.serviceWorker.addEventListener('controllerchange', _reload);
   navigator.serviceWorker.addEventListener('message', e => {
-    if (e.data?.type === 'NEW_VERSION') { window.location.reload(); return; }
+    if (e.data?.type === 'NEW_VERSION') { _reload(); return; }
     if (e.data?.type === 'OPEN_TAB' && ['home','quran','prayer','dhikr','duas','learn'].includes(e.data.tab)) switchTab(e.data.tab);
   });
 }

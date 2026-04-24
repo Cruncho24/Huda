@@ -123,7 +123,7 @@ async function networkFirst(request) {
       }
 
       // Store without query string so it's always found offline
-      cache.put(cacheKey, response.clone());
+      await cache.put(cacheKey, response.clone());
     }
     return response;
   } catch (e) {
