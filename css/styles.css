@@ -1980,9 +1980,21 @@ html.dark .ayah-popup-explain:active { background: #1e1040; }
 }
 /* Skeleton loading */
 .explain-loading { padding: 8px 0; }
+.explain-loading-label {
+  font-size: 13px;
+  color: var(--emerald);
+  font-weight: 600;
+  margin-bottom: 16px;
+  letter-spacing: 0.01em;
+  animation: explain-pulse 1.6s ease-in-out infinite;
+}
+@keyframes explain-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
 .explain-skel {
   height: 14px;
-  background: linear-gradient(90deg, var(--gray-100) 25%, var(--gray-200) 50%, var(--gray-100) 75%);
+  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
   background-size: 200% 100%;
   animation: explain-shimmer 1.4s infinite;
   border-radius: 7px;
@@ -1995,6 +2007,7 @@ html.dark .ayah-popup-explain:active { background: #1e1040; }
 
 /* ── Dark mode: explanation sheet ───────────────────────── */
 html.dark .explain-box { background: #1e293b; }
+html.dark .explain-skel { background: linear-gradient(90deg, #334155 25%, #475569 50%, #334155 75%); background-size: 200% 100%; }
 html.dark .explain-drag-handle { background: #334155; }
 html.dark .explain-header { border-color: #334155; }
 html.dark .explain-ref { color: #64748b; }

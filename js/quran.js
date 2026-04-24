@@ -2088,6 +2088,7 @@ async function showExplanationSheet(globalNum, surahNum, ayahNum) {
       </div>
       <div class="explain-body" id="explain-body">
         <div class="explain-loading">
+          <div class="explain-loading-label">✦ Consulting the scholars…</div>
           <div class="explain-skel" style="width:92%"></div>
           <div class="explain-skel" style="width:75%"></div>
           <div class="explain-skel" style="width:85%"></div>
