@@ -1877,7 +1877,11 @@ async function _loadCategoryVerses(cat) {
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <div class="cv-ref">${esc(v.surahName)} ${v.s}:${v.a}</div>
           <div style="display:flex;gap:8px;align-items:center">
-            <button class="ayah-card-btn explain-btn" onclick="event.stopPropagation();showExplanationSheet(${gn},${v.s},${v.a},${JSON.stringify(v.arabic)},${JSON.stringify(v.english)})" title="Explain">✦</button>
+            <button class="ayah-card-btn explain-btn"
+              data-gn="${gn}" data-s="${v.s}" data-a="${v.a}"
+              data-ar="${esc(v.arabic)}" data-en="${esc(v.english)}"
+              onclick="event.stopPropagation();const d=this.dataset;showExplanationSheet(+d.gn,+d.s,+d.a,d.ar,d.en)"
+              title="Explain">✦</button>
             <button class="cv-play-btn" id="cv-aud-${gn}"
               onclick="event.stopPropagation();playCatAyah(${gn},${v.s},${v.a})">▶</button>
           </div>
@@ -2069,8 +2073,8 @@ async function showExplanationSheet(globalNum, surahNum, ayahNum, _arabicText, _
   const cache = state.quran.cache[surahNum];
   const arAyah = cache?.arData?.ayahs?.find(a => a.numberInSurah === ayahNum);
   const enAyah = cache?.enData?.ayahs?.find(a => a.numberInSurah === ayahNum);
-  const arText = _arabicText || arAyah?.text || '';
-  const enText = _englishText || enAyah?.text || '';
+  const arText = _arabicText ?? arAyah?.text ?? '';
+  const enText = _englishText ?? enAyah?.text ?? '';
   const surahInfo = SURAHS[surahNum - 1];
   const surahName = surahInfo?.[2] || `Surah ${surahNum}`;
 
