@@ -2,7 +2,7 @@
 // HUDA PWA — Service Worker
 // ============================================================
 
-const CACHE_NAME = 'huda-v247';
+const CACHE_NAME = 'huda-v248';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -101,8 +101,28 @@ async function networkFirst(request) {
     const response = await fetch(request);
     if (response.ok && response.type !== 'opaque') {
       const cache = await caches.open(CACHE_NAME);
-      // Store without query string so it's always found offline
       const cacheKey = new Request(stripQuery(request.url));
+
+      // Detect new deploys: when index.html changes on the network, notify
+      // open tabs to reload so they pick up the new JS/CSS immediately.
+      const pathname = new URL(request.url).pathname;
+      if (pathname === '/' || pathname === '/index.html') {
+        const existing = await cache.match(cacheKey);
+        if (existing) {
+          const [cachedText, networkText] = await Promise.all([
+            existing.text(),
+            response.clone().text(),
+          ]);
+          if (cachedText !== networkText) {
+            await cache.put(cacheKey, response.clone());
+            const allClients = await self.clients.matchAll({ includeUncontrolled: true });
+            allClients.forEach(c => c.postMessage({ type: 'NEW_VERSION' }));
+            return response;
+          }
+        }
+      }
+
+      // Store without query string so it's always found offline
       cache.put(cacheKey, response.clone());
     }
     return response;

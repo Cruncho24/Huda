@@ -779,6 +779,7 @@ function registerSW() {
   navigator.serviceWorker.addEventListener('controllerchange', () => window.location.reload());
   // Handle notification tap when app is already open
   navigator.serviceWorker.addEventListener('message', e => {
+    if (e.data?.type === 'NEW_VERSION') { window.location.reload(); return; }
     if (e.data?.type === 'OPEN_TAB' && ['home','quran','prayer','dhikr','duas','learn'].includes(e.data.tab)) switchTab(e.data.tab);
   });
 }
