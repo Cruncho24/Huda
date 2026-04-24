@@ -1876,8 +1876,11 @@ async function _loadCategoryVerses(cat) {
       <div class="cv-verse-card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <div class="cv-ref">${esc(v.surahName)} ${v.s}:${v.a}</div>
-          <button class="cv-play-btn" id="cv-aud-${gn}"
-            onclick="event.stopPropagation();playCatAyah(${gn},${v.s},${v.a})">▶</button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button class="ayah-card-btn explain-btn" onclick="event.stopPropagation();showExplanationSheet(${gn},${v.s},${v.a})" title="Explain">✦</button>
+            <button class="cv-play-btn" id="cv-aud-${gn}"
+              onclick="event.stopPropagation();playCatAyah(${gn},${v.s},${v.a})">▶</button>
+          </div>
         </div>
         <div class="cv-arabic">${esc(v.arabic)}</div>
         <div class="cv-english">${esc(v.english)}</div>
