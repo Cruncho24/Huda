@@ -1877,7 +1877,7 @@ async function _loadCategoryVerses(cat) {
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
           <div class="cv-ref">${esc(v.surahName)} ${v.s}:${v.a}</div>
           <div style="display:flex;gap:8px;align-items:center">
-            <button class="ayah-card-btn explain-btn" onclick="event.stopPropagation();showExplanationSheet(${gn},${v.s},${v.a})" title="Explain">✦</button>
+            <button class="ayah-card-btn explain-btn" onclick="event.stopPropagation();showExplanationSheet(${gn},${v.s},${v.a},${JSON.stringify(v.arabic)},${JSON.stringify(v.english)})" title="Explain">✦</button>
             <button class="cv-play-btn" id="cv-aud-${gn}"
               onclick="event.stopPropagation();playCatAyah(${gn},${v.s},${v.a})">▶</button>
           </div>
@@ -2060,7 +2060,7 @@ function resetAllDhikr() {
 let _explainCallId = 0;
 let _explainHideTimer = null;
 
-async function showExplanationSheet(globalNum, surahNum, ayahNum) {
+async function showExplanationSheet(globalNum, surahNum, ayahNum, _arabicText, _englishText) {
   hideAyahPopup();
   if (_explainHideTimer) { clearTimeout(_explainHideTimer); _explainHideTimer = null; }
 
@@ -2069,6 +2069,8 @@ async function showExplanationSheet(globalNum, surahNum, ayahNum) {
   const cache = state.quran.cache[surahNum];
   const arAyah = cache?.arData?.ayahs?.find(a => a.numberInSurah === ayahNum);
   const enAyah = cache?.enData?.ayahs?.find(a => a.numberInSurah === ayahNum);
+  const arText = _arabicText || arAyah?.text || '';
+  const enText = _englishText || enAyah?.text || '';
   const surahInfo = SURAHS[surahNum - 1];
   const surahName = surahInfo?.[2] || `Surah ${surahNum}`;
 
@@ -2085,7 +2087,7 @@ async function showExplanationSheet(globalNum, surahNum, ayahNum) {
       <div class="explain-header">
         <div>
           <div class="explain-ref">${esc(surahName)} ${surahNum}:${ayahNum}</div>
-          ${arAyah?.text ? `<div class="explain-arabic">${esc(arAyah.text)}</div>` : ''}
+          ${arText ? `<div class="explain-arabic">${esc(arText)}</div>` : ''}
         </div>
         <button class="explain-close" onclick="hideExplanationSheet()">✕</button>
       </div>
@@ -2109,7 +2111,7 @@ async function showExplanationSheet(globalNum, surahNum, ayahNum) {
     const sb = authGetSupabaseClient();
     const session = (await sb.auth.getSession()).data.session;
     const { data, error } = await sb.functions.invoke('explain-ayah', {
-      body: { globalAyahNum: globalNum, surahNum, ayahNum, surahName, arabicText: arAyah?.text || '', englishText: enAyah?.text || '' },
+      body: { globalAyahNum: globalNum, surahNum, ayahNum, surahName, arabicText: arText, englishText: enText },
       headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
     });
 
