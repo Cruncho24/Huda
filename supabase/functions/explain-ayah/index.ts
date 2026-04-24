@@ -7,6 +7,7 @@ const corsHeaders = {
 
 const ANON_DAILY_LIMIT = 5;
 const AUTH_DAILY_LIMIT = 25;
+const ADMIN_USER_IDS = new Set(['dd5b953b-6e7e-4d64-8a65-e6b5bb393849']);
 
 const SYSTEM_PROMPT = `You are an Islamic educational assistant explaining Quran ayahs to Muslim readers.
 Your role is tafsir education only — not fatwa, not legal rulings, not theology debates.
@@ -97,6 +98,7 @@ Deno.serve(async (req: Request) => {
   const rawIp = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? 'unknown';
   const identifier = userId ? `user:${userId}` : `anon:${rawIp}`;
   const limit = userId ? AUTH_DAILY_LIMIT : ANON_DAILY_LIMIT;
+  const isAdmin = userId !== null && ADMIN_USER_IDS.has(userId);
 
   const { data: usage } = await sb
     .from('explanation_usage')
@@ -106,7 +108,7 @@ Deno.serve(async (req: Request) => {
     .maybeSingle();
 
   const currentCount = usage?.count ?? 0;
-  if (currentCount >= limit) {
+  if (!isAdmin && currentCount >= limit) {
     return new Response(
       JSON.stringify({ error: 'rate_limited', message: userId ? `Daily limit of ${limit} reached. Try again tomorrow.` : `Sign in to get ${AUTH_DAILY_LIMIT} explanations per day.` }),
       { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
