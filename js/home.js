@@ -49,6 +49,16 @@ function renderHome() {
     return;
   }
 
+  // Pre-fetch Surah 2 so the Ayatul Kursi ✦ Explain button shows Arabic preview
+  if (!state.quran.cache[2]) {
+    Promise.all([
+      fetch('https://api.alquran.cloud/v1/surah/2/quran-uthmani'),
+      fetch('https://api.alquran.cloud/v1/surah/2/en.sahih')
+    ]).then(([ar, en]) => Promise.all([ar.json(), en.json()]))
+      .then(([arJson, enJson]) => { state.quran.cache[2] = { arData: arJson.data, enData: enJson.data }; })
+      .catch(() => {});
+  }
+
   const now = new Date();
   const hijri = getHijriSync(now);
   const hijriStr = `${hijri.day} ${hijri.monthName} ${hijri.year} AH`;
@@ -321,7 +331,7 @@ function openHelpScreen() {
             <li>Reading plan progress card</li>
             <li>Bookmarked ayahs and saved surahs</li>
             <li>Hadith of the Day</li>
-            <li>Ayatul Kursi with audio and loop playback</li>
+            <li>Ayatul Kursi with audio, loop playback, and AI explanation</li>
             <li>Jumu'ah reminder every Friday</li>
             <li>Hijri (Islamic) date display</li>
           </ul>
@@ -338,6 +348,7 @@ function openHelpScreen() {
             <li>Sleep timer — audio stops after a set time</li>
             <li>Ayah highlighting synced to audio</li>
             <li>Tafsir — tap any ayah for commentary</li>
+            <li>✦ Explain — AI tafsir for any ayah: meaning, context, word study, and scholar insight</li>
             <li>Bookmarks — save ayahs and surahs</li>
             <li>Share any ayah (Arabic + translation)</li>
             <li>Search surahs by name or number</li>
