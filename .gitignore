@@ -30,8 +30,19 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# Secrets — never commit these
+.env
+.env.*
 .env*.local
+*.secret
+secrets.json
+secrets.js
+config.secret.*
+
+# Supabase local dev (contains service role key + JWT secrets)
+supabase/.env
+supabase/config.local.toml
+supabase/.branches/
 
 # typescript
 *.tsbuildinfo
@@ -51,10 +62,9 @@ App.js
 .playwright-mcp/
 .superpowers/
 
-# Test screenshots
-*.png
-*.jpg
-*.jpeg
+# Playwright / test artifacts (not app screenshots)
+.playwright-mcp/
+test-results/
 
 # Docs/plans (internal)
 docs/
