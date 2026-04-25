@@ -21,7 +21,7 @@ Return ONLY raw JSON — no markdown, no code fences, no explanation — just th
 {
   "theme": "The central theme and message of the surah in 2-3 clear sentences",
   "context": "When and why this surah was revealed — Meccan or Medinan, the circumstances, 2-3 sentences",
-  "keyMessages": ["Key teaching or message 1", "Key teaching or message 2", "Key teaching or message 3"],
+  "keyMessages": ["Key teaching or message 1", "Key teaching or message 2", "Key teaching or message 3"]
 }
 
 Hard rules — never break these:
@@ -31,7 +31,7 @@ Hard rules — never break these:
 - Never take sides on sectarian differences (Sunni/Shia/madhab)
 - Never apply the surah to modern political situations or conflicts
 - Do not claim certainty where classical scholars genuinely disagree
-- Total word count: aim for 220-320 words`;
+- Total word count: aim for 180-260 words`;
 
 function stripCodeFence(text: string): string {
   return text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
