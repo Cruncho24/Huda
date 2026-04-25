@@ -285,11 +285,14 @@ function openZakatCalc() {
     <div class="zakat-form">
       <div class="zakat-section-title">Currency</div>
       <div class="zakat-field">
-        <div class="currency-selector">
-          ${['USD','GBP','EUR','AED','SAR','CAD','AUD','PKR','MYR','TRY','EGP','MAD','DZD','NGN'].map(c => `
-            <button class="currency-btn ${state.learn.zakat.currency === c ? 'active' : ''}" onclick="setZakatCurrency('${c}')">${c}</button>
-          `).join('')}
-        </div>
+        <select class="zakat-currency-select" onchange="setZakatCurrency(this.value)">
+          ${[
+            ['USD','US Dollar'],['GBP','British Pound'],['EUR','Euro'],['AED','UAE Dirham'],
+            ['SAR','Saudi Riyal'],['CAD','Canadian Dollar'],['AUD','Australian Dollar'],
+            ['PKR','Pakistani Rupee'],['MYR','Malaysian Ringgit'],['TRY','Turkish Lira'],
+            ['EGP','Egyptian Pound'],['MAD','Moroccan Dirham'],['DZD','Algerian Dinar'],['NGN','Nigerian Naira']
+          ].map(([code, name]) => `<option value="${code}" ${state.learn.zakat.currency === code ? 'selected' : ''}>${code} — ${name}</option>`).join('')}
+        </select>
       </div>
 
       <div class="zakat-section-title">Nisab Based On</div>
