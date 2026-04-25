@@ -20,15 +20,13 @@ Return ONLY raw JSON — no markdown, no code fences, no explanation — just th
   "context": "Historical or revelation context in 2-3 sentences. If no specific occasion of revelation is known, describe the broader Meccan or Medinan context.",
   "wordStudy": [
     {"arabic": "one key word in Arabic script", "root": "trilateral Arabic root", "meaning": "what this word carries that English translation loses"}
-  ],
-  "scholarInsight": "What the classical tafsir tradition generally understood or emphasised about this ayah, 2-3 sentences. Do NOT name or attribute to any specific scholar — describe the general classical view only."
+  ]
 }
 
 Hard rules — never break these:
 - wordStudy must have EXACTLY 1 entry (one word only, pick the most theologically rich)
 - Return raw JSON only — no \`\`\`json wrapper, no text before or after the JSON
 - Never issue a fatwa or legal ruling
-- Never name any specific scholar anywhere in the output — general classical view only throughout
 - Never take sides on sectarian differences (Sunni/Shia/madhab)
 - Never apply the ayah to modern political situations or conflicts
 - Never authenticate or discuss hadith
@@ -40,7 +38,7 @@ function stripCodeFence(text: string): string {
   return text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
 }
 
-function isValidExplanation(obj: unknown): obj is { meaning: string; context: string; wordStudy: Array<{arabic: string; root: string; meaning: string}>; scholarInsight: string } {
+function isValidExplanation(obj: unknown): obj is { meaning: string; context: string; wordStudy: Array<{arabic: string; root: string; meaning: string}> } {
   if (typeof obj !== 'object' || obj === null) return false;
   const e = obj as Record<string, unknown>;
   return typeof e.meaning === 'string' && e.meaning.length > 0
@@ -52,8 +50,7 @@ function isValidExplanation(obj: unknown): obj is { meaning: string; context: st
         return typeof entry.arabic === 'string' && entry.arabic.length > 0
           && typeof entry.root === 'string' && entry.root.length > 0
           && typeof entry.meaning === 'string' && entry.meaning.length > 0;
-      })
-    && typeof e.scholarInsight === 'string' && e.scholarInsight.length > 0;
+      });
 }
 
 // verify_jwt is disabled — this function handles auth itself for rate-limit tiering.

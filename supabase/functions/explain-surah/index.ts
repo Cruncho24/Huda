@@ -22,14 +22,12 @@ Return ONLY raw JSON — no markdown, no code fences, no explanation — just th
   "theme": "The central theme and message of the surah in 2-3 clear sentences",
   "context": "When and why this surah was revealed — Meccan or Medinan, the circumstances, 2-3 sentences",
   "keyMessages": ["Key teaching or message 1", "Key teaching or message 2", "Key teaching or message 3"],
-  "scholarInsight": "What the classical tafsir tradition generally understood or emphasised about this surah, 2-3 sentences. Do NOT name or attribute to any specific scholar — describe the general classical view only."
 }
 
 Hard rules — never break these:
 - keyMessages must have EXACTLY 3 entries, each a complete sentence
 - Return raw JSON only — no \`\`\`json wrapper, no text before or after
 - Never issue a fatwa or legal ruling
-- Never name any specific scholar anywhere in the output — general classical view only throughout
 - Never take sides on sectarian differences (Sunni/Shia/madhab)
 - Never apply the surah to modern political situations or conflicts
 - Do not claim certainty where classical scholars genuinely disagree
@@ -39,14 +37,13 @@ function stripCodeFence(text: string): string {
   return text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
 }
 
-function isValidSurahExplanation(obj: unknown): obj is { theme: string; context: string; keyMessages: string[]; scholarInsight: string } {
+function isValidSurahExplanation(obj: unknown): obj is { theme: string; context: string; keyMessages: string[] } {
   if (typeof obj !== 'object' || obj === null) return false;
   const e = obj as Record<string, unknown>;
   return typeof e.theme === 'string' && e.theme.length > 0
     && typeof e.context === 'string' && e.context.length > 0
     && Array.isArray(e.keyMessages) && (e.keyMessages as unknown[]).length === 3
-    && (e.keyMessages as unknown[]).every(m => typeof m === 'string' && (m as string).length > 0)
-    && typeof e.scholarInsight === 'string' && e.scholarInsight.length > 0;
+    && (e.keyMessages as unknown[]).every(m => typeof m === 'string' && (m as string).length > 0);
 }
 
 Deno.serve(async (req: Request) => {
