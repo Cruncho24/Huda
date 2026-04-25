@@ -286,7 +286,7 @@ function openZakatCalc() {
       <div class="zakat-section-title">Currency</div>
       <div class="zakat-field">
         <div class="currency-selector">
-          ${['USD','GBP','EUR','AED','SAR','CAD','AUD','PKR','MYR','TRY','EGP','NGN'].map(c => `
+          ${['USD','GBP','EUR','AED','SAR','CAD','AUD','PKR','MYR','TRY','EGP','MAD','DZD','NGN'].map(c => `
             <button class="currency-btn ${state.learn.zakat.currency === c ? 'active' : ''}" onclick="setZakatCurrency('${c}')">${c}</button>
           `).join('')}
         </div>
@@ -347,7 +347,7 @@ async function fetchZakatPrices() {
     // Fallback prices — approximate as of early 2026 (~$105/g gold, ~$1.03/g silver). TODO: update annually — last reviewed 2026-04
     zakatPrices.gold = 105;
     zakatPrices.silver = 1.03;
-    zakatPrices.rates = { USD:1, GBP:0.79, EUR:0.92, AED:3.67, SAR:3.75, CAD:1.38, AUD:1.54, PKR:278, MYR:4.47, TRY:34, EGP:50, NGN:1580 };
+    zakatPrices.rates = { USD:1, GBP:0.79, EUR:0.92, AED:3.67, SAR:3.75, CAD:1.38, AUD:1.54, PKR:278, MYR:4.47, TRY:34, EGP:50, MAD:10.0, DZD:134, NGN:1580 };
     if (statusEl) { statusEl.textContent = '⚠️ Could not load live prices — using estimates from early 2026. Results may be inaccurate.'; statusEl.style.color = '#d97706'; }
   }
 }
