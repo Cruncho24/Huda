@@ -795,56 +795,6 @@ function _surahTimeUpdate() {
   _scrollToAyah(an);
 }
 
-// ── Mushaf word-timing helpers (kept for potential future use) ─
-async function fetchMushafTimings(surahNum) {
-  if (state.quran.timings[surahNum]) return state.quran.timings[surahNum];
-  try {
-    const res = await fetch(`https://api.qurancdn.com/api/qdc/audio/reciters/7/audio_files?chapter_number=${surahNum}&segments=true`);
-    const data = await res.json();
-    const map = {};
-    for (const f of (data.audio_files || [])) {
-      for (const vt of (f.verse_timings || [])) {
-        const base = vt.timestamp_from;
-        map[vt.verse_key] = (vt.segments || []).map(([wi, s, e]) =>
-          [wi - 1, Math.max(0, s - base), Math.max(0, e - base)]
-        );
-      }
-    }
-    state.quran.timings[surahNum] = map;
-    return map;
-  } catch(e) { return null; }
-}
-
-function clearMushafHighlights() {
-  document.querySelectorAll('.mword.active').forEach(el => el.classList.remove('active'));
-}
-
-function startWordHighlight(audio, surahNum, ayahNum, globalNum, timings) {
-  const segments = timings[`${surahNum}:${ayahNum}`];
-  if (!segments || !segments.length) return;
-  let lastWord = -1;
-  function frame() {
-    if (!state.audio.player || state.audio.player !== audio) return;
-    const ms = audio.currentTime * 1000;
-    let cur = -1;
-    for (const [wi, start, end] of segments) {
-      if (ms >= start && ms < end) { cur = wi; break; }
-    }
-    if (cur !== lastWord) {
-      if (lastWord >= 0) {
-        const el = document.getElementById(`mw-${globalNum}-${lastWord}`);
-        if (el) el.classList.remove('active');
-      }
-      if (cur >= 0) {
-        const el = document.getElementById(`mw-${globalNum}-${cur}`);
-        if (el) el.classList.add('active');
-      }
-      lastWord = cur;
-    }
-    requestAnimationFrame(frame);
-  }
-  requestAnimationFrame(frame);
-}
 
 // ── Ayatul Kursi audio (Surah 2:255 = global ayah 262) ────────
 let _loopAyatulKursi = false;
@@ -1785,6 +1735,9 @@ function flashAyah(ayahNum) {
 function closeQuranReader() {
   mushafStop();
   if (_ayahObserver) { _ayahObserver.disconnect(); _ayahObserver = null; }
+  window.removeEventListener('scroll', _pauseAutoScroll);
+  window.removeEventListener('touchstart', _pauseAutoScroll);
+  window.removeEventListener('wheel', _pauseAutoScroll);
   document.getElementById('quran-reader').style.display = 'none';
   document.getElementById('quran-list-view').style.display = 'block';
   state.quran.currentSurah = null;
@@ -1862,7 +1815,17 @@ async function _loadCategoryVerses(cat) {
       if (json.code !== 200) return null;
       const [ar, en] = json.data;
       const entry = { s, a, arabic: ar.text, english: en.text, surahName: ar.surah.englishName };
-      try { localStorage.setItem(cacheKey, JSON.stringify(entry)); } catch(e) {}
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify(entry));
+        const log = JSON.parse(localStorage.getItem('huda_cv_log') || '[]');
+        if (!log.includes(cacheKey)) {
+          log.push(cacheKey);
+          if (log.length > 50) {
+            log.splice(0, log.length - 50).forEach(k => localStorage.removeItem(k));
+          }
+          localStorage.setItem('huda_cv_log', JSON.stringify(log));
+        }
+      } catch(e) {}
       return entry;
     } catch(e) { return null; }
   }));
@@ -2020,7 +1983,20 @@ async function toggleTafsir(surah, ayah) {
       text = json.data?.text;
       if (text) {
         cache[ayah] = text;
-        try { localStorage.setItem(`huda_tafsir_k_${surah}`, JSON.stringify(cache)); } catch(e) {}
+        try {
+          // Cap per-surah cache to 30 ayahs (drop oldest)
+          const ayahKeys = Object.keys(cache);
+          if (ayahKeys.length > 30) ayahKeys.slice(0, ayahKeys.length - 30).forEach(k => delete cache[k]);
+          const sKey = `huda_tafsir_k_${surah}`;
+          localStorage.setItem(sKey, JSON.stringify(cache));
+          // Cap total tafsir surahs to 20
+          const tlog = JSON.parse(localStorage.getItem('huda_tafsir_log') || '[]');
+          if (!tlog.includes(sKey)) {
+            tlog.push(sKey);
+            if (tlog.length > 20) tlog.splice(0, tlog.length - 20).forEach(k => localStorage.removeItem(k));
+            localStorage.setItem('huda_tafsir_log', JSON.stringify(tlog));
+          }
+        } catch(e) {}
       }
     }
   } catch(e) {

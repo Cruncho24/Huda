@@ -33,7 +33,7 @@ Hard rules — never break these:
 - Never authenticate or discuss hadith
 - Do not claim certainty where classical scholars genuinely disagree
 - If a field would require speculation beyond classical scholarship, write: "Classical sources do not record a specific occasion for this — it is part of the broader Medinan/Meccan revelation."
-- Total word count across all fields: under 180 words`;
+- Total word count: match the ayah's complexity — aim for ~150 words for a short ayah, ~250 for a medium ayah, ~300-350 for a long ayah (e.g. Ayat al-Kursi, long Baqarah ayahs). Err toward completeness rather than brevity for long ayahs`;
 
 function stripCodeFence(text: string): string {
   return text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
@@ -45,6 +45,13 @@ function isValidExplanation(obj: unknown): obj is { meaning: string; context: st
   return typeof e.meaning === 'string' && e.meaning.length > 0
     && typeof e.context === 'string' && e.context.length > 0
     && Array.isArray(e.wordStudy) && (e.wordStudy as unknown[]).length > 0
+    && (e.wordStudy as unknown[]).every(w => {
+        if (typeof w !== 'object' || w === null) return false;
+        const entry = w as Record<string, unknown>;
+        return typeof entry.arabic === 'string' && entry.arabic.length > 0
+          && typeof entry.root === 'string' && entry.root.length > 0
+          && typeof entry.meaning === 'string' && entry.meaning.length > 0;
+      })
     && typeof e.scholarInsight === 'string' && e.scholarInsight.length > 0;
 }
 
@@ -133,11 +140,11 @@ Deno.serve(async (req: Request) => {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 900,
+        max_tokens: 1500,
         system: SYSTEM_PROMPT,
         messages: [{ role: 'user', content: userContent }],
       }),
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(25000),
     });
 
     if (!resp.ok) {

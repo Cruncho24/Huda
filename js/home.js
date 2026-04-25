@@ -32,6 +32,8 @@ async function fetchAndCacheHijri(date) {
     const json = await res.json();
     const h = json.data.hijri;
     const hijri = { day: parseInt(h.day), month: h.month.number, year: parseInt(h.year), monthName: HIJRI_MONTHS[h.month.number - 1] };
+    // Evict stale hijri keys — only today's is needed
+    Object.keys(localStorage).filter(k => k.startsWith('huda_hijri_') && k !== 'huda_hijri_' + key).forEach(k => localStorage.removeItem(k));
     localStorage.setItem('huda_hijri_' + key, JSON.stringify(hijri));
     _hijriCacheMem = { key, hijri };
     if (state.activeTab === 'home') renderHome(); // refresh with accurate date
@@ -138,8 +140,7 @@ function renderHome() {
   const mm = String(now.getMonth()+1).padStart(2,'0');
   const dd = String(now.getDate()).padStart(2,'0');
   const localDateStr = `${now.getFullYear()}-${mm}-${dd}`;
-  const jumuahDismissKey = `huda_jumuah_dismissed_${localDateStr}`;
-  const jumuahDismissed = localStorage.getItem(jumuahDismissKey) === '1';
+  const jumuahDismissed = localStorage.getItem('huda_jumuah_dismissed') === localDateStr;
   const jumuahCard = (isFriday && !jumuahDismissed) ? `
     <div class="jumuah-card" id="jumuah-card">
       <div class="jumuah-content">
@@ -292,8 +293,7 @@ function dismissJumuah() {
   const now = new Date();
   const mm = String(now.getMonth()+1).padStart(2,'0');
   const dd = String(now.getDate()).padStart(2,'0');
-  const key = `huda_jumuah_dismissed_${now.getFullYear()}-${mm}-${dd}`;
-  localStorage.setItem(key, '1');
+  localStorage.setItem('huda_jumuah_dismissed', `${now.getFullYear()}-${mm}-${dd}`);
   const el = document.getElementById('jumuah-card');
   if (el) el.remove();
 }

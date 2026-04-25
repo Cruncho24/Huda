@@ -147,11 +147,11 @@ function renderProphetDuaReader() {
     <div class="dua-reader-layout">
       <div class="dua-card fade-in">
         <div class="dua-counter">${i + 1} of ${duas.length}</div>
-        <div class="dua-prophet">${PROPHET_ICONS[prophet] || '🤲'} ${prophet}</div>
-        <div class="dua-arabic">${dua.arabic}</div>
-        <div class="dua-transliteration">${dua.transliteration}</div>
-        <div class="dua-meaning">${dua.meaning}</div>
-        <span class="dua-source-badge">📚 ${dua.source} · ${dua.grade}</span>
+        <div class="dua-prophet">${PROPHET_ICONS[prophet] || '🤲'} ${esc(prophet)}</div>
+        <div class="dua-arabic">${esc(dua.arabic)}</div>
+        <div class="dua-transliteration">${esc(dua.transliteration)}</div>
+        <div class="dua-meaning">${esc(dua.meaning)}</div>
+        <span class="dua-source-badge">📚 ${esc(dua.source)} · ${esc(dua.grade)}</span>
         <button class="share-dua-btn" onclick="shareProphetDua(${i})">Share ↗</button>
       </div>
       <div class="dua-nav">
@@ -214,10 +214,10 @@ function renderDuaReader() {
     <div class="dua-reader-layout">
       <div class="dua-card fade-in">
         <div class="dua-counter">${i + 1} of ${duas.length}</div>
-        <div class="dua-arabic">${dua.arabic}</div>
-        <div class="dua-transliteration">${dua.transliteration}</div>
-        <div class="dua-meaning">${dua.meaning}</div>
-        <span class="dua-source-badge">📚 ${dua.source} · ${dua.grade}</span>
+        <div class="dua-arabic">${esc(dua.arabic)}</div>
+        <div class="dua-transliteration">${esc(dua.transliteration)}</div>
+        <div class="dua-meaning">${esc(dua.meaning)}</div>
+        <span class="dua-source-badge">📚 ${esc(dua.source)} · ${esc(dua.grade)}</span>
         <button class="share-dua-btn" onclick="shareDua(${state.learn.currentDuaIndex})">Share ↗</button>
       </div>
       <div class="dua-nav">

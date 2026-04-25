@@ -90,7 +90,7 @@ function applySyncedState() {
   try { state.dhikrCounts    = JSON.parse(localStorage.getItem('huda_dhikr') || '{}'); } catch(e) {}
   state.tasbeeh  = parseInt(localStorage.getItem('huda_tasbeeh') || '0') || 0;
   state.darkMode = localStorage.getItem('huda_dark') === '1';
-  state.fontSize = parseInt(localStorage.getItem('huda_fontsize') || '24') || 24;
+  state.fontSize = parseInt(localStorage.getItem('huda_fontsize') || '28') || 28;
   state.reciter  = localStorage.getItem('huda_reciter') || 'ar.mahermuaiqly';
   try { state.plan = JSON.parse(localStorage.getItem('huda_plan') || 'null'); } catch(e) {}
   // dhikr_history is read directly from localStorage by getDhikrHistory() — no state field needed
