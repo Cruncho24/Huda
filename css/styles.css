@@ -1996,6 +1996,15 @@ html.dark .ayah-popup-explain:active { background: #1e1040; }
   font-size: 15px;
   line-height: 1.6;
 }
+.explain-key-messages {
+  margin: 6px 0 0 0;
+  padding-left: 18px;
+  color: #334155;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.explain-key-messages li { margin-bottom: 6px; }
+html.dark .explain-key-messages { color: #cbd5e1; }
 /* Skeleton loading */
 .explain-loading { padding: 8px 0; }
 .explain-loading-label {

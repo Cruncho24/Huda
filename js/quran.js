@@ -70,6 +70,7 @@ function renderQuranList() {
           <div style="font-size:11px;opacity:0.8" id="reader-meta"></div>
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+          <button class="mhdr-btn" id="surah-explain-btn" onclick="showSurahExplanationSheet(state.quran.currentSurah)" title="Explain this surah" style="display:none">✦</button>
           <button class="mhdr-btn" id="reader-bm-btn" onclick="toggleReaderBookmark()" title="Bookmark this surah">🏷️</button>
           <button class="mhdr-btn" id="surah-prev-btn" onclick="navigateSurah(-1)" title="Previous surah">‹</button>
           <button class="mhdr-btn" id="surah-next-btn" onclick="navigateSurah(1)" title="Next surah">›</button>
@@ -266,6 +267,8 @@ async function openSurah(n, targetAyah = null, { keepAudio = false } = {}) {
   document.getElementById('reader-meta').textContent = `${s[5]} · ${s[4]} verses · ${s[3]}`;
   const rbm = document.getElementById('reader-bm-btn');
   if (rbm) rbm.textContent = isSurahBookmarked(n) ? '🔖' : '🏷️';
+  const seb = document.getElementById('surah-explain-btn');
+  if (seb) seb.style.display = s[4] <= 50 ? '' : 'none';
   // Sync toggle button states
   document.getElementById('btn-verse')?.classList.toggle('active', state.quran.viewMode === 'verse');
   document.getElementById('btn-page')?.classList.toggle('active', state.quran.viewMode === 'page');
@@ -2170,5 +2173,91 @@ function hideExplanationSheet() {
   if (!sheet) return;
   box?.classList.remove('explain-box-open');
   _explainHideTimer = setTimeout(() => { sheet.style.display = 'none'; _explainHideTimer = null; }, 280);
+}
+
+async function showSurahExplanationSheet(surahNum) {
+  if (_explainHideTimer) { clearTimeout(_explainHideTimer); _explainHideTimer = null; }
+  const callId = ++_explainCallId;
+  const surahInfo = SURAHS[surahNum - 1];
+  const surahName = surahInfo?.[2] || `Surah ${surahNum}`;
+
+  let sheet = document.getElementById('explain-sheet');
+  if (!sheet) {
+    sheet = document.createElement('div');
+    sheet.id = 'explain-sheet';
+    document.body.appendChild(sheet);
+  }
+  sheet.innerHTML = `
+    <div class="explain-overlay" onclick="hideExplanationSheet()"></div>
+    <div class="explain-box" id="explain-box">
+      <div class="explain-drag-handle"></div>
+      <div class="explain-header">
+        <div>
+          <div class="explain-ref">✦ ${esc(surahName)}</div>
+          <div style="font-size:12px;opacity:0.65;margin-top:2px">Surah Overview</div>
+        </div>
+        <button class="explain-close" onclick="hideExplanationSheet()">✕</button>
+      </div>
+      <div class="explain-body" id="explain-body">
+        <div class="explain-loading">
+          <div class="explain-loading-label">✦ Consulting the scholars…</div>
+          <div class="explain-skel" style="width:92%"></div>
+          <div class="explain-skel" style="width:75%"></div>
+          <div class="explain-skel" style="width:85%"></div>
+          <div class="explain-skel" style="width:60%"></div>
+          <div class="explain-skel" style="width:88%"></div>
+          <div class="explain-skel" style="width:70%"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  sheet.style.display = 'block';
+  requestAnimationFrame(() => document.getElementById('explain-box')?.classList.add('explain-box-open'));
+
+  try {
+    const sb = authGetSupabaseClient();
+    const session = (await sb.auth.getSession()).data.session;
+    const { data, error } = await sb.functions.invoke('explain-surah', {
+      body: { surahNum, surahName, ayahCount: surahInfo[4], revelationType: surahInfo[5] },
+      headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+    });
+
+    if (callId !== _explainCallId) return;
+    if (error) throw error;
+
+    const ex = data.explanation;
+    document.getElementById('explain-body').innerHTML = `
+      <div class="explain-section">
+        <div class="explain-section-label">Theme</div>
+        <div class="explain-section-text">${esc(ex.theme)}</div>
+      </div>
+      <div class="explain-section">
+        <div class="explain-section-label">Context</div>
+        <div class="explain-section-text">${esc(ex.context)}</div>
+      </div>
+      <div class="explain-section">
+        <div class="explain-section-label">Key Messages</div>
+        <ul class="explain-key-messages">
+          ${(ex.keyMessages || []).map(m => `<li>${esc(m)}</li>`).join('')}
+        </ul>
+      </div>
+      <div class="explain-section">
+        <div class="explain-section-label">Scholar Insight</div>
+        <div class="explain-section-text">${esc(ex.scholarInsight)}</div>
+      </div>
+      <div class="explain-disclaimer">
+        AI-generated educational summary based on classical tafsir (Ibn Kathir, Al-Tabari, Maududi).
+        For religious guidance, consult a qualified scholar.
+      </div>
+    `;
+  } catch(e) {
+    if (callId !== _explainCallId) return;
+    let msg = 'Unable to load explanation. Please check your connection and try again.';
+    try {
+      const body = typeof e?.context?.body === 'string' ? JSON.parse(e.context.body) : e?.context?.body;
+      if (body?.message) msg = body.message;
+    } catch (_) {}
+    document.getElementById('explain-body').innerHTML = `<div class="explain-error">${esc(msg)}</div>`;
+  }
 }
 
