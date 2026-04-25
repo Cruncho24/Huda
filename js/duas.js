@@ -48,9 +48,17 @@ function filterDuas(q) {
   const grid = document.getElementById('dua-category-grid');
   if (!grid) return;
   if (!query) { grid.innerHTML = _renderDuaCategories(Object.keys(DUAS)); return; }
-  const filtered = Object.keys(DUAS).filter(cat => cat.toLowerCase().includes(query));
+  const filtered = Object.keys(DUAS).filter(cat => {
+    if (cat.toLowerCase().includes(query)) return true;
+    // Also search inside duas: transliteration, meaning, arabic
+    return DUAS[cat].some(d =>
+      (d.transliteration || '').toLowerCase().includes(query) ||
+      (d.meaning || '').toLowerCase().includes(query) ||
+      (d.arabic || '').includes(query)
+    );
+  });
   grid.innerHTML = filtered.length ? _renderDuaCategories(filtered)
-    : `<div style="padding:32px 16px;text-align:center;color:var(--gray-400);grid-column:1/-1">No categories found</div>`;
+    : `<div style="padding:32px 16px;text-align:center;color:var(--gray-400);grid-column:1/-1">No duas found</div>`;
 }
 
 function openDuaCategory(cat) {

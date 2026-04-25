@@ -46,7 +46,12 @@ function renderPrayer() {
   _prayerBackgroundRefresh();
 }
 
+let _lastBgRefresh = 0;
 function _prayerBackgroundRefresh() {
+  // Throttle to once per 2 minutes — tab switching triggers this every visit
+  const now = Date.now();
+  if (now - _lastBgRefresh < 120000) return;
+  _lastBgRefresh = now;
   // Silently refresh GPS in background — recalculate if user has moved >0.1° (~11 km)
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
