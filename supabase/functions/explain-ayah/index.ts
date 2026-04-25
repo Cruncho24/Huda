@@ -21,13 +21,14 @@ Return ONLY raw JSON — no markdown, no code fences, no explanation — just th
   "wordStudy": [
     {"arabic": "one key word in Arabic script", "root": "trilateral Arabic root", "meaning": "what this word carries that English translation loses"}
   ],
-  "scholarInsight": "One specific insight from a named classical scholar (Ibn Kathir, Al-Tabari, or Maududi), 2-3 sentences. Name the scholar explicitly."
+  "scholarInsight": "What the classical tafsir tradition generally understood or emphasised about this ayah, 2-3 sentences. Do NOT name or attribute to any specific scholar — describe the general classical view only."
 }
 
 Hard rules — never break these:
 - wordStudy must have EXACTLY 1 entry (one word only, pick the most theologically rich)
 - Return raw JSON only — no \`\`\`json wrapper, no text before or after the JSON
 - Never issue a fatwa or legal ruling
+- Never name or quote a specific scholar in scholarInsight — general classical view only
 - Never take sides on sectarian differences (Sunni/Shia/madhab)
 - Never apply the ayah to modern political situations or conflicts
 - Never authenticate or discuss hadith

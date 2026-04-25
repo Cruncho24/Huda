@@ -2148,7 +2148,7 @@ async function showExplanationSheet(globalNum, surahNum, ayahNum, _arabicText, _
       </div>
       ${wordStudyHtml}
       <div class="explain-section">
-        <div class="explain-section-label">Classical Perspective</div>
+        <div class="explain-section-label">Classical Commentary</div>
         <div class="explain-section-text">${esc(ex.scholarInsight)}</div>
       </div>
       <div class="explain-disclaimer">
@@ -2242,7 +2242,7 @@ async function showSurahExplanationSheet(surahNum) {
         </ul>
       </div>
       <div class="explain-section">
-        <div class="explain-section-label">Classical Perspective</div>
+        <div class="explain-section-label">Classical Commentary</div>
         <div class="explain-section-text">${esc(ex.scholarInsight)}</div>
       </div>
       <div class="explain-disclaimer">
