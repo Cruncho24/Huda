@@ -2148,11 +2148,11 @@ async function showExplanationSheet(globalNum, surahNum, ayahNum, _arabicText, _
       </div>
       ${wordStudyHtml}
       <div class="explain-section">
-        <div class="explain-section-label">Scholar Insight</div>
+        <div class="explain-section-label">Classical Perspective</div>
         <div class="explain-section-text">${esc(ex.scholarInsight)}</div>
       </div>
       <div class="explain-disclaimer">
-        AI-generated educational summary based on classical tafsir (Ibn Kathir, Al-Tabari, Maududi).
+        AI-generated summary drawing on classical tafsir tradition. Scholar attributions are AI-inferred, not verified quotes.
         For religious guidance, consult a qualified scholar.
       </div>
     `;
@@ -2242,11 +2242,11 @@ async function showSurahExplanationSheet(surahNum) {
         </ul>
       </div>
       <div class="explain-section">
-        <div class="explain-section-label">Scholar Insight</div>
+        <div class="explain-section-label">Classical Perspective</div>
         <div class="explain-section-text">${esc(ex.scholarInsight)}</div>
       </div>
       <div class="explain-disclaimer">
-        AI-generated educational summary based on classical tafsir (Ibn Kathir, Al-Tabari, Maududi).
+        AI-generated summary drawing on classical tafsir tradition. Scholar attributions are AI-inferred, not verified quotes.
         For religious guidance, consult a qualified scholar.
       </div>
     `;
