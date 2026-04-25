@@ -347,7 +347,7 @@ async function fetchZakatPrices() {
     // Fallback prices — approximate as of early 2026 (~$105/g gold, ~$1.03/g silver). TODO: update annually — last reviewed 2026-04
     zakatPrices.gold = 105;
     zakatPrices.silver = 1.03;
-    zakatPrices.rates = { USD:1, GBP:0.79, EUR:0.92, AED:3.67, SAR:3.75, CAD:1.38, AUD:1.54, PKR:278, MYR:4.47, TRY:38, EGP:50, NGN:1580 };
+    zakatPrices.rates = { USD:1, GBP:0.79, EUR:0.92, AED:3.67, SAR:3.75, CAD:1.38, AUD:1.54, PKR:278, MYR:4.47, TRY:34, EGP:50, NGN:1580 };
     if (statusEl) { statusEl.textContent = '⚠️ Could not load live prices — using estimates from early 2026. Results may be inaccurate.'; statusEl.style.color = '#d97706'; }
   }
 }
