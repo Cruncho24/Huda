@@ -4400,7 +4400,7 @@ html.dark .plan-cancel-confirm-btn:active { background: #450a0a; }
   -webkit-tap-highlight-color: transparent;
 }
 .dhikr-cal-nav-btn:active { background: #e2e8f0; }
-.dhikr-cal-nav-btn:disabled { color: #cbd5e1; cursor: default; }
+.dhikr-cal-nav-btn:disabled { color: #cbd5e1; cursor: default; opacity: 0.4; }
 .dhikr-cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -4517,6 +4517,7 @@ html.dark .dhikr-section-title { color: #f1f5f9; }
 html.dark .dhikr-cal-month { color: #f1f5f9; }
 html.dark .dhikr-cal-nav-btn { background: #334155; color: #34d399; }
 html.dark .dhikr-cal-nav-btn:active { background: #475569; }
+html.dark .dhikr-cal-nav-btn:disabled { color: #475569; opacity: 0.4; }
 html.dark .dhikr-cal-day.lv0 { background: #334155; color: #475569; }
 html.dark .dhikr-cal-day.future { background: transparent; color: #334155; }
 html.dark .dhikr-cal-header-cell { color: #64748b; }

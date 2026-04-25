@@ -194,9 +194,10 @@ function getPlanScheduleStatus(plan) {
   const actual = plan.completedThrough || 0;
   if (actual >= expected) return { status: 'on-track', daysBehind: 0 };
   const rawDays = Math.floor((expected - actual) / plan.ayahsPerDay);
-  // Cap at 30 so UI never shows absurd numbers
+  // Cap at 30 so UI never shows absurd numbers; flag if capped so display shows "30+d"
+  const capped = rawDays > 30;
   const daysBehind = Math.max(1, Math.min(rawDays, 30));
-  return { status: 'behind', daysBehind };
+  return { status: 'behind', daysBehind, capped };
 }
 
 // How many ayahs of today's range the user has actually read.
@@ -657,7 +658,7 @@ function openPlanDetail() {
         <div class="pd-today-label">TODAY · DAY ${dayNum}</div>
         <div class="pd-today-range">${_rl(range.from, range.to)}</div>
         <div class="pd-today-bar-wrap"><div class="pd-today-bar-fill" style="width:${ayahsDone > 0 ? Math.max(3, dayPct) : 0}%"></div></div>
-        <div class="pd-today-meta">${ayahsDone} of ${total} ayahs read${schedule.status === 'behind' ? ` · <span style="color:#ef4444">${schedule.daysBehind}d behind</span>` : ''}</div>
+        <div class="pd-today-meta">${ayahsDone} of ${total} ayahs read${schedule.status === 'behind' ? ` · <span style="color:#ef4444">${schedule.daysBehind}${schedule.capped ? '+' : ''}d behind</span>` : ''}</div>
         <div class="pd-today-actions">
           <button class="pd-read-btn" onclick="jumpToPlanReading()">▶ Read</button>
           <button class="pd-done-btn" onclick="markPlanDoneNoNav();setTimeout(openPlanDetail,150)">✓ Mark done</button>
@@ -983,7 +984,7 @@ function renderPlanCard() {
 
   let badgeHtml = '';
   if (schedule.status === 'behind') {
-    badgeHtml = `<div class="plan-status-badge plan-status-behind">${schedule.daysBehind}d behind</div>`;
+    badgeHtml = `<div class="plan-status-badge plan-status-behind">${schedule.daysBehind}${schedule.capped ? '+' : ''}d behind</div>`;
   } else if (streak > 1) {
     badgeHtml = `<div class="plan-streak">🔥 ${streak}</div>`;
   }
