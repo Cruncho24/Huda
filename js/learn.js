@@ -357,9 +357,6 @@ async function fetchZakatPrices() {
 
 function setZakatCurrency(c) {
   state.learn.zakat.currency = c;
-  document.querySelectorAll('.currency-btn').forEach(b => {
-    b.classList.toggle('active', b.textContent === c);
-  });
   document.querySelectorAll('label span').forEach(s => { s.textContent = `(${c})`; });
 }
 
