@@ -5,6 +5,9 @@
 // ── Hijri Date (API-accurate, localStorage cached) ────────────
 let _hijriCacheMem = null; // { key: 'YYYY-MM-DD', hijri: {...} }
 
+// Module-level flag — survives state.audio object replacements in quran.js
+let _settingsPausedAudio = false;
+
 function _hijriDateKey(date) {
   return date.toISOString().slice(0, 10);
 }
@@ -102,10 +105,13 @@ function renderHome() {
   let ramadanCard = '';
   if (isRamadan && state.prayer.times) {
     const maghrib = new Date(state.prayer.times.maghrib);
-    const fajr = new Date(state.prayer.times.fajr);
     const nowT = new Date();
     const isBeforeIftar = nowT < maghrib;
-    const target = isBeforeIftar ? maghrib : fajr;
+    // After Maghrib, Suhoor target is tomorrow's Fajr — today's Fajr is already past
+    const fajrToday = new Date(state.prayer.times.fajr);
+    const fajrTomorrow = new Date(fajrToday);
+    fajrTomorrow.setDate(fajrTomorrow.getDate() + 1);
+    const target = isBeforeIftar ? maghrib : fajrTomorrow;
     const label = isBeforeIftar ? 'Iftar' : 'Suhoor (tomorrow)';
     const diff = target - nowT;
     const hh = Math.floor(diff/3600000), mm = Math.floor((diff%3600000)/60000), ss = Math.floor((diff%60000)/1000);
@@ -428,7 +434,7 @@ function openSettings() {
   if (state.audio.player && !state.audio.player.paused) {
     state.audio.player.pause();
     state.audio.paused = true;
-    state.audio._pausedBySettings = true;
+    _settingsPausedAudio = true;
   }
 
   const perm = ('Notification' in window) ? Notification.permission : 'unsupported';
@@ -522,9 +528,9 @@ function openSettings() {
 
 function closeSettings() {
   // Clear the settings-pause flag so auto-resume-on-foreground works again
-  if (state.audio._pausedBySettings) {
+  if (_settingsPausedAudio) {
     state.audio.paused = false;
-    state.audio._pausedBySettings = false;
+    _settingsPausedAudio = false;
   }
   renderHome();
 }

@@ -174,9 +174,9 @@ function getPlanStreak(plan) {
 }
 
 function getPlanDayNumber(plan) {
-  const start = new Date(plan.startDate);
-  const today = new Date(_todayStr());
-  return Math.floor((today - start) / 86400000) + 1;
+  const start = new Date(plan.startDate + 'T12:00:00'); // noon avoids UTC midnight DST/timezone off-by-one
+  const today = new Date(_todayStr() + 'T12:00:00');
+  return Math.max(1, Math.floor((today - start) / 86400000) + 1);
 }
 
 function getPlanPct(plan) {
