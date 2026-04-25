@@ -300,6 +300,7 @@ function dismissJumuah() {
 }
 
 function rotateHadith() {
+  if (HADITHS.length <= 1) return;
   let next;
   do { next = Math.floor(Math.random() * HADITHS.length); } while (next === state.hadithIndex);
   state.hadithIndex = next;

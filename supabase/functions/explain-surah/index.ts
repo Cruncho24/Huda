@@ -66,8 +66,8 @@ Deno.serve(async (req: Request) => {
   }
 
   const { surahNum, surahName, ayahCount, revelationType } = body;
-  if (!surahNum || !surahName) {
-    return new Response(JSON.stringify({ error: 'Missing required fields' }), { status: 400, headers: corsHeaders });
+  if (!surahNum || surahNum < 1 || surahNum > 114 || !surahName) {
+    return new Response(JSON.stringify({ error: 'Invalid surah number' }), { status: 400, headers: corsHeaders });
   }
 
   // ── Cache check ───────────────────────────────────────────────
@@ -98,6 +98,7 @@ Deno.serve(async (req: Request) => {
   const limit = userId ? AUTH_DAILY_LIMIT : ANON_DAILY_LIMIT;
   const isAdmin = userId !== null && ADMIN_USER_IDS.has(userId);
 
+  // Shared quota table with explain-ayah — ayah + surah calls both count against the same daily limit
   const { data: usage } = await sb
     .from('explanation_usage')
     .select('count')
