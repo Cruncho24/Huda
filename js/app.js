@@ -107,8 +107,21 @@ const state = {
   },
   tasbeeh: parseInt(localStorage.getItem('huda_tasbeeh') || '0') || 0,
   plan: (() => { try { return JSON.parse(localStorage.getItem('huda_plan') || 'null'); } catch(e) { return null; } })(),
+  streak: (() => { try { return JSON.parse(localStorage.getItem('huda_streak') || '{"count":0,"lastDate":null}'); } catch(e) { return { count: 0, lastDate: null }; } })(),
   calendar: { displayYear: null, displayMonth: null },
 };
+
+function updateQuranStreak() {
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const s = state.streak;
+  if (s.lastDate === todayStr) return; // already counted today
+  const prev = new Date(now); prev.setDate(prev.getDate() - 1);
+  const yStr = `${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}-${String(prev.getDate()).padStart(2,'0')}`;
+  s.count = s.lastDate === yStr ? (s.count || 0) + 1 : 1;
+  s.lastDate = todayStr;
+  try { localStorage.setItem('huda_streak', JSON.stringify(s)); } catch(e) {}
+}
 
 // ── Auth Modal ────────────────────────────────────────────────
 function openAuthModal() {

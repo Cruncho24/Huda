@@ -240,6 +240,7 @@ function filterSurahs(query) {
 }
 
 async function openSurah(n, targetAyah = null, { keepAudio = false } = {}) {
+  updateQuranStreak();
   if (!keepAudio) mushafStop();
   document.getElementById('quran-list-view').style.display = 'none';
   const reader = document.getElementById('quran-reader');

@@ -159,6 +159,7 @@ function renderHome() {
       <div class="hero-arabic">السَّلَامُ عَلَيْكُمْ</div>
       <div class="hero-sub">Peace be upon you</div>
       ${_pillHtml}
+      ${state.streak?.count >= 1 ? `<div class="hero-streak">🔥 ${state.streak.count} day${state.streak.count === 1 ? '' : 's'} reading streak</div>` : ''}
     </div>
 
     ${ramadanCard}
