@@ -2100,7 +2100,7 @@ async function showExplanationSheet(globalNum, surahNum, ayahNum, _arabicText, _
       </div>
       <div class="explain-body" id="explain-body">
         <div class="explain-loading">
-          <div class="explain-loading-label">✦ Consulting the scholars…</div>
+          <div class="explain-loading-label">✦ Consulting classical sources…</div>
           <div class="explain-skel" style="width:92%"></div>
           <div class="explain-skel" style="width:75%"></div>
           <div class="explain-skel" style="width:85%"></div>
@@ -2152,7 +2152,7 @@ async function showExplanationSheet(globalNum, surahNum, ayahNum, _arabicText, _
         <div class="explain-section-text">${esc(ex.scholarInsight)}</div>
       </div>
       <div class="explain-disclaimer">
-        AI-generated summary drawing on classical tafsir tradition. Scholar attributions are AI-inferred, not verified quotes.
+        AI-generated summary reflecting the general classical tafsir tradition. No specific scholar is quoted or attributed.
         For religious guidance, consult a qualified scholar.
       </div>
     `;
@@ -2200,7 +2200,7 @@ async function showSurahExplanationSheet(surahNum) {
       </div>
       <div class="explain-body" id="explain-body">
         <div class="explain-loading">
-          <div class="explain-loading-label">✦ Consulting the scholars…</div>
+          <div class="explain-loading-label">✦ Consulting classical sources…</div>
           <div class="explain-skel" style="width:92%"></div>
           <div class="explain-skel" style="width:75%"></div>
           <div class="explain-skel" style="width:85%"></div>
@@ -2246,7 +2246,7 @@ async function showSurahExplanationSheet(surahNum) {
         <div class="explain-section-text">${esc(ex.scholarInsight)}</div>
       </div>
       <div class="explain-disclaimer">
-        AI-generated summary drawing on classical tafsir tradition. Scholar attributions are AI-inferred, not verified quotes.
+        AI-generated summary reflecting the general classical tafsir tradition. No specific scholar is quoted or attributed.
         For religious guidance, consult a qualified scholar.
       </div>
     `;
