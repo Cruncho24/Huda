@@ -300,7 +300,9 @@ function dismissJumuah() {
 }
 
 function rotateHadith() {
-  state.hadithIndex = (state.hadithIndex + 1) % HADITHS.length;
+  let next;
+  do { next = Math.floor(Math.random() * HADITHS.length); } while (next === state.hadithIndex);
+  state.hadithIndex = next;
   const card = document.getElementById('hadith-card');
   if (!card) return;
   const h = HADITHS[state.hadithIndex];
