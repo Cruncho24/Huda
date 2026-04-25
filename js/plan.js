@@ -197,7 +197,7 @@ function getPlanScheduleStatus(plan) {
   // Cap at 30 so UI never shows absurd numbers; flag if capped so display shows "30+d"
   const capped = rawDays > 30;
   const daysBehind = Math.max(1, Math.min(rawDays, 30));
-  return { status: 'behind', daysBehind, capped };
+  return { status: 'behind', daysBehind, rawDaysBehind: rawDays, capped };
 }
 
 // How many ayahs of today's range the user has actually read.
@@ -603,7 +603,7 @@ function redistributePlan(fromDetail = false) {
   const schedule = getPlanScheduleStatus(plan);
   if (schedule.status !== 'behind') return;
   const remaining = TOTAL_AYAHS - (plan.completedThrough || 0);
-  const newDays = getPlanDaysRemaining(plan) + schedule.daysBehind;
+  const newDays = getPlanDaysRemaining(plan) + schedule.rawDaysBehind;
   plan.ayahsPerDay = Math.ceil(remaining / newDays);
   delete plan.currentDayEnd;
   // startDate intentionally not reset — keeps heatmap and day numbers intact
