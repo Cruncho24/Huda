@@ -772,12 +772,17 @@ function switchTab(tab) {
 function registerSW() {
   if (!('serviceWorker' in navigator)) return;
   navigator.serviceWorker.register('/service-worker.js').then(reg => {
-    // Check for updates when user returns to the app
+    // Check for updates: reg.update() catches SW file changes;
+    // fetching index.html triggers the SW's content-comparison which catches
+    // deploys where only JS/CSS versions changed (most common case).
+    const _checkUpdate = () => {
+      reg.update();
+      fetch('/?_sw=' + Date.now()).catch(() => {});
+    };
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') reg.update();
+      if (document.visibilityState === 'visible') _checkUpdate();
     });
-    // Also check every 30s while app is in foreground
-    setInterval(() => { if (document.visibilityState === 'visible') reg.update(); }, 30000);
+    setInterval(() => { if (document.visibilityState === 'visible') _checkUpdate(); }, 30000);
   }).catch(() => {});
   // Guard against double-reload when both SW file and index.html change in the same deploy
   let _reloading = false;
