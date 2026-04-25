@@ -58,7 +58,7 @@ function filterDuas(q) {
     );
   });
   grid.innerHTML = filtered.length ? _renderDuaCategories(filtered)
-    : `<div style="padding:32px 16px;text-align:center;color:var(--gray-400);grid-column:1/-1">No duas found</div>`;
+    : `<div style="padding:32px 16px;text-align:center;color:var(--gray-400);grid-column:1/-1">No results found</div>`;
 }
 
 function openDuaCategory(cat) {
