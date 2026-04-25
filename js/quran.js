@@ -1809,7 +1809,18 @@ async function _loadCategoryVerses(cat) {
     const cacheKey = `huda_cv_${s}_${a}`;
     try {
       const cached = localStorage.getItem(cacheKey);
-      if (cached) return JSON.parse(cached);
+      if (cached) {
+        try {
+          const log = JSON.parse(localStorage.getItem('huda_cv_log') || '[]');
+          const idx = log.indexOf(cacheKey);
+          if (idx !== -1 && idx < log.length - 1) {
+            log.splice(idx, 1);
+            log.push(cacheKey);
+            localStorage.setItem('huda_cv_log', JSON.stringify(log));
+          }
+        } catch(e) {}
+        return JSON.parse(cached);
+      }
       const res = await fetch(`https://api.alquran.cloud/v1/ayah/${s}:${a}/editions/quran-uthmani,en.sahih`);
       const json = await res.json();
       if (json.code !== 200) return null;
@@ -1974,8 +1985,18 @@ async function toggleTafsir(surah, ayah) {
   let text;
   try {
     const cache = JSON.parse(localStorage.getItem(`huda_tafsir_k_${surah}`) || '{}');
+    if (!cache._order) cache._order = [];
     if (cache[ayah]) {
       text = cache[ayah];
+      // Promote to MRU position so LRU eviction keeps recently-read ayahs
+      try {
+        const idx = cache._order.indexOf(String(ayah));
+        if (idx !== -1 && idx < cache._order.length - 1) {
+          cache._order.splice(idx, 1);
+          cache._order.push(String(ayah));
+          localStorage.setItem(`huda_tafsir_k_${surah}`, JSON.stringify(cache));
+        }
+      } catch(e) {}
     } else {
       const res = await fetch(`https://api.alquran.cloud/v1/ayah/${surah}:${ayah}/en.maududi`);
       if (!res.ok) throw new Error(res.status);
@@ -1983,10 +2004,12 @@ async function toggleTafsir(surah, ayah) {
       text = json.data?.text;
       if (text) {
         cache[ayah] = text;
+        cache._order.push(String(ayah));
         try {
-          // Cap per-surah cache to 30 ayahs (drop oldest)
-          const ayahKeys = Object.keys(cache);
-          if (ayahKeys.length > 30) ayahKeys.slice(0, ayahKeys.length - 30).forEach(k => delete cache[k]);
+          // Cap per-surah to 30 ayahs in insertion order (LRU eviction)
+          if (cache._order.length > 30) {
+            cache._order.splice(0, cache._order.length - 30).forEach(k => delete cache[k]);
+          }
           const sKey = `huda_tafsir_k_${surah}`;
           localStorage.setItem(sKey, JSON.stringify(cache));
           // Cap total tafsir surahs to 20

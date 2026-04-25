@@ -140,7 +140,7 @@ function renderProphetDuaReader() {
     <div class="page-header">
       <button class="back-btn" onclick="renderProphetList()">←</button>
       <div>
-        <h2>${prophet}</h2>
+        <h2>${esc(prophet)}</h2>
         <div style="font-size:11px;opacity:0.8">${PROPHET_ICONS[prophet] || '🤲'} Prophetic Duas</div>
       </div>
     </div>
@@ -207,7 +207,7 @@ function renderDuaReader() {
     <div class="page-header">
       <button class="back-btn" onclick="renderDuasHome()">←</button>
       <div>
-        <h2>${cat}</h2>
+        <h2>${esc(cat)}</h2>
         <div style="font-size:11px;opacity:0.8">${DUA_ICONS[cat] || '🤲'} Hisnul Muslim</div>
       </div>
     </div>

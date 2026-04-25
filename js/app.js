@@ -95,7 +95,6 @@ const state = {
     filteredSurahs: [...SURAHS],
     viewMode: 'verse',
     currentPage: 0,
-    timings: {},
     searchOpen: false,
     searchQuery: '',
   },
