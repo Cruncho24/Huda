@@ -366,7 +366,7 @@ function updateCountdown(target) {
       const _now = new Date();
       const _hit = ['fajr','dhuhr','asr','maghrib','isha'].find(key => {
         const t = new Date(state.prayer.times[key]);
-        return Math.abs(t - _now) < 90000; // within 90 seconds of prayer time
+        return Math.abs(t - _now) < 60000; // within 60 seconds of prayer time
       });
       if (_hit) {
         const _names = { fajr:'Fajr', dhuhr:'Dhuhr', asr:'Asr', maghrib:'Maghrib', isha:'Isha' };

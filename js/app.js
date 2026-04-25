@@ -748,8 +748,12 @@ function _restoreTab(tab) {
 }
 
 function switchTab(tab) {
+  const prevTab = state.activeTab;
   // Preserve scroll position of current tab before hiding it
-  if (state.activeTab) _tabScrollY[state.activeTab] = window.scrollY;
+  if (prevTab) _tabScrollY[prevTab] = window.scrollY;
+
+  // Stop compass sensor if leaving prayer tab
+  if (prevTab === 'prayer' && tab !== 'prayer' && typeof stopQiblaCompass === 'function') stopQiblaCompass();
 
   state.activeTab = tab;
   haptic();
