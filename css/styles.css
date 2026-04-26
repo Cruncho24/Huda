@@ -320,12 +320,14 @@ body {
   border-radius: 6px;
   padding: 5px 10px;
   font-size: 14px;
+  min-height: 36px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s;
 }
 .mhdr-btn:active { background: rgba(255,255,255,0.4); }
 .mhdr-btn:disabled { opacity: 0.3; cursor: default; }
+.surah-overview-btn { font-size: 12px; border: 1px solid rgba(255,255,255,0.55); letter-spacing: 0.02em; }
 @keyframes mpb-spin { to { transform: rotate(360deg); } }
 .mpb-spinner {
   display: inline-block;

@@ -70,7 +70,7 @@ function renderQuranList() {
           <div style="font-size:11px;opacity:0.8" id="reader-meta"></div>
         </div>
         <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
-          <button class="mhdr-btn" id="surah-explain-btn" onclick="showSurahExplanationSheet(state.quran.currentSurah)" title="Explain this surah" style="display:none">✦</button>
+          <button class="mhdr-btn surah-overview-btn" id="surah-explain-btn" onclick="showSurahExplanationSheet(state.quran.currentSurah)" title="Surah Overview" aria-label="Surah overview" style="display:none">Overview</button>
           <button class="mhdr-btn" id="reader-bm-btn" onclick="toggleReaderBookmark()" title="Bookmark this surah">🏷️</button>
           <button class="mhdr-btn" id="surah-prev-btn" onclick="navigateSurah(-1)" title="Previous surah">‹</button>
           <button class="mhdr-btn" id="surah-next-btn" onclick="navigateSurah(1)" title="Next surah">›</button>
