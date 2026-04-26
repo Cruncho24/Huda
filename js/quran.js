@@ -245,7 +245,7 @@ let _surahListScrollY = 0;
 async function openSurah(n, targetAyah = null, { keepAudio = false } = {}) {
   updateQuranStreak();
   if (!keepAudio) mushafStop();
-  _surahListScrollY = window.scrollY;
+  if (document.getElementById('quran-reader').style.display === 'none') _surahListScrollY = window.scrollY;
   document.getElementById('quran-list-view').style.display = 'none';
   const reader = document.getElementById('quran-reader');
   reader.style.display = 'block';
