@@ -1489,6 +1489,15 @@ const AYATUL_KURSI = {
 // ── Quran Thematic Categories ─────────────────────────────────
 const QURAN_CATEGORIES = [
   {
+    id: 'tawhid', label: 'Tawhid', icon: '🕋', color: '#1e3a8a',
+    verses: [
+      {s:112,a:1},{s:112,a:2},{s:112,a:3},{s:112,a:4},
+      {s:2,a:255},{s:59,a:22},{s:59,a:23},{s:59,a:24},
+      {s:20,a:8},{s:2,a:163},{s:37,a:4},{s:6,a:102},
+      {s:57,a:3},{s:47,a:19},{s:3,a:2}
+    ]
+  },
+  {
     id: 'mercy', label: 'Mercy', icon: '💚', color: '#059669',
     verses: [
       {s:7,a:156},{s:39,a:53},{s:6,a:12},{s:21,a:107},
@@ -1620,15 +1629,6 @@ const QURAN_CATEGORIES = [
       {s:56,a:60},{s:75,a:1},{s:99,a:7},{s:14,a:48},
       {s:82,a:1},{s:99,a:8},{s:36,a:51},{s:18,a:49},
       {s:50,a:19},{s:40,a:16}
-    ]
-  },
-  {
-    id: 'tawhid', label: 'Tawhid', icon: '🕋', color: '#1e3a8a',
-    verses: [
-      {s:112,a:1},{s:112,a:2},{s:112,a:3},{s:112,a:4},
-      {s:2,a:255},{s:59,a:22},{s:59,a:23},{s:59,a:24},
-      {s:20,a:8},{s:2,a:163},{s:37,a:4},{s:6,a:102},
-      {s:57,a:3},{s:47,a:19},{s:3,a:2}
     ]
   },
   {
