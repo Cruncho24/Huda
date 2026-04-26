@@ -1197,6 +1197,43 @@ Say "Bismillah" (In the name of Allah) before beginning.
 **Wudu is broken by:** using the bathroom, passing wind, deep sleep, blood loss, unconsciousness, intimacy.`,
   },
   {
+    title: "How to Perform Ghusl (Ritual Bath)",
+    arabic: "كَيْفِيَّةُ الْغُسْل",
+    transliteration: "Kayfiyyat al-Ghusl",
+    content: `Ghusl is a full-body ritual wash that restores major purity (Taharah al-Kubra). When in a state of major impurity (janabah, post-menstruation, or post-nifas), it is required before prayer, Tawaf, or entering the masjid.
+
+**When Ghusl is obligatory (Fard):**
+- After sexual intercourse or ejaculation — Janabah (Quran 4:43, 5:6)
+- When menstruation ends
+- When postnatal bleeding (Nifas) ends
+- Upon death — performed by others for the deceased
+
+**When Ghusl is recommended (Sunnah):**
+- For Jumu'ah (Friday prayer) (Bukhari 877)
+- Before entering Ihram for Hajj or Umrah
+- Before Eid prayers
+
+**Steps — The Sunnah Method (Bukhari 272, Muslim 316):**
+
+**1. Intention (Niyyah)**
+Intend in the heart to perform ghusl to purify yourself for the sake of Allah.
+
+**2. Bismillah**
+Say "Bismillah" before beginning.
+
+**3. Wash both hands** — 3 times.
+
+**4. Wash the private parts** — removing any impurity.
+
+**5. Perform Wudu** — complete ablution as for prayer.
+
+**6. Pour water over the head** — 3 times, running fingers to the roots so water reaches the scalp. (Bukhari 272)
+
+**7. Pour water over the entire body** — right side first, then left, rubbing the skin. Ensure water reaches underarms, navel, and between toes.
+
+**Important:** Every part of the skin must be reached — ghusl is not valid if any area remains dry.`,
+  },
+  {
     title: "How to Perform Salah (Prayer)",
     arabic: "كَيْفِيَّةُ الصَّلَاة",
     transliteration: "Kayfiyyat as-Salah",
@@ -1273,6 +1310,42 @@ At-tahiyyatu lillahi was-salawatu wat-tayyibat. As-salamu 'alayka ayyuhan-nabiyy
 - Raise the index finger of the right hand during the Tashahhud as a sign of Tawhid (monotheism). (Abu Dawud 989, Sahih)
 - The Tashahhud is obligatory (wajib) in the final sitting; the Salat Ibrahimiyyah is a pillar (rukn) of prayer according to many scholars.
 - The Companion Ibn Mas'ud ؓ narrated teaching the Tashahhud: "The Prophet ﷺ taught it to me as he would teach me a surah of the Quran." (Bukhari 6265)`,
+  },
+  {
+    title: "Fasting in Ramadan (Sawm)",
+    arabic: "صِيَامُ رَمَضَان",
+    transliteration: "Siyam Ramadan",
+    content: `Fasting (Sawm) is the fourth pillar of Islam — obligatory for every adult Muslim throughout the month of Ramadan.
+
+"O you who believe! Fasting is prescribed for you as it was prescribed for those before you, that you may attain taqwa." (Quran 2:183)
+
+**What fasting means:**
+Abstaining from food, drink, and marital relations from Fajr until Maghrib, with the intention (niyyah) of worshipping Allah.
+
+**Suhoor (Pre-dawn meal):**
+Eat before Fajr. The Prophet (ﷺ): "Take the suhoor, for in suhoor there is blessing." (Bukhari 1923). It is Sunnah to delay it until close to Fajr.
+
+**Iftar (Breaking the fast):**
+Break at Maghrib — Sunnah to begin with dates then water. Say upon breaking:
+
+"Dhahabadh-dhama'u wabtallatil-uruqu wa thabatal-ajru insha'Allah"
+"The thirst is gone, the veins are moistened, and the reward is established, if Allah wills." (Abu Dawud 2357, Hasan)
+
+**What breaks the fast:** eating, drinking, marital relations, or intentional vomiting (deliberately and knowingly).
+
+**What does NOT break the fast:** forgetting and eating or drinking (Bukhari 1933), involuntary vomiting, rinsing the mouth without swallowing.
+
+**Who is exempt:**
+- The ill or traveler — make up missed days after Ramadan (Quran 2:184)
+- The elderly who are permanently unable — feed one poor person (Fidyah) per missed day (Quran 2:184)
+- Pregnant or nursing women — scholarly difference; the majority position is to make up the days
+
+**Laylat al-Qadr:**
+"The Night of Decree is better than a thousand months." (Quran 97:3). Seek it in the last 10 nights of Ramadan, especially the odd nights (21st, 23rd, 25th, 27th, 29th).
+
+The best dua for Laylat al-Qadr — taught by the Prophet (ﷺ) to Aisha (RA): "Allahumma innaka 'afuwwun tuhibbul-'afwa fa'fu 'anni" — "O Allah, You are Pardoning, You love pardon, so pardon me." (Tirmidhi 3513, Sahih)
+
+**The reward:** "Whoever fasts Ramadan out of faith and seeking reward, his previous sins will be forgiven." (Bukhari 38, Muslim 760)`,
   },
   {
     title: "Halal & Haram — Permissible & Prohibited",
@@ -1400,7 +1473,7 @@ const HAJJ_UMRAH = {
       step: 3,
       title: "Night of 9th/10th — Muzdalifah",
       subtitle: "الْمُزْدَلِفَة",
-      content: "After sunset, depart Arafah calmly and travel to Muzdalifah. Combine Maghrib and Isha here (at Isha time). Collect 7+ pebbles (chickpea-sized) for stoning tomorrow. Sleep here and pray Fajr.",
+      content: "After sunset, depart Arafah calmly and travel to Muzdalifah. Combine Maghrib and Isha here (at Isha time). Collect pebbles here for all stoning days — chickpea-sized, 49 minimum (if leaving on 12th) or 70 if staying through 13th. Sleep here and pray Fajr.",
       supplication: { arabic: "رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً وَفِي الآخِرَةِ حَسَنَةً وَقِنَا عَذَابَ النَّار", transliteration: "Rabbana atina fid-dunya hasanatan wa fil-akhirati hasanatan wa qina adhaban-nar", meaning: "Our Lord, give us good in this world and good in the Hereafter and protect us from the punishment of Fire." },
       notes: "The elderly and weak may depart for Mina after midnight. Others depart after Fajr. Collect 49–70 pebbles total for all stoning days."
     },
