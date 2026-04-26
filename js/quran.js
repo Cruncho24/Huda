@@ -240,9 +240,12 @@ function filterSurahs(query) {
   renderSurahList(filtered);
 }
 
+let _surahListScrollY = 0;
+
 async function openSurah(n, targetAyah = null, { keepAudio = false } = {}) {
   updateQuranStreak();
   if (!keepAudio) mushafStop();
+  _surahListScrollY = window.scrollY;
   document.getElementById('quran-list-view').style.display = 'none';
   const reader = document.getElementById('quran-reader');
   reader.style.display = 'block';
@@ -1745,6 +1748,7 @@ function closeQuranReader() {
   document.getElementById('quran-reader').style.display = 'none';
   document.getElementById('quran-list-view').style.display = 'block';
   state.quran.currentSurah = null;
+  window.scrollTo({ top: _surahListScrollY, behavior: 'instant' });
 }
 
 
