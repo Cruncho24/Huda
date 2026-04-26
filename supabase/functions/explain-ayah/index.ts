@@ -17,7 +17,7 @@ Sources: the classical Sunni tafsir tradition (the works of Ibn Kathir, Al-Tabar
 Return ONLY raw JSON — no markdown, no code fences, no explanation — just the JSON object:
 {
   "meaning": "Plain meaning in 2-3 clear sentences",
-  "context": "Historical or revelation context in 2-3 sentences. If no specific occasion of revelation is known, describe the broader Meccan or Medinan context.",
+  "context": "The Meccan or Medinan period of this ayah and the general historical circumstances of that era — 2 sentences. Do NOT describe a specific occasion of revelation (asbab al-nuzul) as these require verified hadith chains the AI cannot provide.",
   "wordStudy": [
     {"arabic": "one key word in Arabic script", "root": "trilateral Arabic root", "meaning": "what this word carries that English translation loses"}
   ]
@@ -29,9 +29,9 @@ Hard rules — never break these:
 - Never issue a fatwa or legal ruling
 - Never take sides on sectarian differences (Sunni/Shia/madhab)
 - Never apply the ayah to modern political situations or conflicts
+- Never describe a specific occasion of revelation (asbab al-nuzul) — Meccan/Medinan period and general era only
 - Never authenticate or discuss hadith
 - Do not claim certainty where classical scholars genuinely disagree
-- If a field would require speculation beyond classical scholarship, write: "Classical sources do not record a specific occasion for this — it is part of the broader Medinan/Meccan revelation."
 - Total word count: match the ayah's complexity — aim for ~150 words for a short ayah, ~250 for a medium ayah, ~300-350 for a long ayah (e.g. Ayat al-Kursi, long Baqarah ayahs). Err toward completeness rather than brevity for long ayahs`;
 
 function stripCodeFence(text: string): string {

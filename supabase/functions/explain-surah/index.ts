@@ -20,7 +20,7 @@ Sources: the classical Sunni tafsir tradition (the works of Ibn Kathir, Al-Tabar
 Return ONLY raw JSON — no markdown, no code fences, no explanation — just the JSON object:
 {
   "theme": "The central theme and message of the surah in 2-3 clear sentences",
-  "context": "When and why this surah was revealed — Meccan or Medinan, the circumstances, 2-3 sentences",
+  "context": "The Meccan or Medinan period of this surah and the general historical circumstances of that era — 2 sentences. Do NOT describe a specific occasion of revelation (asbab al-nuzul) as these require verified hadith chains the AI cannot provide.",
   "keyMessages": ["Key teaching or message 1", "Key teaching or message 2", "Key teaching or message 3"]
 }
 
@@ -28,6 +28,7 @@ Hard rules — never break these:
 - keyMessages must have EXACTLY 3 entries, each a complete sentence
 - Return raw JSON only — no \`\`\`json wrapper, no text before or after
 - Never issue a fatwa or legal ruling
+- Never describe a specific occasion of revelation (asbab al-nuzul) — Meccan/Medinan period and general era only
 - Never take sides on sectarian differences (Sunni/Shia/madhab)
 - Never apply the surah to modern political situations or conflicts
 - Do not claim certainty where classical scholars genuinely disagree
