@@ -656,6 +656,26 @@ const DUAS = {
       source: "Hisnul Muslim 102", grade: "Sahih — Ahmad 4/403, authenticated by Al-Albani"
     }
   ],
+  "Fire & Grave Protection": [
+    {
+      arabic: "اللّٰهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ عَذَابِ جَهَنَّمَ، وَمِنْ عَذَابِ الْقَبْرِ، وَمِنْ فِتْنَةِ الْمَحْيَا وَالْمَمَاتِ، وَمِنْ شَرِّ فِتْنَةِ الْمَسِيحِ الدَّجَّالِ",
+      transliteration: "Allahumma inni a'udhu bika min adhabi jahannam, wa min adhabil-qabr, wa min fitnatil-mahya wal-mamat, wa min sharri fitnatil-masihid-dajjal",
+      meaning: "O Allah, I seek Your refuge from the punishment of Hellfire, the punishment of the grave, the trials of life and death, and from the evil of the trial of the False Messiah.",
+      source: "Hisnul Muslim 66 — said in final tashahud before salam", grade: "Sahih — Muslim 588, Bukhari 1377"
+    },
+    {
+      arabic: "اللّٰهُمَّ أَجِرْنِي مِنَ النَّارِ",
+      transliteration: "Allahumma ajirni minan-nar",
+      meaning: "O Allah, save me from the Hellfire.",
+      source: "Hisnul Muslim 121 — say 7 times in morning and evening", grade: "Hasan — Abu Dawud 5079"
+    },
+    {
+      arabic: "اللّٰهُمَّ إِنِّي أَسْأَلُكَ الْجَنَّةَ وَأَعُوذُ بِكَ مِنَ النَّارِ",
+      transliteration: "Allahumma inni as'aluka al-jannata wa a'udhu bika minan-nar",
+      meaning: "O Allah, I ask You for Paradise and I seek Your refuge from the Hellfire.",
+      source: "Hisnul Muslim — Abu Dawud 792, Ibn Majah 910", grade: "Sahih"
+    }
+  ],
   "For Guidance & Knowledge": [
     {
       arabic: "رَبِّ زِدْنِي عِلْمًا",
@@ -1729,6 +1749,14 @@ const QURAN_CATEGORIES = [
       {s:11,a:106},{s:22,a:19},{s:3,a:197},{s:38,a:56},
       {s:40,a:46},{s:67,a:6},{s:78,a:21},{s:78,a:22},
       {s:78,a:23},{s:87,a:12},{s:87,a:13}
+    ]
+  },
+  {
+    id: 'protection', label: 'Protection from Fire', icon: '🛡️', color: '#0369a1',
+    verses: [
+      {s:2,a:201},{s:3,a:16},{s:3,a:191},{s:3,a:192},
+      {s:3,a:193},{s:3,a:194},{s:25,a:65},{s:40,a:7},
+      {s:66,a:8}
     ]
   },
 ];
