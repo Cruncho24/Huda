@@ -673,7 +673,7 @@ const DUAS = {
       arabic: "اللّٰهُمَّ إِنِّي أَسْأَلُكَ الْجَنَّةَ وَأَعُوذُ بِكَ مِنَ النَّارِ",
       transliteration: "Allahumma inni as'aluka al-jannata wa a'udhu bika minan-nar",
       meaning: "O Allah, I ask You for Paradise and I seek Your refuge from the Hellfire.",
-      source: "Hisnul Muslim — Abu Dawud 792, Ibn Majah 910", grade: "Sahih"
+      source: "Abu Dawud 792, Ibn Majah 910 — said during salah", grade: "Sahih — authenticated by Al-Albani"
     }
   ],
   "For Guidance & Knowledge": [
@@ -1754,9 +1754,8 @@ const QURAN_CATEGORIES = [
   {
     id: 'protection', label: 'Protection from Fire', icon: '🛡️', color: '#0369a1',
     verses: [
-      {s:2,a:201},{s:3,a:16},{s:3,a:191},{s:3,a:192},
-      {s:3,a:193},{s:3,a:194},{s:25,a:65},{s:40,a:7},
-      {s:66,a:8}
+      {s:3,a:16},{s:3,a:192},{s:3,a:193},{s:3,a:194},
+      {s:25,a:65},{s:7,a:47},{s:14,a:41},{s:60,a:5}
     ]
   },
 ];
