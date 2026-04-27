@@ -1220,7 +1220,7 @@ Say "Bismillah" (In the name of Allah) before beginning.
     title: "How to Perform Ghusl (Ritual Bath)",
     arabic: "كَيْفِيَّةُ الْغُسْل",
     transliteration: "Kayfiyyat al-Ghusl",
-    content: `Ghusl is a full-body ritual wash that restores major purity (Taharah al-Kubra). When in a state of major impurity (janabah, post-menstruation, or post-nifas), it is required before prayer, Tawaf, or entering the masjid.
+    content: `Ghusl is a full-body ritual wash that restores major purity (Taharah al-Kubra). When in a state of major impurity (janabah, post-menstruation, or post-nifas), it is required before prayer and Tawaf; entering the masjid is also prohibited according to the majority of scholars.
 
 **When Ghusl is obligatory (Fard):**
 - After sexual intercourse or ejaculation — Janabah (Quran 4:43, 5:6)
@@ -1319,7 +1319,7 @@ At-tahiyyatu lillahi was-salawatu wat-tayyibat. As-salamu 'alayka ayyuhan-nabiyy
 
 اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ عَذَابِ جَهَنَّمَ، وَمِنْ عَذَابِ الْقَبْرِ، وَمِنْ فِتْنَةِ الْمَحْيَا وَالْمَمَاتِ، وَمِنْ شَرِّ فِتْنَةِ الْمَسِيحِ الدَّجَّالِ
 
-*Allahumma inni a'udhu bika min 'adhabi jahannam, wa min 'adhabil-qabr, wa min fitnatil-mahya wal-mamat, wa min sharri fitnatil-masihid-dajjal.*
+*Allahumma inni a'udhu bika min adhabi jahannam, wa min adhabil-qabr, wa min fitnatil-mahya wal-mamat, wa min sharri fitnatil-masihid-dajjal.*
 
 "O Allah, I seek refuge in You from the punishment of Hell, from the punishment of the grave, from the trials of life and death, and from the evil of the trial of the False Messiah."
 *(Muslim 588 — the Prophet ﷺ commanded this to be said before tasleem)*
