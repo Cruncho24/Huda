@@ -1460,7 +1460,7 @@ function renderSurahContent(n, arData, enData) {
         </button>
         <button class="ayah-card-btn tafsir-btn" id="tafsir-btn-${n}-${a.numberInSurah}"
           onclick="toggleTafsir(${n},${a.numberInSurah})">Tafsir</button>
-        <button class="ayah-card-btn explain-btn" onclick="showExplanationSheet(${a.number},${n},${a.numberInSurah})" title="AI explanation" aria-label="AI explanation">AI Explain</button>
+        <button class="ayah-card-btn explain-btn" onclick="showExplanationSheet(${a.number},${n},${a.numberInSurah})" title="AI explanation" aria-label="AI explanation">✦ AI Explain</button>
         <button class="ayah-card-btn" onclick="shareAyah(${n},${a.numberInSurah})" aria-label="Share">📤</button>
       </div>
     </div>
@@ -1863,7 +1863,7 @@ async function _loadCategoryVerses(cat) {
               data-gn="${gn}" data-s="${v.s}" data-a="${v.a}"
               data-ar="${esc(v.arabic)}" data-en="${esc(v.english)}"
               onclick="event.stopPropagation();const d=this.dataset;showExplanationSheet(+d.gn,+d.s,+d.a,d.ar,d.en)"
-              title="AI explanation" aria-label="AI explanation">AI Explain</button>
+              title="AI explanation" aria-label="AI explanation">✦ AI Explain</button>
             <button class="cv-play-btn" id="cv-aud-${gn}"
               onclick="event.stopPropagation();playCatAyah(${gn},${v.s},${v.a})">▶</button>
           </div>
