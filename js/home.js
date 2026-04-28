@@ -241,7 +241,10 @@ function renderHome() {
     <div class="hadith-card" id="hadith-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <div class="card-section-label" style="margin-bottom:0">Hadith of the Day</div>
-        <button onclick="rotateHadith()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1" title="Next hadith">↻</button>
+        <div style="display:flex;gap:2px;align-items:center">
+          <button onclick="shareHadith()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:14px;padding:2px 6px;line-height:1" title="Share hadith">↗</button>
+          <button onclick="rotateHadith()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1" title="Next hadith">↻</button>
+        </div>
       </div>
       <p class="hadith-text">"${esc(h.text)}"</p>
       <div class="hadith-source">
@@ -260,7 +263,7 @@ function renderHome() {
         <span class="badge badge-emerald">${AYATUL_KURSI.ref}</span>
         <button class="ak-play-btn" id="ak-play" onclick="playAyatulKursi()">▶ Play</button>
         <button class="ak-loop-btn" id="ak-loop" onclick="toggleAyatulKursiLoop()" title="Loop" style="opacity:${_loopAyatulKursi ? '1' : '0.45'}">🔁</button>
-        <button class="ak-explain-btn" onclick="showExplanationSheet(262,2,255)" title="AI explanation" aria-label="AI explanation">✦ Explain</button>
+        <button class="ak-explain-btn" onclick="showExplanationSheet(262,2,255,AYATUL_KURSI.arabic,AYATUL_KURSI.translation)" title="AI explanation" aria-label="AI explanation">✦ Explain</button>
         <select class="ak-reciter-select" onchange="setReciter(this.value)" title="Reciter">
           ${RECITERS.map(r => `<option value="${r.id}" ${state.reciter === r.id ? 'selected' : ''}>${r.name}</option>`).join('')}
         </select>
@@ -312,7 +315,10 @@ function rotateHadith() {
     card.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <div class="card-section-label" style="margin-bottom:0">Hadith of the Day</div>
-        <button onclick="rotateHadith()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1" title="Next hadith">↻</button>
+        <div style="display:flex;gap:2px;align-items:center">
+          <button onclick="shareHadith()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:14px;padding:2px 6px;line-height:1" title="Share hadith">↗</button>
+          <button onclick="rotateHadith()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1" title="Next hadith">↻</button>
+        </div>
       </div>
       <p class="hadith-text">"${esc(h.text)}"</p>
       <div class="hadith-source">
@@ -322,6 +328,17 @@ function rotateHadith() {
     card.style.opacity = '1';
     card.style.transition = 'opacity 0.5s';
   }, 400);
+}
+
+function shareHadith() {
+  const h = HADITHS?.[state.hadithIndex];
+  if (!h) return;
+  const text = `"${h.text}"\n\n— ${h.source}\n\nShared from Huda Islamic Companion`;
+  if (navigator.share) {
+    navigator.share({ title: 'Hadith', text }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(text).then(() => showToast('Hadith copied ✓')).catch(() => {});
+  }
 }
 
 function openHelpScreen() {
@@ -520,7 +537,7 @@ function openSettings() {
           </div>
           <div class="settings-row">
             <span class="settings-label" style="color:#6b7280">Version</span>
-            <span class="settings-value" style="color:#9ca3af">v211</span>
+            <span class="settings-value" style="color:#9ca3af">${(() => { const s = document.querySelector('script[src*="app.js"]'); return s ? 'v' + (s.src.match(/\?v=(\d+)/)?.[1] ?? '?') : 'v?'; })()}</span>
           </div>
         </div>
 
