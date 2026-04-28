@@ -74,7 +74,7 @@ function getSurahAudioUrl(surahNum) {
 
 // ── State ────────────────────────────────────────────────────
 const state = {
-  activeTab: localStorage.getItem('huda_tab') || 'home',
+  activeTab: (['home','quran','prayer','dhikr','duas','learn'].includes(localStorage.getItem('huda_tab')) ? localStorage.getItem('huda_tab') : 'home'),
   dhikrCounts: (() => { try { return JSON.parse(localStorage.getItem('huda_dhikr') || '{}'); } catch(e) { return {}; } })(),
   hadithIndex: (() => { const d = new Date(); return (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate()) % (typeof HADITHS !== 'undefined' ? HADITHS.length : 40); })(),
   darkMode: localStorage.getItem('huda_dark') !== '0',
@@ -279,6 +279,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (_cp) { try { const p = JSON.parse(_cp); state.prayer.times = p.times; state.prayer.city = p.city || ''; state.prayer.qibla = p.qibla; if (p.lat && p.lng) state.prayer.location = { lat: p.lat, lng: p.lng }; } catch(e) {} }
   setupNav();
   renderHome();
+  if (state.activeTab !== 'home') switchTab(state.activeTab);
   fetchAndCacheHijri(new Date());
   registerSW();
   setupInstallPrompt();
