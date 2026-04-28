@@ -74,7 +74,7 @@ function getSurahAudioUrl(surahNum) {
 
 // ── State ────────────────────────────────────────────────────
 const state = {
-  activeTab: 'home',
+  activeTab: localStorage.getItem('huda_tab') || 'home',
   dhikrCounts: (() => { try { return JSON.parse(localStorage.getItem('huda_dhikr') || '{}'); } catch(e) { return {}; } })(),
   hadithIndex: (() => { const d = new Date(); return (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate()) % (typeof HADITHS !== 'undefined' ? HADITHS.length : 40); })(),
   darkMode: localStorage.getItem('huda_dark') === '1',
@@ -768,6 +768,7 @@ function switchTab(tab) {
   if (prevTab === 'prayer' && tab !== 'prayer' && typeof stopQiblaCompass === 'function') stopQiblaCompass();
 
   state.activeTab = tab;
+  localStorage.setItem('huda_tab', tab);
   haptic();
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
