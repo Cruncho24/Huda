@@ -25,11 +25,18 @@ function renderPrayer() {
         <div style="font-size:40px;margin-bottom:12px">🕌</div>
         <h2 style="font-size:20px;font-weight:700;margin-bottom:6px">Prayer Times</h2>
         <p style="font-size:13px;opacity:0.8;margin-bottom:16px">Enable location for accurate prayer times</p>
-        <button onclick="requestLocation()" style="background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.5);color:white;padding:12px 24px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;">
-          📍 Enable Location
+        <button onclick="requestLocation()" style="background:rgba(255,255,255,0.2);border:2px solid rgba(255,255,255,0.5);color:white;padding:12px 24px;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:20px">
+          📍 Use GPS
         </button>
+        <div class="city-search-form">
+          <input class="city-search-input" id="city-search-input" type="search" placeholder="Or search a city…"
+            oninput="searchCity(this.value)" autocomplete="off" autocorrect="off" spellcheck="false">
+        </div>
+        <div class="city-results" id="city-results"></div>
+        <p class="city-search-hint" id="city-search-hint">Detecting your location…</p>
       </div>
     `;
+    _tryIpLocation();
     const cached = localStorage.getItem('huda_prayer');
     if (cached) {
       try {
@@ -37,6 +44,7 @@ function renderPrayer() {
         state.prayer.times = p.times;
         state.prayer.city = p.city;
         state.prayer.qibla = p.qibla;
+        state.prayer.locationApprox = p.locationApprox ?? false;
         renderPrayerTimes();
       } catch(e) {}
     }
@@ -44,6 +52,68 @@ function renderPrayer() {
   }
   renderPrayerTimes();
   _prayerBackgroundRefresh();
+}
+
+async function _tryIpLocation() {
+  if (state.prayer.times) return;
+  if (localStorage.getItem('huda_prayer')) return;
+  try {
+    const res = await fetch('https://get.geojs.io/v1/ip/geo.json');
+    const data = await res.json();
+    // GPS may have resolved while GeoJS was in flight — don't overwrite it
+    if (state.prayer.times) return;
+    const lat = parseFloat(data.latitude);
+    const lng = parseFloat(data.longitude);
+    if (isNaN(lat) || isNaN(lng)) throw new Error('bad coords');
+    state.prayer.city = data.city || data.region || 'Your Area';
+    state.prayer.locationApprox = true;
+    state.prayer.qibla = calcQibla(lat, lng);
+    calcPrayerTimes(lat, lng);
+  } catch(e) {
+    const hint = document.getElementById('city-search-hint');
+    if (hint) hint.textContent = 'Search your city above to get started';
+  }
+}
+
+let _citySearchTimer = null;
+let _citySearchResults = null;
+async function searchCity(query) {
+  clearTimeout(_citySearchTimer);
+  const resultsEl = document.getElementById('city-results');
+  if (!resultsEl) return;
+  if (!query.trim()) { resultsEl.innerHTML = ''; return; }
+  _citySearchTimer = setTimeout(async () => {
+    try {
+      const res = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5`);
+      const data = await res.json();
+      const el = document.getElementById('city-results');
+      if (!el) return;
+      if (!data.length) {
+        el.innerHTML = '<div class="city-result-item city-no-results">No results found</div>';
+        return;
+      }
+      _citySearchResults = data;
+      el.innerHTML = data.map((r, i) => `
+        <div class="city-result-item" onclick="selectCityResult(${i})">
+          ${esc(r.display_name.split(',').slice(0, 3).join(', '))}
+        </div>`).join('');
+    } catch(e) {
+      const el = document.getElementById('city-results');
+      if (el) el.innerHTML = '<div class="city-result-item city-no-results">Search unavailable — check connection</div>';
+    }
+  }, 1000);
+}
+
+function selectCityResult(i) {
+  const r = _citySearchResults?.[i];
+  if (!r) return;
+  const lat = parseFloat(r.lat);
+  const lng = parseFloat(r.lon);
+  if (isNaN(lat) || isNaN(lng)) return;
+  state.prayer.city = r.display_name.split(',')[0].trim();
+  state.prayer.locationApprox = false;
+  state.prayer.qibla = calcQibla(lat, lng);
+  calcPrayerTimes(lat, lng);
 }
 
 let _lastBgRefresh = 0;
@@ -59,6 +129,7 @@ function _prayerBackgroundRefresh() {
         const { latitude: lat, longitude: lng } = pos.coords;
         const prev = state.prayer.location;
         if (!prev || Math.abs(lat - prev.lat) > 0.1 || Math.abs(lng - prev.lng) > 0.1) {
+          state.prayer.locationApprox = false;
           state.prayer.qibla = calcQibla(lat, lng);
           try {
             const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
@@ -92,6 +163,7 @@ async function requestLocation() {
     async (pos) => {
       const { latitude: lat, longitude: lng } = pos.coords;
       state.prayer.location = { lat, lng };
+      state.prayer.locationApprox = false;
       state.prayer.qibla = calcQibla(lat, lng);
       try {
         const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`);
@@ -138,6 +210,7 @@ function calcPrayerTimes(lat, lng) {
     times: state.prayer.times,
     city: state.prayer.city,
     qibla: state.prayer.qibla,
+    locationApprox: state.prayer.locationApprox,
     lat, lng,
   }));
   renderPrayerTimes();
@@ -256,6 +329,12 @@ function renderPrayerTimes() {
       <button class="notif-banner-dismiss" onclick="dismissNotifBanner()" aria-label="Dismiss">✕</button>
     </div>` : '';
 
+  const approxBanner = state.prayer.locationApprox ? `
+    <div class="approx-banner">
+      <span>📍 Approximate location — times may vary</span>
+      <button onclick="requestLocation()">Use GPS</button>
+    </div>` : '';
+
   const tab = document.getElementById('tab-prayer');
   tab.innerHTML = `
     <div class="prayer-hero" style="padding-top:calc(22px + env(safe-area-inset-top,0px));text-align:center;position:relative;overflow:hidden">
@@ -265,6 +344,7 @@ function renderPrayerTimes() {
       <div class="prayer-hero-time">${fmt(nextTime)}</div>
       <div class="prayer-countdown-pill" id="prayer-countdown">—</div>
     </div>
+    ${approxBanner}
     ${notifBanner}
     <div class="prayer-list">
       ${PRAYER_NAMES.map(p => {

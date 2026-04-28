@@ -84,7 +84,7 @@ const state = {
   reciter: localStorage.getItem('huda_reciter') || 'ar.mahermuaiqly',
   audio: { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false },
   prayer: {
-    times: null, location: null, qibla: null, city: '',
+    times: null, location: null, qibla: null, city: '', locationApprox: false,
     countdownInterval: null, ramadanInterval: null, homeInterval: null,
     compassOpen: false,
   },
@@ -783,22 +783,31 @@ function switchTab(tab) {
 // ── PWA ───────────────────────────────────────────────────────
 function registerSW() {
   if (!('serviceWorker' in navigator)) return;
+  // Guard against double-reload when both SW file and index.html change in the same deploy
+  let _reloading = false;
+  const _reload = () => { if (_reloading) return; _reloading = true; window.location.reload(); };
+
   navigator.serviceWorker.register('/service-worker.js').then(reg => {
-    // Check for updates: reg.update() catches SW file changes;
-    // fetching index.html triggers the SW's content-comparison which catches
-    // deploys where only JS/CSS versions changed (most common case).
-    const _checkUpdate = () => {
+    // Check for updates: reg.update() catches SW file changes.
+    // The page itself reads the fetched index.html and compares CSS version —
+    // avoids relying on SW→page postMessage which is unreliable on iOS.
+    const _checkUpdate = async () => {
       reg.update();
-      fetch('/?_sw=' + Date.now()).catch(() => {});
+      try {
+        const res = await fetch('/?_v=' + Date.now());
+        if (!res.ok) return;
+        const html = await res.text();
+        const serverVer = html.match(/styles\.css\?v=(\d+)/)?.[1];
+        const localVer = document.querySelector('link[href*="styles.css"]')
+                           ?.href?.match(/\?v=(\d+)/)?.[1];
+        if (serverVer && localVer && serverVer !== localVer) _reload();
+      } catch(e) {}
     };
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'visible') _checkUpdate();
     });
     setInterval(() => { if (document.visibilityState === 'visible') _checkUpdate(); }, 30000);
   }).catch(() => {});
-  // Guard against double-reload when both SW file and index.html change in the same deploy
-  let _reloading = false;
-  const _reload = () => { if (_reloading) return; _reloading = true; window.location.reload(); };
 
   navigator.serviceWorker.addEventListener('controllerchange', _reload);
   navigator.serviceWorker.addEventListener('message', e => {
