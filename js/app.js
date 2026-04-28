@@ -77,7 +77,7 @@ const state = {
   activeTab: localStorage.getItem('huda_tab') || 'home',
   dhikrCounts: (() => { try { return JSON.parse(localStorage.getItem('huda_dhikr') || '{}'); } catch(e) { return {}; } })(),
   hadithIndex: (() => { const d = new Date(); return (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate()) % (typeof HADITHS !== 'undefined' ? HADITHS.length : 40); })(),
-  darkMode: localStorage.getItem('huda_dark') === '1',
+  darkMode: localStorage.getItem('huda_dark') !== '0',
   fontSize: parseInt(localStorage.getItem('huda_fontsize') || '28') || 28,
   bookmarks: (() => { try { return JSON.parse(localStorage.getItem('huda_bookmarks') || '[]'); } catch(e) { return []; } })(),
   surahBookmarks: (() => { try { return JSON.parse(localStorage.getItem('huda_surah_bm') || '[]'); } catch(e) { return []; } })(),
