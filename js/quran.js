@@ -275,6 +275,8 @@ async function openSurah(n, targetAyah = null, { keepAudio = false } = {}) {
   // Sync toggle button states
   document.getElementById('btn-verse')?.classList.toggle('active', state.quran.viewMode === 'verse');
   document.getElementById('btn-page')?.classList.toggle('active', state.quran.viewMode === 'page');
+  const fontCtrl = document.getElementById('font-ctrl');
+  if (fontCtrl) fontCtrl.style.display = 'flex';
   const content = document.getElementById('reader-content');
   content.innerHTML = `<div class="loading-state"><div class="spinner"></div><p>Loading Surah...</p></div>`;
 
@@ -1460,7 +1462,11 @@ function renderSurahContent(n, arData, enData) {
         </button>
         <button class="ayah-card-btn tafsir-btn" id="tafsir-btn-${n}-${a.numberInSurah}"
           onclick="toggleTafsir(${n},${a.numberInSurah})">Tafsir</button>
-        <button class="ayah-card-btn explain-btn" onclick="showExplanationSheet(${a.number},${n},${a.numberInSurah})" title="AI explanation" aria-label="AI explanation">✦ AI Explain</button>
+        <button class="ayah-card-btn explain-btn"
+          data-gn="${a.number}" data-s="${n}" data-a="${a.numberInSurah}"
+          data-ar="${esc(a.text)}" data-en="${esc(enData.ayahs[i]?.text ?? '')}"
+          onclick="const d=this.dataset;showExplanationSheet(+d.gn,+d.s,+d.a,d.ar,d.en)"
+          title="AI explanation" aria-label="AI explanation">✦ AI Explain</button>
         <button class="ayah-card-btn" onclick="shareAyah(${n},${a.numberInSurah})" aria-label="Share">📤</button>
       </div>
     </div>
@@ -2080,7 +2086,9 @@ async function showExplanationSheet(globalNum, surahNum, ayahNum, _arabicText, _
   const cache = state.quran.cache[surahNum];
   const arAyah = cache?.arData?.ayahs?.find(a => a.numberInSurah === ayahNum);
   const enAyah = cache?.enData?.ayahs?.find(a => a.numberInSurah === ayahNum);
-  const arText = _arabicText ?? arAyah?.text ?? '';
+  const hasBism = surahNum !== 1 && surahNum !== 9;
+  const rawAr = _arabicText ?? arAyah?.text ?? '';
+  const arText = (hasBism && ayahNum === 1 && rawAr) ? stripBismillah(rawAr) : rawAr;
   const enText = _englishText ?? enAyah?.text ?? '';
   const surahInfo = SURAHS[surahNum - 1];
   const surahName = surahInfo?.[2] || `Surah ${surahNum}`;
