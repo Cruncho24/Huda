@@ -16,6 +16,7 @@ const SYNC_KEYS = [
   'huda_reciter',
   'huda_plan',
   'huda_dhikr_history',
+  'huda_streak',
 ];
 
 let _pushTimer = null;
@@ -93,6 +94,7 @@ function applySyncedState() {
   state.fontSize = parseInt(localStorage.getItem('huda_fontsize') || '28') || 28;
   state.reciter  = localStorage.getItem('huda_reciter') || 'ar.mahermuaiqly';
   try { state.plan = JSON.parse(localStorage.getItem('huda_plan') || 'null'); } catch(e) {}
+  try { const r = JSON.parse(localStorage.getItem('huda_streak') || '{}'); state.streak = { count: parseInt(r.count, 10) || 0, lastDate: typeof r.lastDate === 'string' ? r.lastDate : null }; } catch(e) {}
   // dhikr_history is read directly from localStorage by getDhikrHistory() — no state field needed
   // Apply dark mode immediately
   document.documentElement.classList.toggle('dark', state.darkMode);

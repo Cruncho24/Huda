@@ -121,6 +121,7 @@ function updateQuranStreak() {
   s.count = s.lastDate === yStr ? (parseInt(s.count, 10) || 0) + 1 : 1;
   s.lastDate = todayStr;
   try { localStorage.setItem('huda_streak', JSON.stringify(s)); } catch(e) {}
+  if (typeof debouncedPush === 'function') debouncedPush();
 }
 
 // ── Auth Modal ────────────────────────────────────────────────
