@@ -2084,6 +2084,7 @@ function resetAllDhikr() {
 
 let _explainCallId = 0;
 let _explainHideTimer = null;
+let _explainShareData = null; // stores {ref, arText, enText, ex} for sharing
 
 async function showExplanationSheet(globalNum, surahNum, ayahNum, _arabicText, _englishText) {
   hideAyahPopup();
@@ -2146,6 +2147,7 @@ async function showExplanationSheet(globalNum, surahNum, ayahNum, _arabicText, _
     if (error) throw error;
 
     const ex = data.explanation;
+    _explainShareData = { ref: `${surahName} ${surahNum}:${ayahNum}`, arText, enText, ex };
     const wordStudyHtml = Array.isArray(ex.wordStudy) && ex.wordStudy.length
       ? `<div class="explain-section">
           <div class="explain-section-label">Word Study</div>
@@ -2170,6 +2172,7 @@ async function showExplanationSheet(globalNum, surahNum, ayahNum, _arabicText, _
       <div class="explain-disclaimer">
         AI-generated educational summary. For religious guidance, consult a qualified scholar.
       </div>
+      <button onclick="shareExplanation()" class="explain-share-btn">Share ↗</button>
     `;
   } catch(e) {
     if (callId !== _explainCallId) return;
@@ -2188,6 +2191,22 @@ function hideExplanationSheet() {
   if (!sheet) return;
   box?.classList.remove('explain-box-open');
   _explainHideTimer = setTimeout(() => { sheet.style.display = 'none'; _explainHideTimer = null; }, 280);
+}
+
+function shareExplanation() {
+  const d = _explainShareData;
+  if (!d) return;
+  const parts = [`📖 ${d.ref}`];
+  if (d.arText) parts.push(d.arText);
+  if (d.enText) parts.push(`"${d.enText}"`);
+  if (d.ex?.meaning) parts.push(`✦ Meaning\n${d.ex.meaning}`);
+  if (d.ex?.context) parts.push(`✦ Context\n${d.ex.context}`);
+  const text = parts.join('\n\n');
+  if (navigator.share) {
+    navigator.share({ title: d.ref, text }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(text).then(() => showToast('Copied ✓')).catch(() => {});
+  }
 }
 
 async function showSurahExplanationSheet(surahNum) {
