@@ -333,7 +333,7 @@ function rotateHadith() {
 function shareHadith() {
   const h = HADITHS?.[state.hadithIndex];
   if (!h) return;
-  const text = `"${h.text}"\n\n— ${h.source}\n\nShared from Huda Islamic Companion`;
+  const text = `"${h.text}"\n\n— ${h.source}`;
   if (navigator.share) {
     navigator.share({ title: 'Hadith', text }).catch(() => {});
   } else {
