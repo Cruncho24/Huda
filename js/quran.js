@@ -1596,6 +1596,7 @@ function showCopyToast() {
 let _lpTimer = null;
 let _lpStartX = 0, _lpStartY = 0;
 let _lpFired = false;      // true if the touch became a long-press (suppress click)
+let _ctxFired = false;     // true if contextmenu just ran (suppress subsequent click)
 let _pendingPlay = null;
 let _mushafFromAyah = null; // ayah numberInSurah to restore when returning to mushaf
 
@@ -1648,6 +1649,7 @@ function setupAyahLongPress(container) {
     const anum = e.target.closest('.mushaf-anum');
     if (!anum) return;
     e.preventDefault();
+    _ctxFired = true;
     const wrap = anum.closest('.mushaf-ayah-wrap');
     const g = +anum.id.replace('maud-', '');
     flashAyahEl(wrap);
@@ -1657,6 +1659,7 @@ function setupAyahLongPress(container) {
   // Short tap/click on ayah number → show popup (same as right-click)
   container.addEventListener('click', e => {
     if (_lpFired) { _lpFired = false; return; } // was a long-press, skip
+    if (_ctxFired) { _ctxFired = false; return; } // was a right-click, already handled
     const anum = e.target.closest('.mushaf-anum');
     if (!anum) return;
     e.preventDefault();
@@ -1756,6 +1759,8 @@ function closeQuranReader() {
   window.removeEventListener('wheel', _pauseAutoScroll);
   document.getElementById('quran-reader').style.display = 'none';
   document.getElementById('quran-list-view').style.display = 'block';
+  const _fc = document.getElementById('font-ctrl');
+  if (_fc) _fc.style.display = 'none';
   state.quran.currentSurah = null;
   window.scrollTo({ top: _surahListScrollY, behavior: 'instant' });
 }

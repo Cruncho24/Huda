@@ -74,7 +74,7 @@ function getSurahAudioUrl(surahNum) {
 
 // ── State ────────────────────────────────────────────────────
 const state = {
-  activeTab: (['home','quran','prayer','dhikr','duas','learn'].includes(localStorage.getItem('huda_tab')) ? localStorage.getItem('huda_tab') : 'home'),
+  activeTab: (() => { const t = localStorage.getItem('huda_tab'); return ['home','quran','prayer','dhikr','duas','learn'].includes(t) ? t : 'home'; })(),
   dhikrCounts: (() => { try { return JSON.parse(localStorage.getItem('huda_dhikr') || '{}'); } catch(e) { return {}; } })(),
   hadithIndex: (() => { const d = new Date(); return (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate()) % (typeof HADITHS !== 'undefined' ? HADITHS.length : 40); })(),
   darkMode: localStorage.getItem('huda_dark') !== '0',
@@ -279,14 +279,14 @@ document.addEventListener('DOMContentLoaded', () => {
   if (_cp) { try { const p = JSON.parse(_cp); state.prayer.times = p.times; state.prayer.city = p.city || ''; state.prayer.qibla = p.qibla; if (p.lat && p.lng) state.prayer.location = { lat: p.lat, lng: p.lng }; } catch(e) {} }
   setupNav();
   renderHome();
-  if (state.activeTab !== 'home') switchTab(state.activeTab);
+  // Resolve startup tab: notification ?tab= wins over persisted tab; no haptic on restore
+  const _validTabs = ['home','quran','prayer','dhikr','duas','learn'];
+  const _notifTab = new URLSearchParams(location.search).get('tab');
+  const _initTab = (_validTabs.includes(_notifTab) ? _notifTab : null) ?? state.activeTab;
+  if (_initTab !== 'home') switchTab(_initTab, { silent: true });
   fetchAndCacheHijri(new Date());
   registerSW();
   setupInstallPrompt();
-
-  // Handle notification tap — open to specific tab (whitelist to prevent invalid state)
-  const _notifTab = new URLSearchParams(location.search).get('tab');
-  if (_notifTab && ['home','quran','prayer','dhikr','duas','learn'].includes(_notifTab)) switchTab(_notifTab);
 
   // When user opens the app from the background while audio is actively playing,
   // jump to the Quran tab and scroll to the current ayah.
@@ -760,7 +760,7 @@ function _restoreTab(tab) {
   }
 }
 
-function switchTab(tab) {
+function switchTab(tab, { silent = false } = {}) {
   const prevTab = state.activeTab;
   // Preserve scroll position of current tab before hiding it
   if (prevTab) _tabScrollY[prevTab] = window.scrollY;
@@ -770,7 +770,7 @@ function switchTab(tab) {
 
   state.activeTab = tab;
   localStorage.setItem('huda_tab', tab);
-  haptic();
+  if (!silent) haptic();
   document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   document.getElementById(`tab-${tab}`).classList.add('active');
