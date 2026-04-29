@@ -18,7 +18,6 @@ const SYNC_KEYS = [
   'huda_dhikr_history',
   'huda_streak',
   'huda_furthest_read',
-  'huda_onboarded',
 ];
 
 let _pushTimer = null;
@@ -55,6 +54,28 @@ function debouncedPush() {
   _pushTimer = setTimeout(pushSync, 2000);
 }
 
+// Per-key merge strategies for values that must never decrease.
+// Called when remote timestamp wins; returns the value to actually store.
+const MERGE_STRATEGIES = {
+  // Always keep the higher global-ayah number
+  'huda_furthest_read': (local, remote) => {
+    const l = parseInt(local || '0', 10);
+    const r = parseInt(remote || '0', 10);
+    return String(Math.max(l, r));
+  },
+  // Always keep the higher streak count (credit the user for the most reading)
+  'huda_streak': (local, remote) => {
+    try {
+      const l = JSON.parse(local || '{}');
+      const r = JSON.parse(remote || '{}');
+      const lc = parseInt(l.count, 10) || 0;
+      const rc = parseInt(r.count, 10) || 0;
+      if (lc > rc) return local;
+      return remote;
+    } catch(e) { return remote; }
+  },
+};
+
 // Pull from Supabase, merge into localStorage (remote wins when updated_at is newer).
 // Returns true if any value changed so the caller can re-render.
 async function pullSync() {
@@ -75,8 +96,11 @@ async function pullSync() {
     const remoteTs = new Date(row.updated_at).getTime();
     if (remoteTs > localTs) {
       const current = localStorage.getItem(row.key);
-      if (current !== row.value) {
-        localStorage.setItem(row.key, row.value);
+      const merged = MERGE_STRATEGIES[row.key]
+        ? MERGE_STRATEGIES[row.key](current, row.value)
+        : row.value;
+      if (current !== merged) {
+        localStorage.setItem(row.key, merged);
         localStorage.setItem(`_sync_ts_${row.key}`, String(remoteTs));
         changed = true;
       }
@@ -96,7 +120,10 @@ function applySyncedState() {
   state.fontSize = parseInt(localStorage.getItem('huda_fontsize') || '28') || 28;
   state.reciter  = localStorage.getItem('huda_reciter') || 'ar.mahermuaiqly';
   try { state.plan = JSON.parse(localStorage.getItem('huda_plan') || 'null'); } catch(e) {}
-  try { const r = JSON.parse(localStorage.getItem('huda_streak') || '{}'); state.streak = { count: parseInt(r.count, 10) || 0, lastDate: typeof r.lastDate === 'string' ? r.lastDate : null }; } catch(e) {}
+  try {
+    const _sr = JSON.parse(localStorage.getItem('huda_streak') || '{}');
+    state.streak = { count: parseInt(_sr.count, 10) || 0, lastDate: typeof _sr.lastDate === 'string' ? _sr.lastDate : null };
+  } catch(e) {}
   // dhikr_history is read directly from localStorage by getDhikrHistory() — no state field needed
   // Apply dark mode immediately
   document.documentElement.classList.toggle('dark', state.darkMode);
