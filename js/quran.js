@@ -1654,14 +1654,17 @@ function setupAyahLongPress(container) {
     showAyahPopup(g, +wrap.dataset.surah, +wrap.dataset.ayah, anum);
   });
 
-  // Short tap on ayah number → switch to study view at that ayah
+  // Short tap/click on ayah number → show popup (same as right-click)
   container.addEventListener('click', e => {
     if (_lpFired) { _lpFired = false; return; } // was a long-press, skip
     const anum = e.target.closest('.mushaf-anum');
     if (!anum) return;
+    e.preventDefault();
     const wrap = anum.closest('.mushaf-ayah-wrap');
     if (!wrap) return;
-    switchToStudyAtAyah(+wrap.dataset.surah, +wrap.dataset.ayah);
+    flashAyahEl(wrap);
+    const g = +anum.id.replace('maud-', '');
+    showAyahPopup(g, +wrap.dataset.surah, +wrap.dataset.ayah, anum);
   });
 }
 
