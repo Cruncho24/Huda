@@ -477,7 +477,7 @@ function renderMushafPage(n, arData, enData) {
           localStorage.setItem('huda_last_read', JSON.stringify(lr));
           const _g = globalAyahNum(lr.surah, furthestAyah);
           const _pf = parseInt(localStorage.getItem('huda_furthest_read') || '0', 10);
-          if (_g > _pf) localStorage.setItem('huda_furthest_read', String(_g));
+          if (_g > _pf) { localStorage.setItem('huda_furthest_read', String(_g)); if (typeof debouncedPush === 'function') debouncedPush(); }
         }
         if (typeof updateReaderPlanBar === 'function') updateReaderPlanBar();
       } catch(e) { console.warn('[huda] failed to save reading position', e); }
@@ -1498,7 +1498,7 @@ function renderSurahContent(n, arData, enData) {
           localStorage.setItem('huda_last_read', JSON.stringify(lr));
           const _gv = globalAyahNum(lr.surah, firstVisible);
           const _pfv = parseInt(localStorage.getItem('huda_furthest_read') || '0', 10);
-          if (_gv > _pfv) localStorage.setItem('huda_furthest_read', String(_gv));
+          if (_gv > _pfv) { localStorage.setItem('huda_furthest_read', String(_gv)); if (typeof debouncedPush === 'function') debouncedPush(); }
         }
         if (typeof updateReaderPlanBar === 'function') updateReaderPlanBar();
       } catch(e) { console.warn('[huda] failed to save reading position', e); }

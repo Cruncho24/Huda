@@ -17,6 +17,8 @@ const SYNC_KEYS = [
   'huda_plan',
   'huda_dhikr_history',
   'huda_streak',
+  'huda_furthest_read',
+  'huda_onboarded',
 ];
 
 let _pushTimer = null;
