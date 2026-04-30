@@ -876,6 +876,8 @@ const _CARD_W = 1080;
 const _CARD_H = 1350;
 let   _cardDataUrl = '';
 let   _currentGeneration = null;
+let   _cardSizeMultiplier = 1.0;
+let   _currentCardOpts = null;
 
 function _cardWrap(ctx, text, maxW, maxLines) {
   const words = text.split(' ');
@@ -894,7 +896,7 @@ function _cardWrap(ctx, text, maxW, maxLines) {
   return lines;
 }
 
-async function generateShareCard({ arabic, english, source, grade, type, minimal = false }) {
+async function generateShareCard({ arabic, english, source, grade, type, minimal = false, sizeMultiplier = 1 }) {
   const canvas = document.createElement('canvas');
   canvas.width = _CARD_W; canvas.height = _CARD_H;
   const ctx = canvas.getContext('2d');
@@ -915,14 +917,15 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
   if (minimal) {
     // ── Minimal: Arabic + English + source, vertically centred ──
     const aLen = arabic ? arabic.length : 0;
-    const aFs = aLen < 60 ? 82 : aLen < 100 ? 68 : aLen < 180 ? 58 : aLen < 280 ? 46 : 38;
+    const aFsBase = aLen < 60 ? 82 : aLen < 100 ? 68 : aLen < 180 ? 58 : aLen < 280 ? 46 : 38;
+    const aFs = Math.round(aFsBase * sizeMultiplier);
     const aLh = aFs * 2.4;
     const aMaxLines = aFs >= 60 ? 4 : aFs >= 50 ? 6 : aFs >= 40 ? 8 : 10;
     ctx.font = `${aFs}px UthmanicHafs, "Amiri Quran", "Scheherazade New", serif`;
     ctx.direction = 'rtl'; ctx.textAlign = 'center';
     const aLines = arabic ? _cardWrap(ctx, arabic, maxW, aMaxLines) : [];
 
-    const eFs = 44;
+    const eFs = Math.round(44 * sizeMultiplier);
     const eLh = eFs * 2.2;
     ctx.font = `${eFs}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
     ctx.direction = 'ltr'; ctx.textAlign = 'center';
@@ -948,7 +951,7 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
     if (source) {
       y += 30;
       ctx.fillStyle = '#34d399';
-      ctx.font = `bold 26px -apple-system, sans-serif`;
+      ctx.font = `bold ${Math.round(26 * sizeMultiplier)}px -apple-system, sans-serif`;
       ctx.fillText(`— ${source}`, _CARD_W / 2, y);
     }
   } else {
@@ -978,7 +981,8 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
 
     if (arabic) {
       const aLen = arabic.length;
-      const aFs = aLen < 60 ? 64 : aLen < 100 ? 54 : aLen < 180 ? 44 : aLen < 280 ? 36 : 30;
+      const aFsBase = aLen < 60 ? 64 : aLen < 100 ? 54 : aLen < 180 ? 44 : aLen < 280 ? 36 : 30;
+      const aFs = Math.round(aFsBase * sizeMultiplier);
       const aLh = aFs * 2.0;
       const aMaxLines = aFs >= 54 ? 4 : aFs >= 44 ? 6 : aFs >= 36 ? 8 : 10;
       ctx.font = `${aFs}px UthmanicHafs, "Amiri Quran", "Scheherazade New", serif`;
@@ -992,7 +996,8 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
     }
 
     const eLen2 = english.length;
-    const eFs = arabic ? 32 : (eLen2 < 80 ? 52 : eLen2 < 160 ? 44 : eLen2 < 300 ? 38 : 32);
+    const eFsBase = arabic ? 32 : (eLen2 < 80 ? 52 : eLen2 < 160 ? 44 : eLen2 < 300 ? 38 : 32);
+    const eFs = Math.round(eFsBase * sizeMultiplier);
     const eLh = eFs * 2.0;
     ctx.font = `${eFs}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
     ctx.fillStyle = '#cbd5e1'; ctx.direction = 'ltr'; ctx.textAlign = 'center';
@@ -1002,7 +1007,8 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
     // Vertically centre hadith content between header and footer
     if (!arabic) {
       const srcRaw = source ? (grade ? `— ${source}  ·  ${grade}` : `— ${source}`) : '';
-      ctx.font = `bold 28px -apple-system, sans-serif`;
+      const srcFsM = Math.round(28 * sizeMultiplier);
+      ctx.font = `bold ${srcFsM}px -apple-system, sans-serif`;
       const srcMLines = source ? _cardWrap(ctx, srcRaw, maxW, 2) : [];
       const contentH = eLines.length * eLh + (source ? 56 + srcMLines.length * 42 : 0);
       y = Math.max(260, Math.round(220 + eFs + (footerZone - 220 - contentH) / 2));
@@ -1014,7 +1020,7 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
 
     if (source) {
       ctx.fillStyle = '#34d399';
-      ctx.font = `bold 28px -apple-system, sans-serif`;
+      ctx.font = `bold ${Math.round(28 * sizeMultiplier)}px -apple-system, sans-serif`;
       const srcText = grade ? `— ${source}  ·  ${grade}` : `— ${source}`;
       const srcLines = _cardWrap(ctx, srcText, maxW, 2);
       for (const ln of srcLines) { ctx.fillText(ln, _CARD_W / 2, y); y += 42; }
@@ -1030,6 +1036,9 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
 }
 
 async function showShareCardModal(opts) {
+  _currentCardOpts = opts;
+  _cardSizeMultiplier = 1.0;
+
   const genId = Symbol();
   _currentGeneration = genId;
 
@@ -1045,7 +1054,7 @@ async function showShareCardModal(opts) {
 
   let canvas;
   try {
-    canvas = await generateShareCard(opts);
+    canvas = await generateShareCard({ ...opts, sizeMultiplier: _cardSizeMultiplier });
   } catch(e) {
     closeShareCardModal();
     showToast('Could not generate image');
@@ -1062,6 +1071,11 @@ async function showShareCardModal(opts) {
     <div class="scm-sheet">
       <div class="scm-handle"></div>
       <img class="scm-preview" src="${_cardDataUrl}" alt="Share card">
+      <div class="scm-size-row">
+        <button class="scm-btn scm-btn-size" onclick="_resizeCard(-0.1)">A−</button>
+        <span class="scm-size-label">100%</span>
+        <button class="scm-btn scm-btn-size" onclick="_resizeCard(0.1)">A+</button>
+      </div>
       <div class="scm-actions">
         ${canFileShare ? `<button class="scm-btn scm-btn-primary" onclick="shareCardImage()">📤 Share</button>` : ''}
         <button class="scm-btn" onclick="downloadCardImage()">⬇ Save</button>
@@ -1071,8 +1085,39 @@ async function showShareCardModal(opts) {
   requestAnimationFrame(() => modal.querySelector('.scm-sheet')?.classList.add('open'));
 }
 
+async function _resizeCard(delta) {
+  if (!_currentCardOpts) return;
+  _cardSizeMultiplier = Math.round(Math.min(1.5, Math.max(0.6, _cardSizeMultiplier + delta)) * 10) / 10;
+
+  const modal = document.getElementById('share-card-modal');
+  const preview = modal?.querySelector('.scm-preview');
+  if (preview) preview.style.opacity = '0.3';
+
+  const genId = Symbol();
+  _currentGeneration = genId;
+
+  let canvas;
+  try {
+    canvas = await generateShareCard({ ..._currentCardOpts, sizeMultiplier: _cardSizeMultiplier });
+  } catch(e) {
+    if (preview) preview.style.opacity = '1';
+    showToast('Could not resize');
+    return;
+  }
+
+  if (_currentGeneration !== genId) return;
+
+  _cardDataUrl = canvas.toDataURL('image/png');
+  if (preview) { preview.src = _cardDataUrl; preview.style.opacity = '1'; }
+
+  const label = modal?.querySelector('.scm-size-label');
+  if (label) label.textContent = Math.round(_cardSizeMultiplier * 100) + '%';
+}
+
 function closeShareCardModal() {
   _currentGeneration = null;
+  _currentCardOpts = null;
+  _cardSizeMultiplier = 1.0;
   _cardDataUrl = '';
   const modal = document.getElementById('share-card-modal');
   if (!modal) return;
