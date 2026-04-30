@@ -9,6 +9,7 @@ let _searchDebounce = null;
 let _offlineDownloading = false;
 let _offlineCancelled   = false;
 let _pendingShareText   = '';
+let _pendingShareHtml   = '';
 
 // Persist quran cache with bounded eviction to avoid QuotaExceededError.
 // Keeps the 20 most-recently-opened surahs; recency tracked in state.quran.cacheOrder.
@@ -1525,6 +1526,10 @@ function shareAyah(surahNum, ayahNum) {
   const surahName = SURAHS[surahNum - 1][2]; // index 2 = English name e.g. "Al-Fatiha"
   const ref = `Surah ${surahName} (${surahNum}:${ayahNum})`;
   _pendingShareText = `${ar}\n\n${en}\n\n— ${ref}`;
+  _pendingShareHtml = `
+    <div class="share-sheet-arabic">${esc(ar)}</div>
+    <div class="share-sheet-english">${esc(en)}</div>
+    <div class="share-sheet-ref">— ${esc(ref)}</div>`;
   openShareSheet(ref);
 }
 
@@ -1539,7 +1544,7 @@ function openShareSheet(title) {
     <div class="share-sheet-backdrop" onclick="closeShareSheet()"></div>
     <div class="share-sheet">
       <div class="share-sheet-handle"></div>
-      <div class="share-sheet-text">${esc(_pendingShareText)}</div>
+      <div class="share-sheet-text">${_pendingShareHtml || esc(_pendingShareText)}</div>
       <div class="share-sheet-actions">
         <button class="share-action-btn" onclick="copyShareText()">📋 Copy</button>
         ${navigator.share ? `<button class="share-action-btn share-action-primary" onclick="nativeShare()">📤 Share</button>` : ''}

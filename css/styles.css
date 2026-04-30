@@ -3145,6 +3145,29 @@ html.dark .offline-progress-bar { background: #334155; }
   max-height: 200px;
   overflow-y: auto;
 }
+.share-sheet-arabic {
+  font-family: 'UthmanicHafs', 'Amiri Quran', 'Scheherazade New', serif;
+  font-size: 22px;
+  line-height: 2;
+  direction: rtl;
+  text-align: right;
+  color: #0f172a;
+  margin-bottom: 10px;
+}
+.share-sheet-english {
+  font-size: 13px;
+  line-height: 1.6;
+  color: #334155;
+  margin-bottom: 8px;
+}
+.share-sheet-ref {
+  font-size: 12px;
+  color: #059669;
+  font-weight: 600;
+}
+html.dark .share-sheet-arabic { color: #f1f5f9; }
+html.dark .share-sheet-english { color: #94a3b8; }
+html.dark .share-sheet-ref { color: #34d399; }
 .share-sheet-actions { display: flex; gap: 10px; margin-bottom: 10px; }
 .share-action-btn {
   flex: 1; padding: 11px;
