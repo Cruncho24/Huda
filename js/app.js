@@ -576,6 +576,7 @@ function playAyah(globalNum, surahNum, ayahNum) {
   };
   audio.onplay = () => {
     if (state.audio.player !== audio) return;
+    _intentionalPause = false;
     state.audio.paused = false;
     const b = document.getElementById(`aud-${globalNum}`);
     if (b) b.textContent = '⏸';

@@ -571,6 +571,7 @@ let _verseCard       = null;  // currently highlighted ayah card (verse mode)
 let _surahTiming     = null;  // { [verse_key]: {from, to} } — used for seek-by-ayah lookups
 let _surahTimingArr  = null;  // sorted [{key, from, to}] — used by timeupdate for O(1) scan
 let _surahTimingIdx  = 0;     // current position in _surahTimingArr
+let _intentionalPause = false; // true only when user explicitly pauses; false for system interruptions
 let _loopSurah       = false; // repeat current surah on end
 
 // ── Auto-scroll state ─────────────────────────────────────────
@@ -660,10 +661,11 @@ function _registerMediaSession() {
     if (p) p.play().catch(() => {});
   });
   navigator.mediaSession.setActionHandler('pause', () => {
+    _intentionalPause = true;
     const p = _surahAudio || state.audio.player;
     if (p) p.pause();
   });
-  navigator.mediaSession.setActionHandler('stop', () => mushafStop());
+  navigator.mediaSession.setActionHandler('stop', () => { _intentionalPause = true; mushafStop(); });
   // seekforward/seekbackward: car stereos, AirPods Pro squeeze-hold, lock screen scrub
   try {
     navigator.mediaSession.setActionHandler('seekforward', e => {
@@ -898,6 +900,7 @@ function _mushafSetupOnEnded(audio, globalNum, surahNum, ayahNum) {
     };
     nextAudio.onplay = () => {
       if (state.audio.player !== nextAudio) return;
+      _intentionalPause = false;
       state.audio.paused = false;
       updateMushafPlayBtn(true);
       updateMushafPlayerBar();
@@ -968,6 +971,7 @@ function playMushafAyah(globalNum, surahNum, ayahNum, _skipSurahSeek = false) {
   };
   audio.onplay = () => {
     if (state.audio.player !== audio) return;
+    _intentionalPause = false;
     state.audio.paused = false;
     updateMushafPlayBtn(true);
     updateMushafPlayerBar();
@@ -1017,6 +1021,7 @@ function mushafPlayAll(surahNum, startAyah = 1) {
   };
   _surahAudio.onplay = () => {
     if (!_surahAudio) return;
+    _intentionalPause = false;
     state.audio.paused = false;
     updateMushafPlayBtn(true);
     updateMushafPlayerBar();
@@ -1369,6 +1374,7 @@ function toggleMushafPlayback() {
   if (state.audio.paused) {
     player.play().catch(() => {}); // onplay handler updates state + MediaSession
   } else {
+    _intentionalPause = true;
     player.pause(); // onpause handler updates state + MediaSession
   }
 }
@@ -1412,15 +1418,16 @@ function updateMushafPlayerBar() {
 }
 
 
-// ── Auto-resume after phone call / Bluetooth interruption ─────────────────
-// iOS pauses audio when a call comes in (fires onpause but NOT our intentional
-// pause path, so state.audio.paused stays false). When the user returns to the
-// app, if our state says "should be playing" but audio is actually paused,
-// it was a system interruption — resume automatically.
+// ── Auto-resume after system interruptions (video apps, calls, Bluetooth) ──
+// When a video app or phone call steals audio focus, onpause fires on the
+// audio element — but that's a system event, not the user pressing pause.
+// _intentionalPause is only set true when the user explicitly pauses; system
+// interruptions leave it false. On return, if audio is paused but the user
+// didn't mean to pause, resume automatically (same behaviour as Spotify).
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState !== 'visible') return;
   const player = _surahAudio || state.audio.player;
-  if (player && !state.audio.paused && player.paused) {
+  if (player && !_intentionalPause && player.paused) {
     player.play().catch(() => {});
   }
 });
