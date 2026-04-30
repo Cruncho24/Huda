@@ -870,10 +870,12 @@ function changeFontSize(delta) {
 // ── Share Card Generator ──────────────────────────────────────
 // Generates a portrait 1080×1350 image card for social sharing.
 // arabic/source/grade/type passed in; english is required.
+// minimal=true: just Arabic + English, vertically centred, no branding.
 
 const _CARD_W = 1080;
 const _CARD_H = 1350;
 let   _cardDataUrl = '';
+let   _currentGeneration = null;
 
 function _cardWrap(ctx, text, maxW, maxLines) {
   const words = text.split(' ');
@@ -892,7 +894,7 @@ function _cardWrap(ctx, text, maxW, maxLines) {
   return lines;
 }
 
-async function generateShareCard({ arabic, english, source, grade, type }) {
+async function generateShareCard({ arabic, english, source, grade, type, minimal = false }) {
   const canvas = document.createElement('canvas');
   canvas.width = _CARD_W; canvas.height = _CARD_H;
   const ctx = canvas.getContext('2d');
@@ -907,78 +909,118 @@ async function generateShareCard({ arabic, english, source, grade, type }) {
   bg.addColorStop(0, '#0f172a'); bg.addColorStop(1, '#0a1f2e');
   ctx.fillStyle = bg; ctx.fillRect(0, 0, _CARD_W, _CARD_H);
 
-  // Top accent bar
-  ctx.fillStyle = '#059669'; ctx.fillRect(0, 0, _CARD_W, 10);
-
-  // ── Header ──────────────────────────────────────────────────
-  ctx.fillStyle = '#34d399';
-  ctx.font = 'bold 46px -apple-system, BlinkMacSystemFont, sans-serif';
-  ctx.direction = 'ltr'; ctx.textAlign = 'left';
-  ctx.fillText('Huda', 80, 95);
-
-  const badge = type === 'ayah' ? 'Quran' : 'Hadith';
-  ctx.font = '24px -apple-system, sans-serif';
-  const bw = ctx.measureText(badge).width + 44;
-  ctx.fillStyle = 'rgba(52,211,153,0.15)';
-  ctx.beginPath();
-  if (ctx.roundRect) ctx.roundRect(80, 112, bw, 44, 22);
-  else ctx.rect(80, 112, bw, 44);
-  ctx.fill();
-  ctx.fillStyle = '#34d399'; ctx.fillText(badge, 102, 140);
-
-  // Header divider
-  ctx.strokeStyle = 'rgba(52,211,153,0.2)'; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(80, 185); ctx.lineTo(_CARD_W - 80, 185); ctx.stroke();
-
-  let y = 260;
   const pad = 90;
   const maxW = _CARD_W - pad * 2;
 
-  // ── Arabic (ayah only) ───────────────────────────────────────
-  if (arabic) {
-    const aLen = arabic.length;
-    const aFs = aLen < 60 ? 64 : aLen < 100 ? 54 : aLen < 180 ? 44 : aLen < 280 ? 36 : 30;
+  if (minimal) {
+    // ── Minimal: Arabic + English + source, vertically centred ──
+    const aLen = arabic ? arabic.length : 0;
+    const aFs = aLen < 60 ? 72 : aLen < 100 ? 60 : aLen < 180 ? 50 : aLen < 280 ? 40 : 34;
     const aLh = aFs * 2.0;
+    const aMaxLines = aFs >= 60 ? 4 : aFs >= 50 ? 6 : aFs >= 40 ? 8 : 10;
     ctx.font = `${aFs}px UthmanicHafs, "Amiri Quran", "Scheherazade New", serif`;
-    ctx.fillStyle = '#ffffff'; ctx.direction = 'rtl'; ctx.textAlign = 'center';
-    const aLines = _cardWrap(ctx, arabic, maxW, 10);
-    for (const ln of aLines) { ctx.fillText(ln, _CARD_W / 2, y); y += aLh; }
-    y += 44;
-    ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(160, y); ctx.lineTo(_CARD_W - 160, y); ctx.stroke();
-    y += 52;
-  }
+    ctx.direction = 'rtl'; ctx.textAlign = 'center';
+    const aLines = arabic ? _cardWrap(ctx, arabic, maxW, aMaxLines) : [];
 
-  // ── English ─────────────────────────────────────────────────
-  const eFs = arabic ? 32 : 40;
-  const eLh = eFs * 1.75;
-  ctx.font = `${eFs}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
-  ctx.fillStyle = '#cbd5e1'; ctx.direction = 'ltr'; ctx.textAlign = 'center';
-  const eLines = _cardWrap(ctx, `"${english}"`, maxW, arabic ? 7 : 11);
-  for (const ln of eLines) { ctx.fillText(ln, _CARD_W / 2, y); y += eLh; }
-  y += 48;
+    const eFs = 34;
+    const eLh = eFs * 1.75;
+    ctx.font = `${eFs}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    ctx.direction = 'ltr'; ctx.textAlign = 'center';
+    const eMaxLines = Math.max(2, Math.floor((_CARD_H - aLines.length * aLh - 120) / eLh));
+    const eLines = _cardWrap(ctx, `"${english}"`, maxW, eMaxLines);
 
-  // ── Source ──────────────────────────────────────────────────
-  if (source) {
+    const srcH = source ? 60 : 0;
+    const gapAE = aLines.length ? 60 : 0;
+    const totalH = aLines.length * aLh + gapAE + eLines.length * eLh + srcH;
+    let y = Math.max(100, (_CARD_H - totalH) / 2) + aLh;
+
+    if (aLines.length) {
+      ctx.font = `${aFs}px UthmanicHafs, "Amiri Quran", "Scheherazade New", serif`;
+      ctx.fillStyle = '#ffffff'; ctx.direction = 'rtl'; ctx.textAlign = 'center';
+      for (const ln of aLines) { ctx.fillText(ln, _CARD_W / 2, y); y += aLh; }
+      y += gapAE;
+    }
+
+    ctx.font = `${eFs}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    ctx.fillStyle = '#cbd5e1'; ctx.direction = 'ltr'; ctx.textAlign = 'center';
+    for (const ln of eLines) { ctx.fillText(ln, _CARD_W / 2, y); y += eLh; }
+
+    if (source) {
+      y += 30;
+      ctx.fillStyle = '#34d399';
+      ctx.font = `bold 26px -apple-system, sans-serif`;
+      ctx.fillText(`— ${source}`, _CARD_W / 2, y);
+    }
+  } else {
+    // ── Full branded card ────────────────────────────────────────
+    ctx.fillStyle = '#059669'; ctx.fillRect(0, 0, _CARD_W, 10);
+
     ctx.fillStyle = '#34d399';
-    ctx.font = `bold 26px -apple-system, sans-serif`;
-    const srcText = grade ? `— ${source}  ·  ${grade}` : `— ${source}`;
-    // Wrap source if long
-    const srcLines = _cardWrap(ctx, srcText, maxW, 2);
-    for (const ln of srcLines) { ctx.fillText(ln, _CARD_W / 2, y); y += 38; }
-  }
+    ctx.font = 'bold 46px -apple-system, BlinkMacSystemFont, sans-serif';
+    ctx.direction = 'ltr'; ctx.textAlign = 'left';
+    ctx.fillText('Huda', 80, 95);
 
-  // ── Footer watermark ────────────────────────────────────────
-  ctx.fillStyle = 'rgba(255,255,255,0.18)';
-  ctx.font = '22px -apple-system, sans-serif';
-  ctx.fillText('huda-six.vercel.app', _CARD_W / 2, _CARD_H - 54);
-  ctx.fillStyle = '#059669'; ctx.fillRect(0, _CARD_H - 10, _CARD_W, 10);
+    const badge = type === 'ayah' ? 'Quran' : 'Hadith';
+    ctx.font = '24px -apple-system, sans-serif';
+    const bw = ctx.measureText(badge).width + 44;
+    ctx.fillStyle = 'rgba(52,211,153,0.15)';
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(80, 112, bw, 44, 22);
+    else ctx.rect(80, 112, bw, 44);
+    ctx.fill();
+    ctx.fillStyle = '#34d399'; ctx.fillText(badge, 102, 140);
+
+    ctx.strokeStyle = 'rgba(52,211,153,0.2)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(80, 185); ctx.lineTo(_CARD_W - 80, 185); ctx.stroke();
+
+    const footerZone = _CARD_H - 120;
+    let y = 260;
+
+    if (arabic) {
+      const aLen = arabic.length;
+      const aFs = aLen < 60 ? 64 : aLen < 100 ? 54 : aLen < 180 ? 44 : aLen < 280 ? 36 : 30;
+      const aLh = aFs * 2.0;
+      const aMaxLines = aFs >= 54 ? 4 : aFs >= 44 ? 6 : aFs >= 36 ? 8 : 10;
+      ctx.font = `${aFs}px UthmanicHafs, "Amiri Quran", "Scheherazade New", serif`;
+      ctx.fillStyle = '#ffffff'; ctx.direction = 'rtl'; ctx.textAlign = 'center';
+      const aLines = _cardWrap(ctx, arabic, maxW, aMaxLines);
+      for (const ln of aLines) { ctx.fillText(ln, _CARD_W / 2, y); y += aLh; }
+      y += 44;
+      ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(160, y); ctx.lineTo(_CARD_W - 160, y); ctx.stroke();
+      y += 52;
+    }
+
+    const eFs = arabic ? 32 : 40;
+    const eLh = eFs * 1.75;
+    ctx.font = `${eFs}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    ctx.fillStyle = '#cbd5e1'; ctx.direction = 'ltr'; ctx.textAlign = 'center';
+    const eMaxLines = Math.max(2, Math.floor((footerZone - y - 120) / eLh));
+    const eLines = _cardWrap(ctx, `"${english}"`, maxW, eMaxLines);
+    for (const ln of eLines) { ctx.fillText(ln, _CARD_W / 2, y); y += eLh; }
+    y += 48;
+
+    if (source) {
+      ctx.fillStyle = '#34d399';
+      ctx.font = `bold 26px -apple-system, sans-serif`;
+      const srcText = grade ? `— ${source}  ·  ${grade}` : `— ${source}`;
+      const srcLines = _cardWrap(ctx, srcText, maxW, 2);
+      for (const ln of srcLines) { ctx.fillText(ln, _CARD_W / 2, y); y += 38; }
+    }
+
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.font = '22px -apple-system, sans-serif';
+    ctx.fillText('huda-six.vercel.app', _CARD_W / 2, _CARD_H - 54);
+    ctx.fillStyle = '#059669'; ctx.fillRect(0, _CARD_H - 10, _CARD_W, 10);
+  }
 
   return canvas;
 }
 
 async function showShareCardModal(opts) {
-  // Show loading state immediately
+  const genId = Symbol();
+  _currentGeneration = genId;
+
   let modal = document.getElementById('share-card-modal');
   if (!modal) { modal = document.createElement('div'); modal.id = 'share-card-modal'; document.body.appendChild(modal); }
   modal.innerHTML = `
@@ -989,8 +1031,19 @@ async function showShareCardModal(opts) {
     </div>`;
   modal.style.display = 'flex';
 
-  const canvas = await generateShareCard(opts);
+  let canvas;
+  try {
+    canvas = await generateShareCard(opts);
+  } catch(e) {
+    closeShareCardModal();
+    showToast('Could not generate image');
+    return;
+  }
+
+  if (_currentGeneration !== genId) return;
+
   _cardDataUrl = canvas.toDataURL('image/png');
+  const canFileShare = !!(navigator.canShare?.({ files: [new File([], 'x.png', { type: 'image/png' })] }));
 
   modal.innerHTML = `
     <div class="scm-backdrop" onclick="closeShareCardModal()"></div>
@@ -998,7 +1051,7 @@ async function showShareCardModal(opts) {
       <div class="scm-handle"></div>
       <img class="scm-preview" src="${_cardDataUrl}" alt="Share card">
       <div class="scm-actions">
-        ${navigator.share ? `<button class="scm-btn scm-btn-primary" onclick="shareCardImage()">📤 Share</button>` : ''}
+        ${canFileShare ? `<button class="scm-btn scm-btn-primary" onclick="shareCardImage()">📤 Share</button>` : ''}
         <button class="scm-btn" onclick="downloadCardImage()">⬇ Save</button>
         <button class="scm-btn scm-btn-close" onclick="closeShareCardModal()">Close</button>
       </div>
@@ -1007,6 +1060,7 @@ async function showShareCardModal(opts) {
 }
 
 function closeShareCardModal() {
+  _currentGeneration = null;
   _cardDataUrl = '';
   const modal = document.getElementById('share-card-modal');
   if (!modal) return;

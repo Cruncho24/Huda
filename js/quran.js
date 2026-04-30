@@ -1544,8 +1544,9 @@ function showAyahCard(surahNum, ayahNum) {
   showShareCardModal({
     arabic: arAyah.text,
     english: enAyah.text,
-    source: `Surah ${surahName} (${surahNum}:${ayahNum})`,
+    source: `${surahName} ${surahNum}:${ayahNum}`,
     type: 'ayah',
+    minimal: true,
   });
 }
 

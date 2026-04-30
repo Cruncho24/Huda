@@ -3638,7 +3638,7 @@ html.dark .settings-value-off { color: #f87171; }
   color: #059669;
   flex-shrink: 0;
 }
-.ayah-card-actions { display: flex; gap: 6px; }
+.ayah-card-actions { display: flex; gap: 6px; overflow-x: auto; }
 .ayah-card-btn {
   background: #f0fdf4;
   border: none;
