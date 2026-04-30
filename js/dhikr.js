@@ -181,6 +181,7 @@ function tapDhikr(i) {
   haptic();
   saveDhikr();
   const card = document.getElementById(`dhikr-${i}`);
+  if (!card) return;
   card.classList.add('tapped');
   setTimeout(() => card.classList.remove('tapped'), 150);
   updateDhikrCard(i);

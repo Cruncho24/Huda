@@ -1650,6 +1650,7 @@ function setupAyahLongPress(container) {
     if (!anum) return;
     e.preventDefault();
     _ctxFired = true;
+    setTimeout(() => { _ctxFired = false; }, 0); // click doesn't follow contextmenu; auto-reset next tick
     const wrap = anum.closest('.mushaf-ayah-wrap');
     const g = +anum.id.replace('maud-', '');
     flashAyahEl(wrap);

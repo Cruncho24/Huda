@@ -124,7 +124,9 @@ function applySyncedState() {
     const _sr = JSON.parse(localStorage.getItem('huda_streak') || '{}');
     state.streak = { count: parseInt(_sr.count, 10) || 0, lastDate: typeof _sr.lastDate === 'string' ? _sr.lastDate : null };
   } catch(e) {}
-  // dhikr_history is read directly from localStorage by getDhikrHistory() — no state field needed
+  // dhikr_history is read directly from localStorage by getDhikrHistory() — bust its cache so the
+  // newly synced value is picked up on the next stats view without needing a page reload.
+  if (typeof _historyCache !== 'undefined') _historyCache = null;
   // Apply dark mode immediately
   document.documentElement.classList.toggle('dark', state.darkMode);
   // Re-evaluate dhikr daily reset in case huda_dhikr_date changed across devices

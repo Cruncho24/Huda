@@ -852,9 +852,13 @@ function changeFontSize(delta) {
   debouncedPush();
   const n = state.quran.currentSurah;
   if (!n) return;
-  if (state.quran.viewMode === 'page' && state.quran.cache[n]) {
-    const { arData, enData } = state.quran.cache[n];
-    renderMushafPage(n, arData, enData);
+  if (state.quran.viewMode === 'page') {
+    document.querySelectorAll('.mushaf-arabic-page').forEach(el => {
+      el.style.fontSize = state.fontSize + 'px';
+    });
+    document.querySelectorAll('.mushaf-bismillah').forEach(el => {
+      el.style.fontSize = (state.fontSize + 2) + 'px';
+    });
   } else if (state.quran.viewMode === 'verse') {
     document.querySelectorAll('.ayah-arabic-card').forEach(el => {
       el.style.fontSize = state.fontSize + 'px';

@@ -84,12 +84,25 @@ function renderHome() {
       const t = new Date(state.prayer.times[k]);
       if (t > _now) { _nextKey = k; _nextTime = t; break; }
     }
-    if (!_nextKey) { _nextKey = 'fajr'; _nextTime = new Date(state.prayer.times.fajr); }
+    if (!_nextKey) {
+      // All of today's prayers have passed — compute tomorrow's Fajr if possible
+      _nextKey = 'fajr';
+      _nextTime = new Date(state.prayer.times.fajr);
+      if (typeof adhan !== 'undefined' && state.prayer.location) {
+        try {
+          const coords = new adhan.Coordinates(state.prayer.location.lat, state.prayer.location.lng);
+          const params = adhan.CalculationMethod.MuslimWorldLeague();
+          params.madhab = adhan.Madhab.Shafi;
+          const tomorrow = new Date(_now + 86400000);
+          _nextTime = new adhan.PrayerTimes(coords, tomorrow, params).fajr;
+        } catch(e) {}
+      }
+    }
     const _name = _nextKey.charAt(0).toUpperCase() + _nextKey.slice(1);
     const _fmt = _nextTime.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12: true });
     const _diff = _nextTime - _now;
     const _hh = Math.floor(_diff / 3600000), _mm = Math.floor((_diff % 3600000) / 60000);
-    const _cd = _diff <= 0 ? 'Soon' : (_hh > 0 ? `in ${_hh}h ${_mm}m` : `in ${_mm}m`);
+    const _cd = _diff <= 0 ? 'Tomorrow' : (_hh > 0 ? `in ${_hh}h ${_mm}m` : `in ${_mm}m`);
     _pillHtml = `
     <div class="hero-prayer-pill">
       <div>

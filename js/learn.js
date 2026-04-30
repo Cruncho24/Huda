@@ -107,7 +107,7 @@ function openChildrensQuran() {
 
 function showCQTab(tab) {
   document.querySelectorAll('.tab-switch-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(`cq-${tab}-btn`).classList.add('active');
+  document.getElementById(`cq-${tab}-btn`)?.classList.add('active');
   const content = document.getElementById('cq-content');
   if (tab === 'letters') {
     content.innerHTML = `

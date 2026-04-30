@@ -252,10 +252,28 @@ const DHIKRS = [
 const DUAS = {
   "Morning Adhkar": [
     {
-      arabic: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلّٰهِ، وَالْحَمْدُ لِلّٰهِ، لَا إِلٰهَ إِلَّا اللّٰهُ وَحْدَهُ لَا شَرِيكَ لَهُ",
-      transliteration: "Asbahna wa asbahal-mulku lillah, walhamdu lillah, la ilaha illallahu wahdahu la sharika lah",
-      meaning: "We have reached the morning and the dominion belongs to Allah; all praise is for Allah. None has the right to be worshipped except Allah, alone, without partner.",
+      arabic: "اللّٰهُ لَا إِلٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ، لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ، لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ، مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ، يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ، وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ، وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ، وَلَا يَئُودُهُ حِفْظُهُمَا، وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+      transliteration: "Allahu la ilaha illa huwal-hayyul-qayyum, la ta'khudhuhu sinatun wa la nawm, lahu ma fis-samawati wa ma fil-ard, man dhal-ladhi yashfa'u 'indahu illa bi-idhnih, ya'lamu ma bayna aydihim wa ma khalfahum, wa la yuhituna bishay'in min 'ilmihi illa bima sha', wasi'a kursiyyuhus-samawati wal-ard, wa la ya'uduhu hifzuhuma, wa huwal-'aliyyul-adhim",
+      meaning: "Allah — there is no deity worthy of worship except Him, the Ever-Living, the Sustainer of existence. Neither drowsiness nor sleep overtakes Him. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what is after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great. (Ayatul Kursi — Quran 2:255)",
+      source: "Hisnul Muslim 66 — Quran 2:255", grade: "Sahih — Silsilah al-Sahihah 972 · Al-Hakim · Whoever recites it in the morning is in Allah's protection until evening, and in the evening until morning"
+    },
+    {
+      arabic: "قُلْ هُوَ اللّٰهُ أَحَدٌ ۝ اللّٰهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ",
+      transliteration: "Surah Al-Ikhlas + Al-Falaq + An-Nas — recite each 3 times (×3)",
+      meaning: "(Al-Ikhlas): Say: He is Allah, the One. Allah, the Eternal Refuge. He neither begets nor is born. Nor is there to Him any equivalent. — Then recite Al-Falaq and An-Nas, 3 times each.",
+      source: "Hisnul Muslim 67 — Abu Dawud 5082, Nasai 5428", grade: "Sahih — authenticated by Al-Albani · The Prophet ﷺ said: they suffice you against everything"
+    },
+    {
+      arabic: "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلّٰهِ، وَالْحَمْدُ لِلّٰهِ، لَا إِلٰهَ إِلَّا اللّٰهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذَا الْيَوْمِ وَخَيْرَ مَا بَعْدَهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذَا الْيَوْمِ وَشَرِّ مَا بَعْدَهُ، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ",
+      transliteration: "Asbahna wa asbahal-mulku lillah, walhamdu lillah, la ilaha illallahu wahdahu la sharika lah, lahul-mulku wa lahul-hamdu wa huwa ala kulli shay'in qadir. Rabbi as'aluka khayra ma fi hadhal-yawmi wa khayra ma ba'dah, wa a'udhu bika min sharri ma fi hadhal-yawmi wa sharri ma ba'dah. Rabbi a'udhu bika minal-kasali wa su'il-kibar. Rabbi a'udhu bika min adhabin fin-nari wa adhabin fil-qabr",
+      meaning: "We have reached the morning and the dominion belongs to Allah; all praise is for Allah. None has the right to be worshipped except Allah, alone, without partner. His is the dominion and His is the praise and He is over all things capable. O Lord, I ask You for the good of this day and the good of what follows it, and I seek refuge in You from the evil of this day and the evil of what follows it. O Lord, I seek refuge in You from laziness and the misery of old age. O Lord, I seek refuge in You from punishment in the Fire and punishment in the grave.",
       source: "Hisnul Muslim 68", grade: "Sahih — Abu Dawud 5076"
+    },
+    {
+      arabic: "اللّٰهُمَّ مَا أَصْبَحَ بِي مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ، فَمِنْكَ وَحْدَكَ لَا شَرِيكَ لَكَ، فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ",
+      transliteration: "Allahumma ma asbaha bi min ni'matin, aw bi ahadin min khalqik, faminka wahdaka la sharika lak, falakal-hamdu wa lakashshukr",
+      meaning: "O Allah, whatever blessing I or any of Your creation have reached this morning is from You alone, without partner. To You belongs all praise and all thanks.",
+      source: "Hisnul Muslim 70 — Abu Dawud 5073", grade: "Hasan — authenticated by Al-Albani · Whoever says this has fulfilled the gratitude due for that day's blessings"
     },
     {
       arabic: "اللّٰهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ",
@@ -264,10 +282,22 @@ const DUAS = {
       source: "Hisnul Muslim 71", grade: "Hasan — Tirmidhi 3391"
     },
     {
+      arabic: "اللّٰهُمَّ أَنْتَ رَبِّي لَا إِلٰهَ إِلَّا أَنْتَ، عَلَيْكَ تَوَكَّلْتُ، وَأَنْتَ رَبُّ الْعَرْشِ الْعَظِيمِ، مَا شَاءَ اللّٰهُ كَانَ وَمَا لَمْ يَشَأْ لَمْ يَكُنْ، لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّٰهِ الْعَلِيِّ الْعَظِيمِ، أَعْلَمُ أَنَّ اللّٰهَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، وَأَنَّ اللّٰهَ قَدْ أَحَاطَ بِكُلِّ شَيْءٍ عِلْمًا، اللّٰهُمَّ إِنِّي أَعُوذُ بِكَ مِنْ شَرِّ نَفْسِي، وَمِنْ شَرِّ كُلِّ دَابَّةٍ أَنْتَ آخِذٌ بِنَاصِيَتِهَا، إِنَّ رَبِّي عَلَى صِرَاطٍ مُسْتَقِيمٍ",
+      transliteration: "Allahumma anta rabbi la ilaha illa ant, alayka tawakkaltu wa anta rabbul-arshil-adhim. Ma sha'allahu kana wa ma lam yasha' lam yakun. La hawla wa la quwwata illa billahil-'aliyyil-adhim. A'lamu annallaha ala kulli shay'in qadir, wa anallaha qad ahata bikulli shay'in ilma. Allahumma inni a'udhu bika min sharri nafsi, wa min sharri kulli dabbatin anta akhidhun binasiyatiha. Inna rabbi ala siratin mustaqim",
+      meaning: "O Allah, You are my Lord. None has the right to be worshipped but You. I place my trust in You and You are the Lord of the magnificent throne. Whatever Allah wills comes to pass and whatever He does not will does not. There is no power nor might except with Allah, the Most High, the Most Great. I know that Allah is over all things capable, and that Allah encompasses all things in His knowledge. O Allah, I seek refuge in You from the evil of myself and from the evil of every creature that is under Your control. Indeed, my Lord is on a straight path.",
+      source: "Hisnul Muslim 72", grade: "Hasan — Abu Dawud 5081"
+    },
+    {
+      arabic: "اللّٰهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالآخِرَةِ، اللّٰهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي، اللّٰهُمَّ اسْتُرْ عَوْرَاتِي وَآمِنْ رَوْعَاتِي، اللّٰهُمَّ احْفَظْنِي مِنْ بَيْنِ يَدَيَّ وَمِنْ خَلْفِي وَعَنْ يَمِينِي وَعَنْ شِمَالِي وَمِنْ فَوْقِي، وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي",
+      transliteration: "Allahumma inni as'alukal-'afwa wal-'afiyata fid-dunya wal-akhirah. Allahumma inni as'alukal-'afwa wal-'afiyata fi dini wa dunyaya wa ahli wa mali. Allahummastur 'awrati wa amin raw'ati. Allahumma-hfazni min bayni yadayya wa min khalfi wa 'an yamini wa 'an shimali wa min fawqi, wa a'udhu bi'azamatika an ughtala min tahti",
+      meaning: "O Allah, I ask You for pardon and well-being in this world and the Hereafter. O Allah, I ask You for pardon and well-being in my religion, my worldly life, my family and my wealth. O Allah, conceal my faults and calm my fears. O Allah, guard me from before me and behind me, from my right and my left, and from above me. I seek refuge in Your greatness from being struck from below.",
+      source: "Hisnul Muslim 73 — Abu Dawud 5074, Ibn Majah 3871", grade: "Sahih — authenticated by Al-Albani · Ibn Umar ؓ never left this dua morning or evening"
+    },
+    {
       arabic: "اللّٰهُمَّ أَنْتَ رَبِّي لَا إِلٰهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ لَكَ بِذَنْبِي فَاغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ",
       transliteration: "Allahumma anta rabbi la ilaha illa ant, khalaqtani wa ana abduk, wa ana ala ahdika wa wa'dika mastata't, a'udhu bika min sharri ma sana't, abu'u laka bini'matika alayya, wa abu'u laka bidhanbi faghfir li, fa innahu la yaghfirudh-dhunuba illa ant",
       meaning: "O Allah, You are my Lord. None has the right to be worshipped except You. You created me and I am Your servant, and I abide by Your covenant and promise as best I can. I seek refuge in You from the evil of what I have done. I acknowledge Your favour upon me and I acknowledge my sin, so forgive me — for verily none can forgive sins except You.",
-      source: "Hisnul Muslim 100 — Sayyidul Istighfar", grade: "Sahih — Bukhari 6306"
+      source: "Hisnul Muslim 100 — Sayyidul Istighfar", grade: "Sahih — Bukhari 6306 · Whoever says this with certainty in the morning and dies that day enters Jannah"
     },
     {
       arabic: "رَضِيتُ بِاللّٰهِ رَبًّا، وَبِالإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ صَلَّى اللّٰهُ عَلَيْهِ وَسَلَّمَ نَبِيًّا",
@@ -284,16 +314,46 @@ const DUAS = {
   ],
   "Evening Adhkar": [
     {
-      arabic: "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلّٰهِ، وَالْحَمْدُ لِلّٰهِ، لَا إِلٰهَ إِلَّا اللّٰهُ وَحْدَهُ لَا شَرِيكَ لَهُ",
-      transliteration: "Amsayna wa amsal-mulku lillah, walhamdu lillah, la ilaha illallahu wahdahu la sharika lah",
-      meaning: "We have reached the evening and the dominion belongs to Allah; all praise is for Allah. None has the right to be worshipped except Allah, alone, without partner.",
+      arabic: "اللّٰهُ لَا إِلٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ، لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ، لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ، مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ، يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ، وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ، وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ، وَلَا يَئُودُهُ حِفْظُهُمَا، وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+      transliteration: "Allahu la ilaha illa huwal-hayyul-qayyum, la ta'khudhuhu sinatun wa la nawm, lahu ma fis-samawati wa ma fil-ard, man dhal-ladhi yashfa'u 'indahu illa bi-idhnih, ya'lamu ma bayna aydihim wa ma khalfahum, wa la yuhituna bishay'in min 'ilmihi illa bima sha', wasi'a kursiyyuhus-samawati wal-ard, wa la ya'uduhu hifzuhuma, wa huwal-'aliyyul-adhim",
+      meaning: "Allah — there is no deity worthy of worship except Him, the Ever-Living, the Sustainer of existence. Neither drowsiness nor sleep overtakes Him. To Him belongs whatever is in the heavens and whatever is on the earth. Who is it that can intercede with Him except by His permission? He knows what is before them and what is after them, and they encompass not a thing of His knowledge except for what He wills. His Kursi extends over the heavens and the earth, and their preservation tires Him not. And He is the Most High, the Most Great. (Ayatul Kursi — Quran 2:255)",
+      source: "Hisnul Muslim 66 — Quran 2:255", grade: "Sahih — Silsilah al-Sahihah 972 · Al-Hakim · Whoever recites it in the evening is in Allah's protection until morning"
+    },
+    {
+      arabic: "قُلْ هُوَ اللّٰهُ أَحَدٌ ۝ اللّٰهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ",
+      transliteration: "Surah Al-Ikhlas + Al-Falaq + An-Nas — recite each 3 times (×3)",
+      meaning: "(Al-Ikhlas): Say: He is Allah, the One. Allah, the Eternal Refuge. He neither begets nor is born. Nor is there to Him any equivalent. — Then recite Al-Falaq and An-Nas, 3 times each.",
+      source: "Hisnul Muslim 67 — Abu Dawud 5082, Nasai 5428", grade: "Sahih — authenticated by Al-Albani · The Prophet ﷺ said: they suffice you against everything"
+    },
+    {
+      arabic: "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلّٰهِ، وَالْحَمْدُ لِلّٰهِ، لَا إِلٰهَ إِلَّا اللّٰهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، رَبِّ أَسْأَلُكَ خَيْرَ مَا فِي هَذِهِ اللَّيْلَةِ وَخَيْرَ مَا بَعْدَهَا، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِي هَذِهِ اللَّيْلَةِ وَشَرِّ مَا بَعْدَهَا، رَبِّ أَعُوذُ بِكَ مِنَ الْكَسَلِ وَسُوءِ الْكِبَرِ، رَبِّ أَعُوذُ بِكَ مِنْ عَذَابٍ فِي النَّارِ وَعَذَابٍ فِي الْقَبْرِ",
+      transliteration: "Amsayna wa amsal-mulku lillah, walhamdu lillah, la ilaha illallahu wahdahu la sharika lah, lahul-mulku wa lahul-hamdu wa huwa ala kulli shay'in qadir. Rabbi as'aluka khayra ma fi hadhihil-laylati wa khayra ma ba'daha, wa a'udhu bika min sharri ma fi hadhihil-laylati wa sharri ma ba'daha. Rabbi a'udhu bika minal-kasali wa su'il-kibar. Rabbi a'udhu bika min adhabin fin-nari wa adhabin fil-qabr",
+      meaning: "We have reached the evening and the dominion belongs to Allah; all praise is for Allah. None has the right to be worshipped except Allah, alone, without partner. His is the dominion and His is the praise and He is over all things capable. O Lord, I ask You for the good of this night and the good of what follows it, and I seek refuge in You from the evil of this night and the evil of what follows it. O Lord, I seek refuge in You from laziness and the misery of old age. O Lord, I seek refuge in You from punishment in the Fire and punishment in the grave.",
       source: "Hisnul Muslim 68", grade: "Sahih — Abu Dawud 5076"
+    },
+    {
+      arabic: "اللّٰهُمَّ مَا أَمْسَى بِي مِنْ نِعْمَةٍ أَوْ بِأَحَدٍ مِنْ خَلْقِكَ، فَمِنْكَ وَحْدَكَ لَا شَرِيكَ لَكَ، فَلَكَ الْحَمْدُ وَلَكَ الشُّكْرُ",
+      transliteration: "Allahumma ma amsa bi min ni'matin, aw bi ahadin min khalqik, faminka wahdaka la sharika lak, falakal-hamdu wa lakashshukr",
+      meaning: "O Allah, whatever blessing I or any of Your creation have reached this evening is from You alone, without partner. To You belongs all praise and all thanks.",
+      source: "Hisnul Muslim 70 — Abu Dawud 5073", grade: "Hasan — authenticated by Al-Albani · Whoever says this has fulfilled the gratitude due for that evening's blessings"
     },
     {
       arabic: "اللّٰهُمَّ بِكَ أَمْسَيْنَا، وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ وَإِلَيْكَ الْمَصِيرُ",
       transliteration: "Allahumma bika amsayna, wa bika asbahna, wa bika nahya, wa bika namutu wa ilaykal-masir",
       meaning: "O Allah, by You we enter the evening and by You we enter the morning, by You we live and by You we die, and unto You is the final return.",
       source: "Hisnul Muslim 71", grade: "Hasan — Tirmidhi 3391"
+    },
+    {
+      arabic: "اللّٰهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالآخِرَةِ، اللّٰهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي، اللّٰهُمَّ اسْتُرْ عَوْرَاتِي وَآمِنْ رَوْعَاتِي، اللّٰهُمَّ احْفَظْنِي مِنْ بَيْنِ يَدَيَّ وَمِنْ خَلْفِي وَعَنْ يَمِينِي وَعَنْ شِمَالِي وَمِنْ فَوْقِي، وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي",
+      transliteration: "Allahumma inni as'alukal-'afwa wal-'afiyata fid-dunya wal-akhirah. Allahumma inni as'alukal-'afwa wal-'afiyata fi dini wa dunyaya wa ahli wa mali. Allahummastur 'awrati wa amin raw'ati. Allahumma-hfazni min bayni yadayya wa min khalfi wa 'an yamini wa 'an shimali wa min fawqi, wa a'udhu bi'azamatika an ughtala min tahti",
+      meaning: "O Allah, I ask You for pardon and well-being in this world and the Hereafter. O Allah, I ask You for pardon and well-being in my religion, my worldly life, my family and my wealth. O Allah, conceal my faults and calm my fears. O Allah, guard me from before me and behind me, from my right and my left, and from above me. I seek refuge in Your greatness from being struck from below.",
+      source: "Hisnul Muslim 73 — Abu Dawud 5074, Ibn Majah 3871", grade: "Sahih — authenticated by Al-Albani · Ibn Umar ؓ never left this dua morning or evening"
+    },
+    {
+      arabic: "اللّٰهُمَّ أَنْتَ رَبِّي لَا إِلٰهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ لَكَ بِذَنْبِي فَاغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ",
+      transliteration: "Allahumma anta rabbi la ilaha illa ant, khalaqtani wa ana abduk, wa ana ala ahdika wa wa'dika mastata't, a'udhu bika min sharri ma sana't, abu'u laka bini'matika alayya, wa abu'u laka bidhanbi faghfir li, fa innahu la yaghfirudh-dhunuba illa ant",
+      meaning: "O Allah, You are my Lord. None has the right to be worshipped except You. You created me and I am Your servant, and I abide by Your covenant and promise as best I can. I seek refuge in You from the evil of what I have done. I acknowledge Your favour upon me and I acknowledge my sin, so forgive me — for verily none can forgive sins except You.",
+      source: "Hisnul Muslim 100 — Sayyidul Istighfar", grade: "Sahih — Bukhari 6306 · Whoever says this with certainty in the evening and dies that night enters Jannah"
     },
     {
       arabic: "اللّٰهُمَّ عَافِنِي فِي بَدَنِي، اللّٰهُمَّ عَافِنِي فِي سَمْعِي، اللّٰهُمَّ عَافِنِي فِي بَصَرِي",
