@@ -5279,3 +5279,39 @@ html.dark .approx-banner button {
   color: rgba(255,255,255,0.55);
   margin: 8px 0 0;
 }
+
+/* ── Share Card Modal ───────────────────────────────────────── */
+#share-card-modal {
+  position: fixed; inset: 0; z-index: 1100;
+  display: none; align-items: flex-end; justify-content: center;
+}
+.scm-backdrop {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.75);
+}
+.scm-sheet {
+  position: relative; width: 100%; max-width: 480px;
+  background: #1e293b; border-radius: 20px 20px 0 0;
+  padding: 14px 16px calc(28px + env(safe-area-inset-bottom));
+  transform: translateY(100%); transition: transform 0.25s ease;
+  max-height: 92vh; overflow-y: auto;
+}
+.scm-sheet.open { transform: translateY(0); }
+.scm-handle {
+  width: 36px; height: 4px; background: rgba(255,255,255,0.2);
+  border-radius: 2px; margin: 0 auto 14px;
+}
+.scm-preview {
+  width: 100%; border-radius: 12px; display: block; margin-bottom: 14px;
+}
+.scm-loading {
+  text-align: center; padding: 48px 0; color: #94a3b8; font-size: 15px;
+}
+.scm-actions { display: flex; gap: 10px; }
+.scm-btn {
+  flex: 1; padding: 13px 10px; border: none; border-radius: 12px;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  background: rgba(255,255,255,0.1); color: #fff;
+}
+.scm-btn-primary { background: #059669; }
+.scm-btn-close { background: rgba(255,255,255,0.06); color: #94a3b8; }
+html.dark .scm-sheet { background: #0f172a; }

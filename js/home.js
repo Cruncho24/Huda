@@ -256,6 +256,7 @@ function renderHome() {
         <div class="card-section-label" style="margin-bottom:0">Hadith of the Day</div>
         <div style="display:flex;gap:2px;align-items:center">
           <button onclick="shareHadith()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:14px;padding:2px 6px;line-height:1" title="Share hadith">↗</button>
+          <button onclick="shareHadithCard()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:15px;padding:2px 4px;line-height:1" title="Share as image">📸</button>
           <button onclick="rotateHadith()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1" title="Next hadith">↻</button>
         </div>
       </div>
@@ -330,6 +331,7 @@ function rotateHadith() {
         <div class="card-section-label" style="margin-bottom:0">Hadith of the Day</div>
         <div style="display:flex;gap:2px;align-items:center">
           <button onclick="shareHadith()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:14px;padding:2px 6px;line-height:1" title="Share hadith">↗</button>
+          <button onclick="shareHadithCard()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:15px;padding:2px 4px;line-height:1" title="Share as image">📸</button>
           <button onclick="rotateHadith()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1" title="Next hadith">↻</button>
         </div>
       </div>
@@ -610,5 +612,10 @@ function onboardingEnableLocation(btn) {
 function dismissOnboarding() {
   localStorage.setItem('huda_onboarded', '1');
   renderHome();
+}
+
+function shareHadithCard() {
+  const h = HADITHS[state.hadithIndex % HADITHS.length];
+  showShareCardModal({ english: h.text, source: h.source, grade: h.grade, type: 'hadith' });
 }
 

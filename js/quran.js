@@ -1476,6 +1476,7 @@ function renderSurahContent(n, arData, enData) {
           onclick="const d=this.dataset;showExplanationSheet(+d.gn,+d.s,+d.a,d.ar,d.en)"
           title="AI explanation" aria-label="AI explanation">✦ AI Explain</button>
         <button class="ayah-card-btn" onclick="shareAyah(${n},${a.numberInSurah})" aria-label="Share">📤</button>
+        <button class="ayah-card-btn" onclick="showAyahCard(${n},${a.numberInSurah})" aria-label="Share as image" title="Share as image">📸</button>
       </div>
     </div>
     <div class="ayah-arabic-card">${esc(displayText)}</div>
@@ -1531,6 +1532,21 @@ function shareAyah(surahNum, ayahNum) {
     <div class="share-sheet-english">${esc(en)}</div>
     <div class="share-sheet-ref">— ${esc(ref)}</div>`;
   openShareSheet(ref);
+}
+
+function showAyahCard(surahNum, ayahNum) {
+  const cached = state.quran.cache[surahNum];
+  if (!cached) { showToast('Load the surah first'); return; }
+  const arAyah = cached.arData.ayahs.find(a => a.numberInSurah === ayahNum);
+  const enAyah = cached.enData.ayahs.find(a => a.numberInSurah === ayahNum);
+  if (!arAyah || !enAyah) return;
+  const surahName = SURAHS[surahNum - 1][2];
+  showShareCardModal({
+    arabic: arAyah.text,
+    english: enAyah.text,
+    source: `Surah ${surahName} (${surahNum}:${ayahNum})`,
+    type: 'ayah',
+  });
 }
 
 function openShareSheet(title) {
