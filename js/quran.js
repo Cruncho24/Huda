@@ -1560,6 +1560,7 @@ function openShareSheet(title) {
 }
 
 function closeShareSheet() {
+  _pendingShareHtml = '';
   const overlay = document.getElementById('share-sheet-overlay');
   if (!overlay) return;
   const sheet = overlay.querySelector('.share-sheet');
