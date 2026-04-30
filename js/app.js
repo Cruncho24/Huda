@@ -916,21 +916,21 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
     // ── Minimal: Arabic + English + source, vertically centred ──
     const aLen = arabic ? arabic.length : 0;
     const aFs = aLen < 60 ? 82 : aLen < 100 ? 68 : aLen < 180 ? 58 : aLen < 280 ? 46 : 38;
-    const aLh = aFs * 2.0;
+    const aLh = aFs * 2.4;
     const aMaxLines = aFs >= 60 ? 4 : aFs >= 50 ? 6 : aFs >= 40 ? 8 : 10;
     ctx.font = `${aFs}px UthmanicHafs, "Amiri Quran", "Scheherazade New", serif`;
     ctx.direction = 'rtl'; ctx.textAlign = 'center';
     const aLines = arabic ? _cardWrap(ctx, arabic, maxW, aMaxLines) : [];
 
-    const eFs = 38;
-    const eLh = eFs * 1.75;
+    const eFs = 44;
+    const eLh = eFs * 2.2;
     ctx.font = `${eFs}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
     ctx.direction = 'ltr'; ctx.textAlign = 'center';
     const eMaxLines = Math.max(2, Math.floor((_CARD_H - aLines.length * aLh - 120) / eLh));
     const eLines = _cardWrap(ctx, `"${english}"`, maxW, eMaxLines);
 
-    const srcH = source ? 60 : 0;
-    const gapAE = aLines.length ? 60 : 0;
+    const srcH = source ? 70 : 0;
+    const gapAE = aLines.length ? 90 : 0;
     const totalH = aLines.length * aLh + gapAE + eLines.length * eLh + srcH;
     let y = Math.max(100, (_CARD_H - totalH) / 2) + aLh;
 
@@ -991,21 +991,33 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
       y += 52;
     }
 
-    const eFs = arabic ? 32 : 40;
-    const eLh = eFs * 1.75;
+    const eLen2 = english.length;
+    const eFs = arabic ? 32 : (eLen2 < 80 ? 52 : eLen2 < 160 ? 44 : eLen2 < 300 ? 38 : 32);
+    const eLh = eFs * 2.0;
     ctx.font = `${eFs}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
     ctx.fillStyle = '#cbd5e1'; ctx.direction = 'ltr'; ctx.textAlign = 'center';
     const eMaxLines = Math.max(2, Math.floor((footerZone - y - 120) / eLh));
     const eLines = _cardWrap(ctx, `"${english}"`, maxW, eMaxLines);
+
+    // Vertically centre hadith content between header and footer
+    if (!arabic) {
+      const srcRaw = source ? (grade ? `— ${source}  ·  ${grade}` : `— ${source}`) : '';
+      ctx.font = `bold 28px -apple-system, sans-serif`;
+      const srcMLines = source ? _cardWrap(ctx, srcRaw, maxW, 2) : [];
+      const contentH = eLines.length * eLh + (source ? 56 + srcMLines.length * 42 : 0);
+      y = Math.max(260, Math.round(220 + eFs + (footerZone - 220 - contentH) / 2));
+      ctx.font = `${eFs}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    }
+
     for (const ln of eLines) { ctx.fillText(ln, _CARD_W / 2, y); y += eLh; }
-    y += 48;
+    y += 56;
 
     if (source) {
       ctx.fillStyle = '#34d399';
-      ctx.font = `bold 26px -apple-system, sans-serif`;
+      ctx.font = `bold 28px -apple-system, sans-serif`;
       const srcText = grade ? `— ${source}  ·  ${grade}` : `— ${source}`;
       const srcLines = _cardWrap(ctx, srcText, maxW, 2);
-      for (const ln of srcLines) { ctx.fillText(ln, _CARD_W / 2, y); y += 38; }
+      for (const ln of srcLines) { ctx.fillText(ln, _CARD_W / 2, y); y += 42; }
     }
 
     ctx.fillStyle = 'rgba(255,255,255,0.18)';
