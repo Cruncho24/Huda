@@ -915,14 +915,14 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
   if (minimal) {
     // ── Minimal: Arabic + English + source, vertically centred ──
     const aLen = arabic ? arabic.length : 0;
-    const aFs = aLen < 60 ? 72 : aLen < 100 ? 60 : aLen < 180 ? 50 : aLen < 280 ? 40 : 34;
+    const aFs = aLen < 60 ? 82 : aLen < 100 ? 68 : aLen < 180 ? 58 : aLen < 280 ? 46 : 38;
     const aLh = aFs * 2.0;
     const aMaxLines = aFs >= 60 ? 4 : aFs >= 50 ? 6 : aFs >= 40 ? 8 : 10;
     ctx.font = `${aFs}px UthmanicHafs, "Amiri Quran", "Scheherazade New", serif`;
     ctx.direction = 'rtl'; ctx.textAlign = 'center';
     const aLines = arabic ? _cardWrap(ctx, arabic, maxW, aMaxLines) : [];
 
-    const eFs = 34;
+    const eFs = 38;
     const eLh = eFs * 1.75;
     ctx.font = `${eFs}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
     ctx.direction = 'ltr'; ctx.textAlign = 'center';
