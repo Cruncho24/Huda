@@ -521,35 +521,7 @@ function clearAudioPos() {
   localStorage.removeItem('huda_audio_pos');
 }
 
-// Called from "Continue Listening" card on home screen
-function resumeAudioPos() {
-  let pos;
-  try { pos = JSON.parse(localStorage.getItem('huda_audio_pos') || 'null'); } catch(e) {}
-  if (!pos?.surah) return;
-  if (pos.reciter) { state.reciter = pos.reciter; localStorage.setItem('huda_reciter', pos.reciter); }
-  if (pos.mode) state.quran.viewMode = pos.mode;
-  switchTab('quran');
-  setTimeout(() => {
-    openSurah(pos.surah, pos.ayah).then(() => {
-      const cache = state.quran.cache[pos.surah];
-      if (!cache) return;
-      if (pos.mode === 'page') {
-        const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === pos.ayah) || cache.arData.ayahs[0];
-        // Always use playMushafAyah so we resume at the saved ayah, not from ayah 1
-        if (ayahObj) playMushafAyah(ayahObj.number, pos.surah, ayahObj.numberInSurah);
-        else mushafPlayAll(pos.surah); // no cache entry at all — last resort
-      } else {
-        const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === pos.ayah) || cache.arData.ayahs[0];
-        if (ayahObj) playAyah(ayahObj.number, pos.surah, ayahObj.numberInSurah);
-      }
-    });
-  }, 100);
-}
-
-// Car/AirPods auto-play — resume from last known position (huda_last_audio never cleared)
-function resumeLastAudio() {
-  let pos;
-  try { pos = JSON.parse(localStorage.getItem('huda_last_audio') || 'null'); } catch(e) {}
+function _resumeFromPos(pos) {
   if (!pos?.surah) return;
   if (pos.reciter) { state.reciter = pos.reciter; localStorage.setItem('huda_reciter', pos.reciter); }
   if (pos.mode) state.quran.viewMode = pos.mode;
@@ -568,6 +540,22 @@ function resumeLastAudio() {
       }
     });
   }, 100);
+}
+
+// Called from "Continue Listening" card on home screen
+function resumeAudioPos() {
+  let pos;
+  try { pos = JSON.parse(localStorage.getItem('huda_audio_pos') || 'null'); } catch(e) {}
+  _resumeFromPos(pos);
+}
+
+// Car/AirPods auto-play — huda_last_audio is never cleared on stop, only overwritten
+function resumeLastAudio() {
+  let pos;
+  try { pos = JSON.parse(localStorage.getItem('huda_last_audio') || 'null'); } catch(e) {}
+  // Don't auto-resume positions older than 30 days — stale context is more confusing than helpful
+  if (!pos?.surah || (pos.ts && Date.now() - pos.ts > 30 * 24 * 60 * 60 * 1000)) return;
+  _resumeFromPos(pos);
 }
 
 // ── Audio ─────────────────────────────────────────────────────

@@ -408,10 +408,10 @@ function injectPlanTargetMarker(surahNum, isVerse) {
   if (!range) return;
 
   const ahead = range.isAhead;
-  const stopWord = ahead ? 'Tomorrow stops here' : 'Stop here today';
-  const startWord = ahead ? 'Tomorrow starts here' : 'Today starts here';
-  const continueWord = ahead ? 'Tomorrow: continue into' : 'Continue into';
-  const fullWord = ahead ? 'Full surah in tomorrow\'s reading' : 'Full surah in today\'s reading';
+  const stopWord = ahead ? 'Up next: stop here' : 'Stop here today';
+  const startWord = ahead ? 'Up next: starts here' : 'Today starts here';
+  const continueWord = ahead ? 'Up next: continue into' : 'Continue into';
+  const fullWord = ahead ? 'Full surah in next session' : 'Full surah in today\'s reading';
 
   // Inject "starts here" before the first ayah when range starts mid-surah
   if (range.from.surah === surahNum && range.from.ayah > 1) {
@@ -534,7 +534,7 @@ function updateReaderPlanBar() {
   } else if (reached && range.isAhead) {
     labelEl.innerHTML = `Read ahead complete! &nbsp;<button class="reader-plan-done-btn" onclick="markReadAheadDoneFromReader()">✓ Mark done</button>`;
   } else if (range.isAhead) {
-    labelEl.textContent = `Tomorrow: ${done} / ${total} ayahs`;
+    labelEl.textContent = `Up next: ${done} / ${total} ayahs`;
   } else {
     labelEl.textContent = `Today: ${done} / ${total} ayahs`;
   }
@@ -800,6 +800,7 @@ function goBackADay() {
   // Undo one entry at a time — read-ahead (tomorrow) takes priority over today,
   // today takes priority over yesterday. Each click = exactly one day back.
   let dayToUndo = null;
+  // TODO: remove tmrStr check after ~Aug 2026 — new sessions never write tomorrow log keys
   if (plan.log && plan.log[tmrStr]) dayToUndo = tmrStr;
   else if (plan.log && plan.log[todayStr]) dayToUndo = todayStr;
   else if (plan.log && plan.log[yStr]) dayToUndo = yStr;

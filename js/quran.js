@@ -690,14 +690,15 @@ function _registerMediaSession() {
       }
     });
   } catch(_) {} // some older browsers don't support these handlers
-  // setPositionState — powers the seek bar on car displays and lock screen
+  // setPositionState — separate try/catch; powers seek bar on car displays and lock screen
+  // Clamp position <= duration to satisfy spec (float rounding at track end can violate this)
   try {
     const p = _surahAudio || state.audio.player;
     if (p && isFinite(p.duration) && p.duration > 0) {
       navigator.mediaSession.setPositionState({
         duration: p.duration,
         playbackRate: p.playbackRate || 1,
-        position: p.currentTime,
+        position: Math.min(p.currentTime, p.duration),
       });
     }
   } catch(_) {}
@@ -1280,9 +1281,11 @@ function mushafStop() {
   _isAutoScrolling  = false;
   if (_autoScrollTimer)     { clearTimeout(_autoScrollTimer);     _autoScrollTimer     = null; }
   if (_autoScrollAnimTimer) { clearTimeout(_autoScrollAnimTimer); _autoScrollAnimTimer = null; }
-  // Stay as 'paused' (not 'none') so the OS keeps us as the active audio app.
-  // When the car or AirPods reconnect, the system sends a play command here
-  // and the play handler calls resumeLastAudio() to restart from huda_last_audio.
+  updateMushafPlayBtn(false);
+  updateMushafPlayerBar();
+  // Must come AFTER updateMushafPlayerBar — its else-branch sets playbackState='none'
+  // and nulls all handlers when state.audio is empty. We override that here: staying
+  // 'paused' keeps the browser as the OS active audio app so car/AirPods auto-play works.
   if ('mediaSession' in navigator) {
     navigator.mediaSession.playbackState = 'paused';
     navigator.mediaSession.setActionHandler('play', () => resumeLastAudio());
@@ -1290,8 +1293,6 @@ function mushafStop() {
       try { navigator.mediaSession.setActionHandler(a, null); } catch(_) {}
     });
   }
-  updateMushafPlayBtn(false);
-  updateMushafPlayerBar();
 }
 
 // Show/hide a buffering spinner in the player bar info label
