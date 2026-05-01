@@ -77,7 +77,7 @@ const state = {
   activeTab: (() => { const t = localStorage.getItem('huda_tab'); return ['home','quran','prayer','dhikr','duas','learn'].includes(t) ? t : 'home'; })(),
   dhikrCounts: (() => { try { return JSON.parse(localStorage.getItem('huda_dhikr') || '{}'); } catch(e) { return {}; } })(),
   hadithIndex: (() => { const d = new Date(); return (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate()) % (typeof HADITHS !== 'undefined' ? HADITHS.length : 40); })(),
-  verseIndex: (() => { const d = new Date(); return (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate() + 17) % (typeof VERSES_OF_DAY !== 'undefined' ? VERSES_OF_DAY.length : 50); })(),
+  verseIndex: (() => { const d = new Date(); return (d.getFullYear() * 366 + d.getMonth() * 31 + d.getDate() + 17) % (typeof VERSES_OF_DAY !== 'undefined' ? VERSES_OF_DAY.length : 1); })(),
   darkMode: localStorage.getItem('huda_dark') !== '0',
   fontSize: parseInt(localStorage.getItem('huda_fontsize') || '28') || 28,
   bookmarks: (() => { try { return JSON.parse(localStorage.getItem('huda_bookmarks') || '[]'); } catch(e) { return []; } })(),

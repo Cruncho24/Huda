@@ -354,7 +354,7 @@ body {
 }
 html.dark .hadith-text { color: #e2e8f0; }
 .votd-arabic {
-  font-family: 'Noto Naskh Arabic', 'Scheherazade New', serif;
+  font-family: 'Amiri Quran', 'Noto Naskh Arabic', serif;
   font-size: 22px;
   line-height: 1.8;
   color: #065f46;

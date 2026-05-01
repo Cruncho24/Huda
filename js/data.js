@@ -1228,7 +1228,7 @@ const VERSES_OF_DAY = [
   { arabic: "لَّآ إِلَٰهَ إِلَّآ أَنتَ سُبۡحَٰنَكَ إِنِّي كُنتُ مِنَ الظَّٰلِمِينَ", english: "There is no deity except You; exalted are You. Indeed, I have been of the wrongdoers.", surah: 21, ayah: 87 },
   { arabic: "رَّبِّ اغۡفِرۡ وَارۡحَمۡ وَأَنتَ خَيۡرُ الرَّٰحِمِينَ", english: "My Lord, forgive and have mercy, and You are the best of the merciful.", surah: 23, ayah: 118 },
   { arabic: "هُوَ الۡأَوَّلُ وَالۡأٓخِرُ وَالظَّٰهِرُ وَالۡبَاطِنُ وَهُوَ بِكُلِّ شَيۡءٍ عَلِيمٌ", english: "He is the First and the Last, the Ascendant and the Intimate, and He is of all things Knowing.", surah: 57, ayah: 3 },
-  { arabic: "إِنَّ مَعَ الصَّبۡرِ وَالصِّدۡقِ وَالطَّاعَةِ وَالۡإِنفَاقِ نَجَاةً", english: "Indeed, with patience, truthfulness, obedience, and charity comes salvation.", surah: 3, ayah: 17 },
+  { arabic: "وَنَحۡنُ أَقۡرَبُ إِلَيۡهِ مِنۡ حَبۡلِ الۡوَرِيدِ", english: "And We are closer to him than his jugular vein.", surah: 50, ayah: 16 },
   { arabic: "يُرِيدُ اللَّهُ بِكُمُ الۡيُسۡرَ وَلَا يُرِيدُ بِكُمُ الۡعُسۡرَ", english: "Allah intends for you ease and does not intend for you hardship.", surah: 2, ayah: 185 },
   { arabic: "وَلَذِكۡرُ اللَّهِ أَكۡبَرُ", english: "And the remembrance of Allah is greater.", surah: 29, ayah: 45 },
   { arabic: "إِنَّ اللَّهَ مَعَ الصَّٰبِرِينَ", english: "Indeed, Allah is with the patient.", surah: 2, ayah: 153 },
@@ -1866,7 +1866,10 @@ const QURAN_CATEGORIES = [
       {s:2,a:24},{s:3,a:131},{s:4,a:56},{s:4,a:145},
       {s:11,a:106},{s:22,a:19},{s:3,a:197},{s:38,a:56},
       {s:40,a:46},{s:67,a:6},{s:78,a:21},{s:78,a:22},
-      {s:78,a:23},{s:87,a:12},{s:87,a:13}
+      {s:78,a:23},{s:87,a:12},{s:87,a:13},
+      {s:2,a:206},{s:9,a:35},{s:14,a:16},{s:18,a:29},
+      {s:35,a:36},{s:50,a:30},{s:56,a:41},{s:66,a:6},
+      {s:76,a:4},{s:88,a:2}
     ]
   },
   {

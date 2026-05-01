@@ -61,6 +61,7 @@ function renderQuranList() {
         </div>
       </div>
       <div id="offline-banner"></div>
+      <div id="plan-card-wrap" style="padding:12px 12px 0"></div>
       <div id="quran-themes-section"></div>
       <div id="surah-list"></div>
     </div>
@@ -122,6 +123,7 @@ function renderQuranList() {
   renderSurahList(SURAHS);
   _renderOfflineBanner();
   _renderQuranThemes();
+  _refreshPlanCard();
 
   // Pause auto-scroll when user manually scrolls/touches anywhere.
   // #quran-reader has no overflow-y so scroll events bubble to window.

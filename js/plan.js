@@ -230,7 +230,7 @@ function startPlan(type) {
   _savePlan(plan);
   _planStartGlobal = 0;
   closePlanSetup();
-  renderHome();
+  _refreshPlanCard();
 }
 
 function startCustomPlan(days) {
@@ -249,7 +249,7 @@ function startCustomPlan(days) {
   _savePlan(plan);
   _planStartGlobal = 0;
   closePlanSetup();
-  renderHome();
+  _refreshPlanCard();
 }
 
 function markPlanDone() {
@@ -267,7 +267,7 @@ function markPlanDone() {
   }
   _savePlan(plan);
   haptic(80);
-  setTimeout(renderHome, 350);
+  setTimeout(_refreshPlanCard, 350);
 }
 
 function markPlanDoneNoNav() {
@@ -340,7 +340,7 @@ function _applyPaceChange(plan, requestedDays, type, label) {
   // startDate intentionally not reset — keeps heatmap and day numbers intact
   _savePlan(plan);
   closePlanSetup();
-  renderHome();
+  _refreshPlanCard();
 }
 
 // Skip ahead to today's expected position when behind schedule
@@ -366,7 +366,7 @@ function catchUpPlan(fromDetail = false) {
   }
   _savePlan(plan);
   haptic(40);
-  if (fromDetail) { setTimeout(openPlanDetail, 150); } else { renderHome(); }
+  if (fromDetail) { setTimeout(openPlanDetail, 150); } else { _refreshPlanCard(); }
 }
 
 function _insertMarker(html, ayahId, isVerse, position = 'afterend') {
@@ -566,7 +566,7 @@ function markReadAheadDone() {
   }
   _savePlan(plan);
   haptic(80);
-  setTimeout(renderHome, 350);
+  setTimeout(_refreshPlanCard, 350);
 }
 
 function markReadAheadDoneFromReader() {
@@ -593,7 +593,7 @@ function redistributePlan(fromDetail = false) {
   // startDate intentionally not reset — keeps heatmap and day numbers intact
   _savePlan(plan);
   showToast('Plan extended — no days skipped ✓');
-  if (fromDetail) { setTimeout(openPlanDetail, 150); } else { renderHome(); }
+  if (fromDetail) { setTimeout(openPlanDetail, 150); } else { _refreshPlanCard(); }
 }
 
 function openPlanDetail() {
@@ -698,9 +698,10 @@ function openPlanDetail() {
       </div>
     </div>`;
 
-  document.getElementById('tab-home').innerHTML = `
+  switchTab('quran');
+  document.getElementById('tab-quran').innerHTML = `
     <div class="page-header">
-      <button class="back-btn" onclick="renderHome()">←</button>
+      <button class="back-btn" onclick="_restoreQuranList()">←</button>
       <div>
         <h2>Reading Plan</h2>
         <div style="font-size:11px;opacity:0.8">Day ${dayNum} · ${plan.label}</div>
@@ -786,7 +787,7 @@ function confirmRestartPlan() {
     if (lr) { lr.ayah = null; localStorage.setItem('huda_last_read', JSON.stringify(lr)); }
   } catch(e) {}
   haptic(60);
-  renderHome();
+  _restoreQuranList();
 }
 
 function goBackADay() {
@@ -834,7 +835,7 @@ function goBackADay() {
 function confirmCancelPlan() {
   closePlanCancelSheet();
   _savePlan(null);
-  renderHome();
+  _refreshPlanCard();
 }
 
 function jumpToPlanReading(readAhead = false) {
@@ -891,6 +892,18 @@ function _renderWeekCalendar(plan) {
 }
 
 // ── Render ─────────────────────────────────────────────────────
+
+function _refreshPlanCard() {
+  const el = document.getElementById('plan-card-wrap');
+  if (el) el.innerHTML = renderPlanCard();
+}
+
+function _restoreQuranList() {
+  const tab = document.getElementById('tab-quran');
+  if (!tab) return;
+  tab.innerHTML = '';
+  if (typeof renderQuranList === 'function') renderQuranList();
+}
 
 function renderPlanCard() {
   const plan = _loadPlan();
