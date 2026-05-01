@@ -17,7 +17,7 @@ async function authSignUp(email, password) {
   const { data, error } = await _getClient().auth.signUp({
     email,
     password,
-    options: { emailRedirectTo: 'https://huda-six.vercel.app/auth/confirm' },
+    options: { emailRedirectTo: 'https://hudacompanion.com/auth/confirm' },
   });
   if (error) throw error;
   // session is null when email confirmation is required
@@ -40,7 +40,7 @@ async function authSignOut() {
 
 async function authResetPassword(email) {
   const { error } = await _getClient().auth.resetPasswordForEmail(email, {
-    redirectTo: 'https://huda-six.vercel.app/auth/reset',
+    redirectTo: 'https://hudacompanion.com/auth/reset',
   });
   if (error) throw error;
 }
