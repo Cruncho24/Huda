@@ -916,8 +916,8 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
     watermark: 'rgba(255,255,255,0.18)',
   } : {
     bgFrom: '#ffffff', bgTo: '#f0fdf4',
-    bar: '#059669', huda: '#059669',
-    badgeBg: 'rgba(5,150,105,0.1)', badgeFg: '#059669',
+    bar: '#059669', huda: '#047857',
+    badgeBg: 'rgba(5,150,105,0.1)', badgeFg: '#047857',
     divider: 'rgba(5,150,105,0.2)',
     arabic: '#1e293b', english: '#374151', source: '#059669',
     separator: 'rgba(0,0,0,0.06)',
@@ -1135,6 +1135,7 @@ async function _resizeCard(delta) {
 }
 
 function _toggleCardMode() {
+  if (!_currentCardOpts) return;
   _cardDarkMode = !_cardDarkMode;
   const btn = document.getElementById('scm-mode-btn');
   if (btn) btn.textContent = _cardDarkMode ? '🌙' : '☀️';
