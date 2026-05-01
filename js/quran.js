@@ -1927,6 +1927,11 @@ async function _loadCategoryVerses(cat) {
               data-ar="${esc(v.arabic)}" data-en="${esc(v.english)}"
               onclick="event.stopPropagation();const d=this.dataset;showExplanationSheet(+d.gn,+d.s,+d.a,d.ar,d.en)"
               title="AI explanation" aria-label="AI explanation">✦ AI Explain</button>
+            <button class="cv-share-btn"
+              data-ar="${esc(v.arabic)}" data-en="${esc(v.english)}"
+              data-sn="${esc(v.surahName)}" data-s="${v.s}" data-a="${v.a}"
+              onclick="event.stopPropagation();const d=this.dataset;showShareCardModal({arabic:d.ar,english:d.en,source:d.sn+' '+d.s+':'+d.a,type:'ayah',minimal:true})"
+              title="Share as image" aria-label="Share as image">📸</button>
             <button class="cv-play-btn" id="cv-aud-${gn}"
               onclick="event.stopPropagation();playCatAyah(${gn},${v.s},${v.a})">▶</button>
           </div>

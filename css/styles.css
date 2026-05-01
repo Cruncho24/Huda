@@ -2836,6 +2836,16 @@ html.dark .qcat-tile:active { background: #0f172a; }
 .cv-play-btn.cv-playing { background: #047857; }
 html.dark .cv-play-btn { background: #059669; }
 html.dark .cv-play-btn.cv-playing { background: #047857; }
+.cv-share-btn {
+  width: 30px; height: 30px; border-radius: 50%; border: none;
+  background: rgba(5,150,105,0.12); color: #059669;
+  font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: background 0.15s, transform 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.cv-share-btn:active { transform: scale(0.9); background: rgba(5,150,105,0.24); }
+html.dark .cv-share-btn { background: rgba(52,211,153,0.1); color: #34d399; }
 
 /* Reciter dropdown in green page headers */
 .cv-sz-group { display: flex; gap: 4px; flex-shrink: 0; }
