@@ -660,7 +660,8 @@ function _registerMediaSession() {
   navigator.mediaSession.playbackState = state.audio.paused ? 'paused' : 'playing';
   navigator.mediaSession.setActionHandler('play', () => {
     const p = _surahAudio || state.audio.player;
-    if (p) p.play().catch(() => {});
+    if (p) { p.play().catch(() => {}); }
+    else { resumeLastAudio(); } // car/AirPods connect with no active player — restart last session
   });
   navigator.mediaSession.setActionHandler('pause', () => {
     _intentionalPause = true;
@@ -668,7 +669,7 @@ function _registerMediaSession() {
     if (p) p.pause();
   });
   navigator.mediaSession.setActionHandler('stop', () => { _intentionalPause = true; mushafStop(); });
-  // seekforward/seekbackward: car stereos, AirPods Pro squeeze-hold, lock screen scrub
+  // seekforward/seekbackward/seekto: car stereos, AirPods Pro squeeze-hold, lock screen scrub
   try {
     navigator.mediaSession.setActionHandler('seekforward', e => {
       const p = _surahAudio || state.audio.player;
@@ -681,7 +682,25 @@ function _registerMediaSession() {
       const p = _surahAudio || state.audio.player;
       if (p) { p.currentTime = Math.max(0, p.currentTime - (e?.seekOffset ?? 10)); _surahTimingIdx = 0; }
     });
+    navigator.mediaSession.setActionHandler('seekto', e => {
+      const p = _surahAudio || state.audio.player;
+      if (p && isFinite(p.duration) && e?.seekTime != null) {
+        p.currentTime = Math.max(0, Math.min(p.duration, e.seekTime));
+        _surahTimingIdx = 0;
+      }
+    });
   } catch(_) {} // some older browsers don't support these handlers
+  // setPositionState — powers the seek bar on car displays and lock screen
+  try {
+    const p = _surahAudio || state.audio.player;
+    if (p && isFinite(p.duration) && p.duration > 0) {
+      navigator.mediaSession.setPositionState({
+        duration: p.duration,
+        playbackRate: p.playbackRate || 1,
+        position: p.currentTime,
+      });
+    }
+  } catch(_) {}
   navigator.mediaSession.setActionHandler('nexttrack', () => advanceToNextSurah());
   navigator.mediaSession.setActionHandler('previoustrack', () => {
     const prev = (state.quran.currentSurah || 1) - 1;
@@ -806,6 +825,16 @@ function _surahTimeUpdate() {
   saveAudioPos();
   updateMushafPlayerBar();
   _scrollToAyah(an);
+  // Keep car display / lock screen seek bar in sync
+  try {
+    if ('mediaSession' in navigator && _surahAudio && isFinite(_surahAudio.duration) && _surahAudio.duration > 0) {
+      navigator.mediaSession.setPositionState({
+        duration: _surahAudio.duration,
+        playbackRate: _surahAudio.playbackRate || 1,
+        position: _surahAudio.currentTime,
+      });
+    }
+  } catch(_) {}
 }
 
 
@@ -1251,7 +1280,16 @@ function mushafStop() {
   _isAutoScrolling  = false;
   if (_autoScrollTimer)     { clearTimeout(_autoScrollTimer);     _autoScrollTimer     = null; }
   if (_autoScrollAnimTimer) { clearTimeout(_autoScrollAnimTimer); _autoScrollAnimTimer = null; }
-  if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'none';
+  // Stay as 'paused' (not 'none') so the OS keeps us as the active audio app.
+  // When the car or AirPods reconnect, the system sends a play command here
+  // and the play handler calls resumeLastAudio() to restart from huda_last_audio.
+  if ('mediaSession' in navigator) {
+    navigator.mediaSession.playbackState = 'paused';
+    navigator.mediaSession.setActionHandler('play', () => resumeLastAudio());
+    ['pause','stop','seekforward','seekbackward','seekto','nexttrack','previoustrack'].forEach(a => {
+      try { navigator.mediaSession.setActionHandler(a, null); } catch(_) {}
+    });
+  }
   updateMushafPlayBtn(false);
   updateMushafPlayerBar();
 }

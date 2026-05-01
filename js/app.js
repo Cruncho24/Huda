@@ -503,14 +503,17 @@ function saveAudioPos() {
   const { playingSurah, playingAyah, playingId } = state.audio;
   if (!playingSurah) return;
   try {
-    localStorage.setItem('huda_audio_pos', JSON.stringify({
+    const pos = {
       surah: playingSurah,
       ayah: playingAyah || 1,
       globalNum: playingId,
       mode: state.quran.viewMode,
       reciter: state.reciter,
       ts: Date.now(),
-    }));
+    };
+    localStorage.setItem('huda_audio_pos', JSON.stringify(pos));
+    // Persistent copy — never cleared on stop so car/AirPods can auto-resume
+    localStorage.setItem('huda_last_audio', JSON.stringify(pos));
   } catch(e) {}
 }
 
@@ -535,6 +538,30 @@ function resumeAudioPos() {
         // Always use playMushafAyah so we resume at the saved ayah, not from ayah 1
         if (ayahObj) playMushafAyah(ayahObj.number, pos.surah, ayahObj.numberInSurah);
         else mushafPlayAll(pos.surah); // no cache entry at all — last resort
+      } else {
+        const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === pos.ayah) || cache.arData.ayahs[0];
+        if (ayahObj) playAyah(ayahObj.number, pos.surah, ayahObj.numberInSurah);
+      }
+    });
+  }, 100);
+}
+
+// Car/AirPods auto-play — resume from last known position (huda_last_audio never cleared)
+function resumeLastAudio() {
+  let pos;
+  try { pos = JSON.parse(localStorage.getItem('huda_last_audio') || 'null'); } catch(e) {}
+  if (!pos?.surah) return;
+  if (pos.reciter) { state.reciter = pos.reciter; localStorage.setItem('huda_reciter', pos.reciter); }
+  if (pos.mode) state.quran.viewMode = pos.mode;
+  switchTab('quran');
+  setTimeout(() => {
+    openSurah(pos.surah, pos.ayah).then(() => {
+      const cache = state.quran.cache[pos.surah];
+      if (!cache) return;
+      if (pos.mode === 'page') {
+        const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === pos.ayah) || cache.arData.ayahs[0];
+        if (ayahObj) playMushafAyah(ayahObj.number, pos.surah, ayahObj.numberInSurah);
+        else mushafPlayAll(pos.surah);
       } else {
         const ayahObj = cache.arData.ayahs.find(a => a.numberInSurah === pos.ayah) || cache.arData.ayahs[0];
         if (ayahObj) playAyah(ayahObj.number, pos.surah, ayahObj.numberInSurah);
