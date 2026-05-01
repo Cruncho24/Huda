@@ -878,6 +878,7 @@ let   _cardDataUrl = '';
 let   _currentGeneration = null;
 let   _cardSizeMultiplier = 1.0;
 let   _currentCardOpts = null;
+let   _cardDarkMode = true;
 
 function _cardWrap(ctx, text, maxW, maxLines) {
   const words = text.split(' ');
@@ -896,19 +897,36 @@ function _cardWrap(ctx, text, maxW, maxLines) {
   return lines;
 }
 
-async function generateShareCard({ arabic, english, source, grade, type, minimal = false, sizeMultiplier = 1 }) {
+async function generateShareCard({ arabic, english, source, grade, type, minimal = false, sizeMultiplier = 1, darkMode = true }) {
   const canvas = document.createElement('canvas');
   canvas.width = _CARD_W; canvas.height = _CARD_H;
   const ctx = canvas.getContext('2d');
 
-  // Ensure fonts are ready before drawing
   try { await document.fonts.load('48px UthmanicHafs'); } catch(e) {}
   try { await document.fonts.load('48px "Amiri Quran"'); } catch(e) {}
   await document.fonts.ready.catch(() => {});
 
+  const C = darkMode ? {
+    bgFrom: '#0f172a', bgTo: '#0a1f2e',
+    bar: '#059669', huda: '#34d399',
+    badgeBg: 'rgba(52,211,153,0.15)', badgeFg: '#34d399',
+    divider: 'rgba(52,211,153,0.2)',
+    arabic: '#ffffff', english: '#cbd5e1', source: '#34d399',
+    separator: 'rgba(255,255,255,0.08)',
+    watermark: 'rgba(255,255,255,0.18)',
+  } : {
+    bgFrom: '#ffffff', bgTo: '#f0fdf4',
+    bar: '#059669', huda: '#059669',
+    badgeBg: 'rgba(5,150,105,0.1)', badgeFg: '#059669',
+    divider: 'rgba(5,150,105,0.2)',
+    arabic: '#1e293b', english: '#374151', source: '#059669',
+    separator: 'rgba(0,0,0,0.06)',
+    watermark: 'rgba(0,0,0,0.22)',
+  };
+
   // ── Background ──────────────────────────────────────────────
   const bg = ctx.createLinearGradient(0, 0, 0, _CARD_H);
-  bg.addColorStop(0, '#0f172a'); bg.addColorStop(1, '#0a1f2e');
+  bg.addColorStop(0, C.bgFrom); bg.addColorStop(1, C.bgTo);
   ctx.fillStyle = bg; ctx.fillRect(0, 0, _CARD_W, _CARD_H);
 
   const pad = 90;
@@ -939,26 +957,26 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
 
     if (aLines.length) {
       ctx.font = `${aFs}px UthmanicHafs, "Amiri Quran", "Scheherazade New", serif`;
-      ctx.fillStyle = '#ffffff'; ctx.direction = 'rtl'; ctx.textAlign = 'center';
+      ctx.fillStyle = C.arabic; ctx.direction = 'rtl'; ctx.textAlign = 'center';
       for (const ln of aLines) { ctx.fillText(ln, _CARD_W / 2, y); y += aLh; }
       y += gapAE;
     }
 
     ctx.font = `${eFs}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
-    ctx.fillStyle = '#cbd5e1'; ctx.direction = 'ltr'; ctx.textAlign = 'center';
+    ctx.fillStyle = C.english; ctx.direction = 'ltr'; ctx.textAlign = 'center';
     for (const ln of eLines) { ctx.fillText(ln, _CARD_W / 2, y); y += eLh; }
 
     if (source) {
       y += 30;
-      ctx.fillStyle = '#34d399';
+      ctx.fillStyle = C.source;
       ctx.font = `bold ${Math.round(26 * sizeMultiplier)}px -apple-system, sans-serif`;
       ctx.fillText(`— ${source}`, _CARD_W / 2, y);
     }
   } else {
     // ── Full branded card ────────────────────────────────────────
-    ctx.fillStyle = '#059669'; ctx.fillRect(0, 0, _CARD_W, 10);
+    ctx.fillStyle = C.bar; ctx.fillRect(0, 0, _CARD_W, 10);
 
-    ctx.fillStyle = '#34d399';
+    ctx.fillStyle = C.huda;
     ctx.font = 'bold 46px -apple-system, BlinkMacSystemFont, sans-serif';
     ctx.direction = 'ltr'; ctx.textAlign = 'left';
     ctx.fillText('Huda', 80, 95);
@@ -966,14 +984,14 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
     const badge = type === 'ayah' ? 'Quran' : 'Hadith';
     ctx.font = '24px -apple-system, sans-serif';
     const bw = ctx.measureText(badge).width + 44;
-    ctx.fillStyle = 'rgba(52,211,153,0.15)';
+    ctx.fillStyle = C.badgeBg;
     ctx.beginPath();
     if (ctx.roundRect) ctx.roundRect(80, 112, bw, 44, 22);
     else ctx.rect(80, 112, bw, 44);
     ctx.fill();
-    ctx.fillStyle = '#34d399'; ctx.fillText(badge, 102, 140);
+    ctx.fillStyle = C.badgeFg; ctx.fillText(badge, 102, 140);
 
-    ctx.strokeStyle = 'rgba(52,211,153,0.2)'; ctx.lineWidth = 1;
+    ctx.strokeStyle = C.divider; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(80, 185); ctx.lineTo(_CARD_W - 80, 185); ctx.stroke();
 
     const footerZone = _CARD_H - 120;
@@ -986,11 +1004,11 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
       const aLh = aFs * 2.0;
       const aMaxLines = aFs >= 54 ? 4 : aFs >= 44 ? 6 : aFs >= 36 ? 8 : 10;
       ctx.font = `${aFs}px UthmanicHafs, "Amiri Quran", "Scheherazade New", serif`;
-      ctx.fillStyle = '#ffffff'; ctx.direction = 'rtl'; ctx.textAlign = 'center';
+      ctx.fillStyle = C.arabic; ctx.direction = 'rtl'; ctx.textAlign = 'center';
       const aLines = _cardWrap(ctx, arabic, maxW, aMaxLines);
       for (const ln of aLines) { ctx.fillText(ln, _CARD_W / 2, y); y += aLh; }
       y += 44;
-      ctx.strokeStyle = 'rgba(255,255,255,0.08)'; ctx.lineWidth = 1;
+      ctx.strokeStyle = C.separator; ctx.lineWidth = 1;
       ctx.beginPath(); ctx.moveTo(160, y); ctx.lineTo(_CARD_W - 160, y); ctx.stroke();
       y += 52;
     }
@@ -1000,11 +1018,10 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
     const eFs = Math.round(eFsBase * sizeMultiplier);
     const eLh = eFs * 2.0;
     ctx.font = `${eFs}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
-    ctx.fillStyle = '#cbd5e1'; ctx.direction = 'ltr'; ctx.textAlign = 'center';
+    ctx.fillStyle = C.english; ctx.direction = 'ltr'; ctx.textAlign = 'center';
     const eMaxLines = Math.max(2, Math.floor((footerZone - y - 120) / eLh));
     const eLines = _cardWrap(ctx, `"${english}"`, maxW, eMaxLines);
 
-    // Vertically centre hadith content between header and footer
     if (!arabic) {
       const srcRaw = source ? (grade ? `— ${source}  ·  ${grade}` : `— ${source}`) : '';
       const srcFsM = Math.round(28 * sizeMultiplier);
@@ -1019,17 +1036,17 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
     y += 56;
 
     if (source) {
-      ctx.fillStyle = '#34d399';
+      ctx.fillStyle = C.source;
       ctx.font = `bold ${Math.round(28 * sizeMultiplier)}px -apple-system, sans-serif`;
       const srcText = grade ? `— ${source}  ·  ${grade}` : `— ${source}`;
       const srcLines = _cardWrap(ctx, srcText, maxW, 2);
       for (const ln of srcLines) { ctx.fillText(ln, _CARD_W / 2, y); y += Math.round(42 * sizeMultiplier); }
     }
 
-    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.fillStyle = C.watermark;
     ctx.font = '22px -apple-system, sans-serif';
     ctx.fillText('huda-six.vercel.app', _CARD_W / 2, _CARD_H - 54);
-    ctx.fillStyle = '#059669'; ctx.fillRect(0, _CARD_H - 10, _CARD_W, 10);
+    ctx.fillStyle = C.bar; ctx.fillRect(0, _CARD_H - 10, _CARD_W, 10);
   }
 
   return canvas;
@@ -1038,6 +1055,7 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
 async function showShareCardModal(opts) {
   _currentCardOpts = opts;
   _cardSizeMultiplier = 1.0;
+  _cardDarkMode = true;
 
   const genId = Symbol();
   _currentGeneration = genId;
@@ -1054,7 +1072,7 @@ async function showShareCardModal(opts) {
 
   let canvas;
   try {
-    canvas = await generateShareCard({ ...opts, sizeMultiplier: _cardSizeMultiplier });
+    canvas = await generateShareCard({ ...opts, sizeMultiplier: _cardSizeMultiplier, darkMode: _cardDarkMode });
   } catch(e) {
     closeShareCardModal();
     showToast('Could not generate image');
@@ -1075,6 +1093,7 @@ async function showShareCardModal(opts) {
         <button class="scm-btn scm-btn-size" onclick="_resizeCard(-0.1)">A−</button>
         <span class="scm-size-label">100%</span>
         <button class="scm-btn scm-btn-size" onclick="_resizeCard(0.1)">A+</button>
+        <button class="scm-btn scm-btn-mode" id="scm-mode-btn" onclick="_toggleCardMode()" title="Toggle light/dark">🌙</button>
       </div>
       <div class="scm-actions">
         ${canFileShare ? `<button class="scm-btn scm-btn-primary" onclick="shareCardImage()">📤 Share</button>` : ''}
@@ -1098,7 +1117,7 @@ async function _resizeCard(delta) {
 
   let canvas;
   try {
-    canvas = await generateShareCard({ ..._currentCardOpts, sizeMultiplier: _cardSizeMultiplier });
+    canvas = await generateShareCard({ ..._currentCardOpts, sizeMultiplier: _cardSizeMultiplier, darkMode: _cardDarkMode });
   } catch(e) {
     _currentGeneration = null;
     if (preview) preview.style.opacity = '1';
@@ -1115,10 +1134,18 @@ async function _resizeCard(delta) {
   if (label) label.textContent = Math.round(_cardSizeMultiplier * 100) + '%';
 }
 
+function _toggleCardMode() {
+  _cardDarkMode = !_cardDarkMode;
+  const btn = document.getElementById('scm-mode-btn');
+  if (btn) btn.textContent = _cardDarkMode ? '🌙' : '☀️';
+  _resizeCard(0);
+}
+
 function closeShareCardModal() {
   _currentGeneration = null;
   _currentCardOpts = null;
   _cardSizeMultiplier = 1.0;
+  _cardDarkMode = true;
   _cardDataUrl = '';
   const modal = document.getElementById('share-card-modal');
   if (!modal) return;
