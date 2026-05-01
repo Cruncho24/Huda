@@ -1542,8 +1542,10 @@ function showAyahCard(surahNum, ayahNum) {
   const enAyah = cached.enData.ayahs.find(a => a.numberInSurah === ayahNum);
   if (!arAyah || !enAyah) return;
   const surahName = SURAHS[surahNum - 1][2];
+  const hasBism = surahNum !== 1 && surahNum !== 9;
+  const arText = (hasBism && ayahNum === 1) ? stripBismillah(arAyah.text) : arAyah.text;
   showShareCardModal({
-    arabic: arAyah.text,
+    arabic: arText,
     english: enAyah.text,
     source: `${surahName} ${surahNum}:${ayahNum}`,
     type: 'ayah',
@@ -1941,6 +1943,7 @@ async function _loadCategoryVerses(cat) {
       </div>
     `;
   }).join('');
+  if (_cvFontScale !== 1.0) _cvResizeText(0);
 }
 
 function openSurahFromCategory(s, a) {

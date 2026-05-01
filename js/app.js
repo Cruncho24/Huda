@@ -929,11 +929,11 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
     const eLh = eFs * 2.2;
     ctx.font = `${eFs}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
     ctx.direction = 'ltr'; ctx.textAlign = 'center';
-    const eMaxLines = Math.max(2, Math.floor((_CARD_H - aLines.length * aLh - 120) / eLh));
-    const eLines = _cardWrap(ctx, `"${english}"`, maxW, eMaxLines);
-
     const srcH = source ? 70 : 0;
     const gapAE = aLines.length ? 90 : 0;
+    const reservedH = aLines.length * aLh + gapAE + srcH + 80;
+    const eMaxLines = Math.max(2, Math.floor((_CARD_H - reservedH) / eLh));
+    const eLines = _cardWrap(ctx, `"${english || ''}"`, maxW, eMaxLines);
     const totalH = aLines.length * aLh + gapAE + eLines.length * eLh + srcH;
     let y = Math.max(100, (_CARD_H - totalH) / 2) + aLh;
 
@@ -1023,7 +1023,7 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
       ctx.font = `bold ${Math.round(28 * sizeMultiplier)}px -apple-system, sans-serif`;
       const srcText = grade ? `— ${source}  ·  ${grade}` : `— ${source}`;
       const srcLines = _cardWrap(ctx, srcText, maxW, 2);
-      for (const ln of srcLines) { ctx.fillText(ln, _CARD_W / 2, y); y += 42; }
+      for (const ln of srcLines) { ctx.fillText(ln, _CARD_W / 2, y); y += Math.round(42 * sizeMultiplier); }
     }
 
     ctx.fillStyle = 'rgba(255,255,255,0.18)';
@@ -1100,6 +1100,7 @@ async function _resizeCard(delta) {
   try {
     canvas = await generateShareCard({ ..._currentCardOpts, sizeMultiplier: _cardSizeMultiplier });
   } catch(e) {
+    _currentGeneration = null;
     if (preview) preview.style.opacity = '1';
     showToast('Could not resize');
     return;
