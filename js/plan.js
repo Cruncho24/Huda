@@ -288,20 +288,12 @@ function markPlanDoneNoNav() {
 function markReadAheadDoneNoNav() {
   const plan = _loadPlan();
   if (!plan || !isPlanTodayDone(plan)) return;
-  if (!plan.log) plan.log = {};
-  if (!plan.logPrev) plan.logPrev = {};
   const nextFrom = (plan.completedThrough || 0) + 1;
   const nextTo = Math.min(nextFrom + plan.ayahsPerDay - 1, TOTAL_AYAHS);
   const furthest = _getFurthestRead();
   if (furthest < nextTo) return;
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth()+1).padStart(2,'0')}-${String(tomorrow.getDate()).padStart(2,'0')}`;
-  if (plan.log[tomorrowStr]) return;
-  plan.logPrev[tomorrowStr] = plan.completedThrough || 0;
   plan.completedThrough = nextTo;
   delete plan.currentDayEnd;
-  plan.log[tomorrowStr] = true;
   if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) plan.completedDate = _todayStr();
   _savePlan(plan);
   haptic(80);
@@ -563,21 +555,12 @@ function markPlanDoneFromReader() {
 function markReadAheadDone() {
   const plan = _loadPlan();
   if (!plan || !isPlanTodayDone(plan)) return;
-  if (!plan.log) plan.log = {};
-  if (!plan.logPrev) plan.logPrev = {};
   const nextFrom = (plan.completedThrough || 0) + 1;
   const nextTo = Math.min(nextFrom + plan.ayahsPerDay - 1, TOTAL_AYAHS);
   const furthest = _getFurthestRead();
-  if (furthest < nextTo) return; // guard: user hasn't actually read through the range
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  const tomorrowStr = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth()+1).padStart(2,'0')}-${String(tomorrow.getDate()).padStart(2,'0')}`;
-  if (plan.log[tomorrowStr]) return; // spam guard: already marked for tomorrow
-  plan.logPrev[tomorrowStr] = plan.completedThrough || 0;
+  if (furthest < nextTo) return;
   plan.completedThrough = nextTo;
   delete plan.currentDayEnd;
-  // Log tomorrow as done so it counts toward the streak
-  plan.log[tomorrowStr] = true;
   if (plan.completedThrough >= TOTAL_AYAHS && !plan.completedDate) {
     plan.completedDate = _todayStr();
   }
@@ -646,7 +629,7 @@ function openPlanDetail() {
         <div class="pd-today-tick">✓</div>
         <div style="flex:1">
           <div class="pd-today-title">Today's reading complete</div>
-          ${hasNext ? `<div class="pd-today-sub">Tomorrow: ${_rl(nextRef, nextRef2)}</div>` : '<div class="pd-today-sub">Quran complete!</div>'}
+          ${hasNext ? `<div class="pd-today-sub">Up next: ${_rl(nextRef, nextRef2)}</div>` : '<div class="pd-today-sub">Quran complete!</div>'}
         </div>
         ${hasNext ? `<button class="pd-read-btn" style="flex:0;white-space:nowrap;padding:8px 14px;font-size:13px" onclick="jumpToPlanReading(true)">Read ahead ›</button>` : ''}
       </div>
@@ -964,7 +947,7 @@ function renderPlanCard() {
           ${streak > 1 ? `<div class="plan-streak">🔥 ${streak}</div>` : ''}
         </div>
         <div class="plan-done-check">✓ Today's reading complete</div>
-        ${nextLabel ? `<div class="plan-next-label">Tomorrow: ${nextLabel}</div>` : ''}
+        ${nextLabel ? `<div class="plan-next-label">Up next: ${nextLabel}</div>` : ''}
         ${_renderWeekCalendar(plan)}
         <div class="plan-progress-wrap" style="margin-bottom:6px">
           <div class="plan-progress-fill" style="width:${pct}%"></div>
