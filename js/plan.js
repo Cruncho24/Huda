@@ -87,7 +87,8 @@ function _getJuzProgress(completedThrough) {
 
 function _getLongestStreak(plan) {
   if (!plan.log) return 0;
-  const dates = Object.keys(plan.log).filter(k => plan.log[k] === true).sort();
+  const today = _todayStr();
+  const dates = Object.keys(plan.log).filter(k => plan.log[k] === true && k <= today).sort();
   let longest = 0, current = 0, prev = null;
   for (const dateStr of dates) {
     if (prev) {
@@ -625,7 +626,8 @@ function openPlanDetail() {
   const schedule = getPlanScheduleStatus(plan);
   const juzProgress = _getJuzProgress(plan.completedThrough || 0);
   const projectedDate = _getProjectedDate(plan);
-  const totalDaysLogged = Object.keys(plan.log || {}).filter(k => (plan.log||{})[k] === true).length;
+  const _today = _todayStr();
+  const totalDaysLogged = Object.keys(plan.log || {}).filter(k => (plan.log||{})[k] === true && k <= _today).length;
   const daysLeftDisplay = pct >= 100 ? '—' : daysLeft + 'd';
   const _rl = (f, t) => f.surah === t.surah
     ? `${f.name} ${f.surah}:${f.ayah}–${t.ayah}`
