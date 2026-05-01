@@ -357,11 +357,11 @@ html.dark .hadith-text { color: #e2e8f0; }
   font-family: 'UthmanicHafs', 'Scheherazade New', serif;
   font-size: 22px;
   line-height: 1.8;
-  color: #065f46;
+  color: var(--gray-900);
   text-align: right;
   direction: rtl;
 }
-html.dark .votd-arabic { color: #34d399; }
+html.dark .votd-arabic { color: #f1f5f9; }
 .hadith-source {
   display: flex;
   align-items: center;
