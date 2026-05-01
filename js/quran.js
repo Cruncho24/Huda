@@ -8,6 +8,7 @@ let _ayahObserver = null; // IntersectionObserver for reading position tracking
 let _searchDebounce = null;
 let _offlineDownloading = false;
 let _offlineCancelled   = false;
+let _cvFontScale = 1.0;
 let _pendingShareText   = '';
 let _pendingShareHtml   = '';
 
@@ -1819,6 +1820,7 @@ function _renderQuranThemes() {
 function openCategoryView(id) {
   const cat = QURAN_CATEGORIES.find(c => c.id === id);
   if (!cat) return;
+  _cvFontScale = 1.0;
   const listView = document.getElementById('quran-list-view');
   let cv = document.getElementById('quran-category-view');
   if (!cv) {
@@ -1836,6 +1838,10 @@ function openCategoryView(id) {
       <div style="flex:1;min-width:0;overflow:hidden">
         <h2 style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${cat.icon} ${cat.label}</h2>
       </div>
+      <div class="cv-sz-group">
+        <button class="cv-sz-btn" onclick="_cvResizeText(-0.1)">A−</button>
+        <button class="cv-sz-btn" onclick="_cvResizeText(0.1)">A+</button>
+      </div>
       <select class="hdr-reciter-select" onchange="setCatReciter(this.value)">
         ${RECITERS.map(r => `<option value="${r.id}" ${state.reciter === r.id ? 'selected' : ''}>${r.name}</option>`).join('')}
       </select>
@@ -1845,6 +1851,18 @@ function openCategoryView(id) {
     </div>
   `;
   _loadCategoryVerses(cat);
+}
+
+function _cvResizeText(delta) {
+  _cvFontScale = Math.round(Math.min(1.8, Math.max(0.6, _cvFontScale + delta)) * 10) / 10;
+  const container = document.getElementById('cv-verse-list');
+  if (!container) return;
+  container.querySelectorAll('.cv-arabic').forEach(el => {
+    el.style.fontSize = Math.round(20 * _cvFontScale) + 'px';
+  });
+  container.querySelectorAll('.cv-english').forEach(el => {
+    el.style.fontSize = Math.round(13 * _cvFontScale) + 'px';
+  });
 }
 
 function closeCategoryView() {

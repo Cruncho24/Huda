@@ -2838,6 +2838,19 @@ html.dark .cv-play-btn { background: #059669; }
 html.dark .cv-play-btn.cv-playing { background: #047857; }
 
 /* Reciter dropdown in green page headers */
+.cv-sz-group { display: flex; gap: 4px; flex-shrink: 0; }
+.cv-sz-btn {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.25);
+  border-radius: 8px;
+  color: white;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 9px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.cv-sz-btn:active { background: rgba(255,255,255,0.28); }
 .hdr-reciter-select {
   background: rgba(255,255,255,0.15);
   border: 1px solid rgba(255,255,255,0.25);
