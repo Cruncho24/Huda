@@ -353,6 +353,15 @@ body {
   font-style: italic;
 }
 html.dark .hadith-text { color: #e2e8f0; }
+.votd-arabic {
+  font-family: 'Noto Naskh Arabic', 'Scheherazade New', serif;
+  font-size: 22px;
+  line-height: 1.8;
+  color: #065f46;
+  text-align: right;
+  direction: rtl;
+}
+html.dark .votd-arabic { color: #34d399; }
 .hadith-source {
   display: flex;
   align-items: center;

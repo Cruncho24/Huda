@@ -251,6 +251,27 @@ function renderHome() {
       }).join('')}
     </div>` : ''}
 
+    ${(() => {
+      const v = VERSES_OF_DAY[state.verseIndex % VERSES_OF_DAY.length];
+      const s = SURAHS[v.surah - 1];
+      const ref = s ? `${s[2]} ${v.surah}:${v.ayah}` : `${v.surah}:${v.ayah}`;
+      return `
+    <div class="hadith-card" id="votd-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="card-section-label" style="margin-bottom:0">Verse of the Day</div>
+        <div style="display:flex;gap:2px;align-items:center">
+          <button onclick="shareVerseCard()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:15px;padding:2px 4px;line-height:1" title="Share as image">📸</button>
+          <button onclick="rotateVerse()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1" title="Next verse">↻</button>
+        </div>
+      </div>
+      <div class="votd-arabic">${esc(v.arabic)}</div>
+      <p class="hadith-text" style="margin-top:10px">"${esc(v.english)}"</p>
+      <div class="hadith-source">
+        <span class="badge badge-emerald">${esc(ref)}</span>
+      </div>
+    </div>`;
+    })()}
+
     <div class="hadith-card" id="hadith-card">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
         <div class="card-section-label" style="margin-bottom:0">Hadith of the Day</div>
@@ -314,6 +335,43 @@ function dismissJumuah() {
   localStorage.setItem('huda_jumuah_dismissed', `${now.getFullYear()}-${mm}-${dd}`);
   const el = document.getElementById('jumuah-card');
   if (el) el.remove();
+}
+
+function rotateVerse() {
+  if (VERSES_OF_DAY.length <= 1) return;
+  let next;
+  do { next = Math.floor(Math.random() * VERSES_OF_DAY.length); } while (next === state.verseIndex);
+  state.verseIndex = next;
+  const card = document.getElementById('votd-card');
+  if (!card) return;
+  const v = VERSES_OF_DAY[state.verseIndex];
+  const s = SURAHS[v.surah - 1];
+  const ref = s ? `${s[2]} ${v.surah}:${v.ayah}` : `${v.surah}:${v.ayah}`;
+  card.style.opacity = '0';
+  setTimeout(() => {
+    card.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <div class="card-section-label" style="margin-bottom:0">Verse of the Day</div>
+        <div style="display:flex;gap:2px;align-items:center">
+          <button onclick="shareVerseCard()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:15px;padding:2px 4px;line-height:1" title="Share as image">📸</button>
+          <button onclick="rotateVerse()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1" title="Next verse">↻</button>
+        </div>
+      </div>
+      <div class="votd-arabic">${esc(v.arabic)}</div>
+      <p class="hadith-text" style="margin-top:10px">"${esc(v.english)}"</p>
+      <div class="hadith-source">
+        <span class="badge badge-emerald">${esc(ref)}</span>
+      </div>`;
+    card.style.opacity = '1';
+    card.style.transition = 'opacity 0.5s';
+  }, 200);
+}
+
+function shareVerseCard() {
+  const v = VERSES_OF_DAY[state.verseIndex % VERSES_OF_DAY.length];
+  const s = SURAHS[v.surah - 1];
+  const source = s ? `${s[2]} ${v.surah}:${v.ayah}` : `${v.surah}:${v.ayah}`;
+  showShareCardModal({ arabic: v.arabic, english: v.english, source, type: 'ayah', minimal: true });
 }
 
 function rotateHadith() {
