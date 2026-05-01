@@ -368,6 +368,7 @@ function rotateHadith() {
   const card = document.getElementById('hadith-card');
   if (!card) return;
   const h = HADITHS[state.hadithIndex];
+  card.style.transition = 'opacity 0.3s';
   card.style.opacity = '0';
   setTimeout(() => {
     card.innerHTML = `
@@ -385,8 +386,7 @@ function rotateHadith() {
         <span class="badge badge-gold">${esc(h.grade)}</span>
       </div>`;
     card.style.opacity = '1';
-    card.style.transition = 'opacity 0.5s';
-  }, 400);
+  }, 300);
 }
 
 function shareHadith() {

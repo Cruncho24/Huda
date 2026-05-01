@@ -698,7 +698,7 @@ function openPlanDetail() {
       </div>
     </div>`;
 
-  switchTab('quran');
+  if (state.activeTab !== 'quran') switchTab('quran');
   document.getElementById('tab-quran').innerHTML = `
     <div class="page-header">
       <button class="back-btn" onclick="_restoreQuranList()">←</button>
@@ -835,7 +835,7 @@ function goBackADay() {
 function confirmCancelPlan() {
   closePlanCancelSheet();
   _savePlan(null);
-  _refreshPlanCard();
+  _restoreQuranList();
 }
 
 function jumpToPlanReading(readAhead = false) {
