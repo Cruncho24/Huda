@@ -1045,7 +1045,7 @@ async function generateShareCard({ arabic, english, source, grade, type, minimal
 
     ctx.fillStyle = C.watermark;
     ctx.font = '22px -apple-system, sans-serif';
-    ctx.fillText('huda-six.vercel.app', _CARD_W / 2, _CARD_H - 54);
+    ctx.fillText('hudacompanion.com', _CARD_W / 2, _CARD_H - 54);
     ctx.fillStyle = C.bar; ctx.fillRect(0, _CARD_H - 10, _CARD_W, 10);
   }
 
