@@ -334,6 +334,7 @@ function _buildVotdInner(v, ref) {
     <p class="hadith-text" style="margin-top:10px">"${esc(v.english)}"</p>
     <div class="hadith-source">
       <span class="badge badge-emerald">${esc(ref)}</span>
+      <button id="votd-play" class="ak-play-btn" onclick="playVotd()" aria-label="Play verse audio">▶ Play</button>
     </div>`;
 }
 
@@ -380,6 +381,31 @@ function explainVotd() {
   if (!v) return;
   const globalNum = globalAyahNum(v.surah, v.ayah);
   showExplanationSheet(globalNum, v.surah, v.ayah, v.arabic, v.english);
+}
+
+function playVotd() {
+  const v = VERSES_OF_DAY?.[state.verseIndex % VERSES_OF_DAY.length];
+  if (!v) return;
+  const globalNum = globalAyahNum(v.surah, v.ayah);
+  const btn = document.getElementById('votd-play');
+  const reset = () => {
+    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
+    updateMushafPlayerBar();
+    if (btn) btn.innerHTML = '▶ Play';
+  };
+  if (state.audio.player && state.audio.playingId === globalNum) {
+    state.audio.player.onended = null;
+    state.audio.player.pause();
+    reset();
+    return;
+  }
+  mushafStop();
+  const audio = new Audio(getAyahUrl(globalNum, v.surah, v.ayah));
+  state.audio = { player: audio, playingId: globalNum, playingSurah: null, playingAyah: null, paused: false };
+  if (btn) btn.innerHTML = '⏸ Stop';
+  audio.play().catch(reset);
+  audio.onended = reset;
+  audio.onerror = reset;
 }
 
 function rotateHadith() {
