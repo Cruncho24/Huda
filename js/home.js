@@ -335,6 +335,9 @@ function _buildVotdInner(v, ref) {
     <div class="hadith-source">
       <span class="badge badge-emerald">${esc(ref)}</span>
       <button id="votd-play" class="ak-play-btn" onclick="playVotd()" aria-label="Play verse audio">▶ Play</button>
+      <select class="ak-reciter-select" onchange="setReciter(this.value)" title="Reciter">
+        ${RECITERS.map(r => `<option value="${r.id}" ${state.reciter === r.id ? 'selected' : ''}>${r.name}</option>`).join('')}
+      </select>
     </div>`;
 }
 
