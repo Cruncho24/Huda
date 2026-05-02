@@ -662,8 +662,8 @@ function _registerMediaSession() {
   navigator.mediaSession.playbackState = state.audio.paused ? 'paused' : 'playing';
   navigator.mediaSession.setActionHandler('play', () => {
     const p = _surahAudio || state.audio.player;
-    if (p) { p.play().catch(() => {}); }
-    else { resumeLastAudio(); } // car/AirPods connect with no active player — restart last session
+    if (p) { p.play().catch(() => resumeLastAudio()); } // if session lost, rebuild
+    else { resumeLastAudio(); }
   });
   navigator.mediaSession.setActionHandler('pause', () => {
     _intentionalPause = true;
@@ -1060,6 +1060,9 @@ function mushafPlayAll(surahNum, startAyah = 1) {
   // data is available, then onwaiting can fire immediately after.
   _surahAudio.oncanplay = () => { if (_surahAudio) _setBuffering(false); };
   _surahAudio.onerror = () => {
+    // Preserve position in huda_last_audio before clearing state — resumeLastAudio()
+    // can then restore from this if the per-ayah fallback below also fails (e.g. no user gesture)
+    if (typeof saveAudioPos === 'function') saveAudioPos();
     // Fall back to per-ayah from the ayah we were on (not always restart from 1)
     const resumeAyah = state.audio.playingAyah || startAyah;
     _surahAudio = null; _surahTiming = null; _surahTimingArr = null; _surahTimingIdx = 0;
@@ -1408,7 +1411,11 @@ function toggleMushafPlayback() {
   const player = _surahAudio || state.audio.player;
   if (!player) return;
   if (state.audio.paused) {
-    player.play().catch(() => {}); // onplay handler updates state + MediaSession
+    _intentionalPause = false;
+    player.play().catch(() => {
+      // Audio session was taken by another app — rebuild from last saved position
+      resumeLastAudio();
+    });
   } else {
     _intentionalPause = true;
     player.pause(); // onpause handler updates state + MediaSession
