@@ -389,7 +389,12 @@ function explainVotd() {
 function playVotd() {
   const v = VERSES_OF_DAY?.[state.verseIndex % VERSES_OF_DAY.length];
   if (!v) return;
-  const globalNum = globalAyahNum(v.surah, v.ayah);
+  const startAyah = v.ayah;
+  // Count ۝ end-of-ayah markers to know how many consecutive ayahs to play
+  const extraAyahs = (v.arabic.match(/۝/g) || []).length;
+  const endAyah = startAyah + extraAyahs;
+  const firstGlobalNum = globalAyahNum(v.surah, startAyah);
+
   const reset = () => {
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
     updateMushafPlayerBar();
@@ -397,19 +402,30 @@ function playVotd() {
     if (b) b.innerHTML = '▶ Play';
   };
   const btn = document.getElementById('votd-play');
-  if (state.audio.player && state.audio.playingId === globalNum) {
+
+  // Toggle: if already playing this verse, stop
+  if (state.audio.player && state.audio.playingId === firstGlobalNum) {
     state.audio.player.onended = null;
     state.audio.player.pause();
     reset();
     return;
   }
+
   mushafStop();
-  const audio = new Audio(getAyahUrl(globalNum, v.surah, v.ayah));
-  state.audio = { player: audio, playingId: globalNum, playingSurah: null, playingAyah: null, paused: false };
   if (btn) btn.innerHTML = '⏸ Stop';
-  audio.play().catch(reset);
-  audio.onended = reset;
-  audio.onerror = reset;
+
+  // Play ayahs in sequence (handles single ayah or multi-ayah verses)
+  let currentAyah = startAyah;
+  const playNext = () => {
+    if (currentAyah > endAyah) { reset(); return; }
+    const gNum = globalAyahNum(v.surah, currentAyah);
+    const audio = new Audio(getAyahUrl(gNum, v.surah, currentAyah));
+    state.audio = { player: audio, playingId: firstGlobalNum, playingSurah: null, playingAyah: currentAyah, paused: false };
+    audio.play().catch(reset);
+    audio.onended = () => { currentAyah++; playNext(); };
+    audio.onerror = reset;
+  };
+  playNext();
 }
 
 function setVotdReciter(id) {
