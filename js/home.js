@@ -324,7 +324,7 @@ function _buildVotdInner(v, ref) {
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div class="card-section-label" style="margin-bottom:0">Verse of the Day</div>
       <div style="display:flex;gap:2px;align-items:center">
-        <button onclick="explainVotd()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:12px;font-weight:600;padding:2px 6px;line-height:1" title="AI explanation">✦ AI</button>
+        <button onclick="explainVotd()" class="ak-explain-btn" title="AI explanation">✦ Explain</button>
         <button onclick="shareVerse()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:14px;padding:2px 6px;line-height:1" title="Share verse">↗</button>
         <button onclick="shareVerseCard()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:15px;padding:2px 4px;line-height:1" title="Share as image">📸</button>
         <button onclick="rotateVerse()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1" title="Next verse">↻</button>
