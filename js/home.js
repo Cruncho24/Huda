@@ -334,10 +334,6 @@ function _buildVotdInner(v, ref) {
     <p class="hadith-text" style="margin-top:10px">"${esc(v.english)}"</p>
     <div class="hadith-source">
       <span class="badge badge-emerald">${esc(ref)}</span>
-      <button id="votd-play" class="ak-play-btn" onclick="playVotd()" aria-label="Play verse audio">▶ Play</button>
-      <select class="ak-reciter-select" onchange="setVotdReciter(this.value)" title="Reciter">
-        ${RECITERS.map(r => `<option value="${r.id}" ${state.reciter === r.id ? 'selected' : ''}>${r.name}</option>`).join('')}
-      </select>
     </div>`;
 }
 
@@ -384,56 +380,6 @@ function explainVotd() {
   if (!v) return;
   const globalNum = globalAyahNum(v.surah, v.ayah);
   showExplanationSheet(globalNum, v.surah, v.ayah, v.arabic, v.english);
-}
-
-function playVotd() {
-  const v = VERSES_OF_DAY?.[state.verseIndex % VERSES_OF_DAY.length];
-  if (!v) return;
-  const startAyah = v.ayah;
-  // Count ۝ end-of-ayah markers to know how many consecutive ayahs to play
-  const extraAyahs = (v.arabic.match(/۝/g) || []).length;
-  const endAyah = startAyah + extraAyahs;
-  const firstGlobalNum = globalAyahNum(v.surah, startAyah);
-
-  const reset = () => {
-    state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
-    updateMushafPlayerBar();
-    const b = document.getElementById('votd-play');
-    if (b) b.innerHTML = '▶ Play';
-  };
-  const btn = document.getElementById('votd-play');
-
-  // Toggle: if already playing this verse, stop
-  if (state.audio.player && state.audio.playingId === firstGlobalNum) {
-    state.audio.player.onended = null;
-    state.audio.player.pause();
-    reset();
-    return;
-  }
-
-  mushafStop();
-  if (btn) btn.innerHTML = '⏸ Stop';
-
-  // Play ayahs in sequence (handles single ayah or multi-ayah verses)
-  let currentAyah = startAyah;
-  const playNext = () => {
-    if (currentAyah > endAyah) { reset(); return; }
-    const gNum = globalAyahNum(v.surah, currentAyah);
-    const audio = new Audio(getAyahUrl(gNum, v.surah, currentAyah));
-    state.audio = { player: audio, playingId: firstGlobalNum, playingSurah: null, playingAyah: currentAyah, paused: false };
-    audio.play().catch(reset);
-    audio.onended = () => { currentAyah++; playNext(); };
-    audio.onerror = reset;
-  };
-  playNext();
-}
-
-function setVotdReciter(id) {
-  // Update reciter preference without calling mushafStop() — setReciter() calls
-  // mushafStop() which would kill VOTD audio the moment the user changes the picker.
-  state.reciter = id;
-  localStorage.setItem('huda_reciter', id);
-  if (typeof debouncedPush === 'function') debouncedPush();
 }
 
 function rotateHadith() {
