@@ -715,6 +715,7 @@ function _registerMediaSession() {
       state.audio.playingId = -1;
       state.audio.paused = false;
       _surahAudio.onerror = () => {
+        if (typeof saveAudioPos === 'function') saveAudioPos();
         _surahAudio = null; _surahTiming = null; _surahTimingArr = null; _surahTimingIdx = 0;
         state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
         openSurah(prev).then(() => mushafPlayAll(prev));
@@ -1193,6 +1194,7 @@ async function advanceToNextSurah() {
 
     // Update onerror for the new surah (old closure would reference the old surah)
     _surahAudio.onerror = () => {
+      if (typeof saveAudioPos === 'function') saveAudioPos();
       const resumeAyah = state.audio.playingAyah || 1;
       _surahAudio = null; _surahTiming = null; _surahTimingArr = null; _surahTimingIdx = 0;
       state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
