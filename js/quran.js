@@ -1284,7 +1284,7 @@ function mushafStop() {
   if ('mediaSession' in navigator) {
     navigator.mediaSession.playbackState = 'paused';
     navigator.mediaSession.setActionHandler('play', () => resumeLastAudio());
-    ['pause','stop','seekforward','seekbackward','seekto','nexttrack','previoustrack'].forEach(a => {
+    ['pause','stop','seekto','nexttrack','previoustrack'].forEach(a => {
       try { navigator.mediaSession.setActionHandler(a, null); } catch(_) {}
     });
   }
@@ -1423,8 +1423,8 @@ function updateMushafPlayerBar() {
   const navBtns = document.getElementById('reader-nav-btns');
   if (navBtns) navBtns.style.display = playing ? 'none' : 'flex';
   if (playing) {
-    if ('mediaSession' in navigator && state.audio.paused) {
-      navigator.mediaSession.playbackState = 'paused';
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.playbackState = state.audio.paused ? 'paused' : 'playing';
     }
     const s = SURAHS[state.audio.playingSurah - 1];
     const surahName = s ? s[1] : '';
