@@ -387,12 +387,13 @@ function playVotd() {
   const v = VERSES_OF_DAY?.[state.verseIndex % VERSES_OF_DAY.length];
   if (!v) return;
   const globalNum = globalAyahNum(v.surah, v.ayah);
-  const btn = document.getElementById('votd-play');
   const reset = () => {
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };
     updateMushafPlayerBar();
-    if (btn) btn.innerHTML = '▶ Play';
+    const b = document.getElementById('votd-play');
+    if (b) b.innerHTML = '▶ Play';
   };
+  const btn = document.getElementById('votd-play');
   if (state.audio.player && state.audio.playingId === globalNum) {
     state.audio.player.onended = null;
     state.audio.player.pause();
