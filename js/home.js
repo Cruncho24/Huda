@@ -335,7 +335,7 @@ function _buildVotdInner(v, ref) {
     <div class="hadith-source">
       <span class="badge badge-emerald">${esc(ref)}</span>
       <button id="votd-play" class="ak-play-btn" onclick="playVotd()" aria-label="Play verse audio">▶ Play</button>
-      <select class="ak-reciter-select" onchange="setReciter(this.value)" title="Reciter">
+      <select class="ak-reciter-select" onchange="setVotdReciter(this.value)" title="Reciter">
         ${RECITERS.map(r => `<option value="${r.id}" ${state.reciter === r.id ? 'selected' : ''}>${r.name}</option>`).join('')}
       </select>
     </div>`;
@@ -410,6 +410,14 @@ function playVotd() {
   audio.play().catch(reset);
   audio.onended = reset;
   audio.onerror = reset;
+}
+
+function setVotdReciter(id) {
+  // Update reciter preference without calling mushafStop() — setReciter() calls
+  // mushafStop() which would kill VOTD audio the moment the user changes the picker.
+  state.reciter = id;
+  localStorage.setItem('huda_reciter', id);
+  if (typeof debouncedPush === 'function') debouncedPush();
 }
 
 function rotateHadith() {
