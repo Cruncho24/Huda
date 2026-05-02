@@ -324,6 +324,7 @@ function _buildVotdInner(v, ref) {
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div class="card-section-label" style="margin-bottom:0">Verse of the Day</div>
       <div style="display:flex;gap:2px;align-items:center">
+        <button onclick="shareVerse()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:14px;padding:2px 6px;line-height:1" title="Share verse">↗</button>
         <button onclick="shareVerseCard()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:15px;padding:2px 4px;line-height:1" title="Share as image">📸</button>
         <button onclick="rotateVerse()" style="background:none;border:none;color:var(--gray-400);cursor:pointer;font-size:16px;padding:2px 4px;line-height:1" title="Next verse">↻</button>
       </div>
@@ -358,6 +359,19 @@ function shareVerseCard() {
   const s = SURAHS[v.surah - 1];
   const source = s ? `${s[2]} ${v.surah}:${v.ayah}` : `${v.surah}:${v.ayah}`;
   showShareCardModal({ arabic: v.arabic, english: v.english, source, type: 'ayah', minimal: true });
+}
+
+function shareVerse() {
+  const v = VERSES_OF_DAY?.[state.verseIndex];
+  if (!v) return;
+  const s = SURAHS[v.surah - 1];
+  const ref = s ? `${s[2]} ${v.surah}:${v.ayah}` : `${v.surah}:${v.ayah}`;
+  const text = `${v.arabic}\n\n"${v.english}"\n\n— ${ref}`;
+  if (navigator.share) {
+    navigator.share({ title: 'Verse of the Day', text }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(text).then(() => showToast('Verse copied ✓')).catch(() => {});
+  }
 }
 
 function rotateHadith() {
