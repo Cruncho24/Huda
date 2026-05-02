@@ -1574,6 +1574,15 @@ function shareAyah(surahNum, ayahNum) {
   openShareSheet(ref);
 }
 
+function _shareCatAyahText(ar, en, ref) {
+  _pendingShareText = `${ar}\n\n${en}\n\n— ${ref}`;
+  _pendingShareHtml = `
+    <div class="share-sheet-arabic">${esc(ar)}</div>
+    <div class="share-sheet-english">${esc(en)}</div>
+    <div class="share-sheet-ref">— ${esc(ref)}</div>`;
+  openShareSheet(ref);
+}
+
 function showAyahCard(surahNum, ayahNum) {
   const cached = state.quran.cache[surahNum];
   if (!cached) { showToast('Load the surah first'); return; }
@@ -1968,6 +1977,11 @@ async function _loadCategoryVerses(cat) {
               data-ar="${esc(v.arabic)}" data-en="${esc(v.english)}"
               onclick="event.stopPropagation();const d=this.dataset;showExplanationSheet(+d.gn,+d.s,+d.a,d.ar,d.en)"
               title="AI explanation" aria-label="AI explanation">✦ AI Explain</button>
+            <button class="cv-share-btn"
+              data-ar="${esc(v.arabic)}" data-en="${esc(v.english)}"
+              data-sn="${esc(v.surahName)}" data-s="${v.s}" data-a="${v.a}"
+              onclick="event.stopPropagation();const d=this.dataset;_shareCatAyahText(d.ar,d.en,d.sn+' '+d.s+':'+d.a)"
+              title="Share text / copy" aria-label="Share text">📤</button>
             <button class="cv-share-btn"
               data-ar="${esc(v.arabic)}" data-en="${esc(v.english)}"
               data-sn="${esc(v.surahName)}" data-s="${v.s}" data-a="${v.a}"
