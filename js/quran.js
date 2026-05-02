@@ -72,7 +72,7 @@ function renderQuranList() {
           <h2 id="reader-title">Surah</h2>
           <div style="font-size:11px;opacity:0.8" id="reader-meta"></div>
         </div>
-        <div style="display:flex;align-items:center;gap:4px;flex-shrink:0">
+        <div id="reader-nav-btns" style="display:flex;align-items:center;gap:4px;flex-shrink:0">
           <button class="mhdr-btn surah-overview-btn" id="surah-explain-btn" onclick="showSurahExplanationSheet(state.quran.currentSurah)" title="Surah Overview" aria-label="Surah overview" style="display:none">Overview</button>
           <button class="mhdr-btn" id="reader-bm-btn" onclick="toggleReaderBookmark()" title="Bookmark this surah">🏷️</button>
           <button class="mhdr-btn" id="surah-prev-btn" onclick="navigateSurah(-1)" title="Previous surah">‹</button>
@@ -671,19 +671,12 @@ function _registerMediaSession() {
     if (p) p.pause();
   });
   navigator.mediaSession.setActionHandler('stop', () => { _intentionalPause = true; mushafStop(); });
-  // seekforward/seekbackward/seekto: car stereos, AirPods Pro squeeze-hold, lock screen scrub
+  // seekto only — seekforward/seekbackward omitted intentionally: on iOS they replace
+  // the prev/next track buttons on the lock screen with skip-10s buttons instead.
+  // seekto alone gives CarPlay/car stereo scrubbing without breaking lock screen nav.
   try {
-    navigator.mediaSession.setActionHandler('seekforward', e => {
-      const p = _surahAudio || state.audio.player;
-      if (p && isFinite(p.duration)) {
-        p.currentTime = Math.min(p.duration, p.currentTime + (e?.seekOffset ?? 30));
-        _surahTimingIdx = 0;
-      }
-    });
-    navigator.mediaSession.setActionHandler('seekbackward', e => {
-      const p = _surahAudio || state.audio.player;
-      if (p) { p.currentTime = Math.max(0, p.currentTime - (e?.seekOffset ?? 10)); _surahTimingIdx = 0; }
-    });
+    navigator.mediaSession.setActionHandler('seekforward', null);
+    navigator.mediaSession.setActionHandler('seekbackward', null);
     navigator.mediaSession.setActionHandler('seekto', e => {
       const p = _surahAudio || state.audio.player;
       if (p && isFinite(p.duration) && e?.seekTime != null) {
@@ -691,7 +684,7 @@ function _registerMediaSession() {
         _surahTimingIdx = 0;
       }
     });
-  } catch(_) {} // some older browsers don't support these handlers
+  } catch(_) {}
   // setPositionState — separate try/catch; powers seek bar on car displays and lock screen
   // Clamp position <= duration to satisfy spec (float rounding at track end can violate this)
   try {
@@ -1427,7 +1420,12 @@ function updateMushafPlayerBar() {
   if (!controls) return;
   const playing = !!(state.audio.player && state.audio.playingSurah);
   controls.style.display = playing ? 'flex' : 'none';
+  const navBtns = document.getElementById('reader-nav-btns');
+  if (navBtns) navBtns.style.display = playing ? 'none' : 'flex';
   if (playing) {
+    if ('mediaSession' in navigator && state.audio.paused) {
+      navigator.mediaSession.playbackState = 'paused';
+    }
     const s = SURAHS[state.audio.playingSurah - 1];
     const surahName = s ? s[1] : '';
     const ayahLabel = state.audio.playingAyah ? `:${state.audio.playingAyah}` : '';
@@ -1451,7 +1449,7 @@ function updateMushafPlayerBar() {
     if ('mediaSession' in navigator) {
       navigator.mediaSession.metadata = null;
       navigator.mediaSession.playbackState = 'none';
-      ['play','pause','stop','nexttrack','previoustrack','seekforward','seekbackward'].forEach(a => {
+      ['play','pause','stop','nexttrack','previoustrack','seekto'].forEach(a => {
         try { navigator.mediaSession.setActionHandler(a, null); } catch(_) {}
       });
     }
