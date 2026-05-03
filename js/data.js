@@ -1236,6 +1236,16 @@ const VERSES_OF_DAY = [
   { arabic: "وَمَا تَوۡفِيقِيٓ إِلَّا بِاللَّهِ", english: "And my success is not but through Allah.", surah: 11, ayah: 88 },
   { arabic: "إِنَّ اللَّهَ لَا يُغَيِّرُ مَا بِقَوۡمٍ حَتَّىٰ يُغَيِّرُواْ مَا بِأَنفُسِهِمۡ", english: "Indeed, Allah will not change the condition of a people until they change what is in themselves.", surah: 13, ayah: 11 },
   { arabic: "وَإِذَا سَأَلَكَ عِبَادِي عَنِّي فَإِنِّي قَرِيبٌ أُجِيبُ دَعۡوَةَ الدَّاعِ إِذَا دَعَانِ", english: "And when My servants ask you concerning Me — indeed I am near. I respond to the invocation of the supplicant when he calls upon Me.", surah: 2, ayah: 186 },
+  { arabic: "وَقَضَىٰ رَبُّكَ أَلَّا تَعۡبُدُوٓاْ إِلَّآ إِيَّاهُ وَبِٱلۡوَٰلِدَيۡنِ إِحۡسَٰنًا", english: "Your Lord has decreed that you worship none but Him, and be good to your parents.", surah: 17, ayah: 23 },
+  { arabic: "رَبَّنَآ ءَاتِنَا مِن لَّدُنكَ رَحۡمَةٗ وَهَيِّئۡ لَنَا مِنۡ أَمۡرِنَا رَشَدٗا", english: "Our Lord, grant us from Yourself mercy and prepare for us from our affair right guidance.", surah: 18, ayah: 10 },
+  { arabic: "الۡمَالُ وَالۡبَنُونَ زِينَةُ الۡحَيَوٰةِ الدُّنۡيَا وَالۡبَٰقِيَٰتُ الصَّٰلِحَٰتُ خَيۡرٌ عِندَ رَبِّكَ ثَوَابٗا وَخَيۡرٌ أَمَلٗا", english: "Wealth and children are the adornment of worldly life, but enduring good deeds are better to your Lord for reward and better for hope.", surah: 18, ayah: 46 },
+  { arabic: "قَدۡ أَفۡلَحَ الۡمُؤۡمِنُونَ ۝ الَّذِينَ هُمۡ فِي صَلَاتِهِمۡ خَٰشِعُونَ", english: "Certainly the believers have succeeded — those who are humble in their prayers.", surah: 23, ayah: 1 },
+  { arabic: "إِنَّ اللَّهَ وَمَلَٰٓئِكَتَهُۥ يُصَلُّونَ عَلَى النَّبِيِّ يَٰٓأَيُّهَا الَّذِينَ ءَامَنُواْ صَلُّواْ عَلَيۡهِ وَسَلِّمُواْ تَسۡلِيمٗا", english: "Indeed, Allah confers blessing upon the Prophet, and His angels do too. O you who have believed, ask Allah to confer blessing upon him and ask Him to grant him peace.", surah: 33, ayah: 56 },
+  { arabic: "إِنَّمَآ أَمۡرُهُۥٓ إِذَآ أَرَادَ شَيۡـًٔا أَن يَقُولَ لَهُۥ كُن فَيَكُونُ", english: "His command is only when He intends a thing that He says to it, 'Be,' and it is.", surah: 36, ayah: 82 },
+  { arabic: "هَلۡ يَسۡتَوِي الَّذِينَ يَعۡلَمُونَ وَالَّذِينَ لَا يَعۡلَمُونَ", english: "Are those who know equal to those who do not know?", surah: 39, ayah: 9 },
+  { arabic: "هُوَ اللَّهُ الَّذِي لَآ إِلَٰهَ إِلَّا هُوَ الۡمَلِكُ الۡقُدُّوسُ السَّلَٰمُ الۡمُؤۡمِنُ الۡمُهَيۡمِنُ الۡعَزِيزُ الۡجَبَّارُ الۡمُتَكَبِّرُ سُبۡحَٰنَ اللَّهِ عَمَّا يُشۡرِكُونَ", english: "He is Allah, other than whom there is no deity — the Sovereign, the Pure, the Perfection, the Bestower of Faith, the Overseer, the Exalted in Might, the Compeller, the Superior. Exalted is Allah above whatever they associate with Him.", surah: 59, ayah: 23 },
+  { arabic: "مَآ أَصَابَ مِن مُّصِيبَةٍ إِلَّا بِإِذۡنِ اللَّهِ وَمَن يُؤۡمِنۢ بِاللَّهِ يَهۡدِ قَلۡبَهُۥ", english: "No disaster strikes except by permission of Allah. And whoever believes in Allah — He will guide his heart.", surah: 64, ayah: 11 },
+  { arabic: "وَمَن يَتَّقِ اللَّهَ يَجۡعَل لَّهُۥ مَخۡرَجٗا", english: "And whoever fears Allah — He will make for him a way out.", surah: 65, ayah: 2 },
 ];
 
 // ── New Muslim Lessons ───────────────────────────────────────
