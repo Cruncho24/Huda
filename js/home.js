@@ -369,7 +369,7 @@ function shareVerse() {
   const ref = s ? `${s[2]} ${v.surah}:${v.ayah}` : `${v.surah}:${v.ayah}`;
   const text = `${v.arabic}\n\n"${v.english}"\n\n— ${ref}`;
   if (navigator.share) {
-    navigator.share({ title: 'Verse of the Day', text }).catch(() => {});
+    navigator.share({ text }).catch(() => {});
   } else {
     navigator.clipboard?.writeText(text).then(() => showToast('Verse copied ✓')).catch(() => {});
   }
