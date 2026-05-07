@@ -384,8 +384,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (state.activeTab && state.activeTab !== 'home') {
           switchTab(state.activeTab);
         }
+      } else {
+        await pushSync();
       }
-      await pushSync();
     }
   });
 });
@@ -592,7 +593,7 @@ function playAyah(globalNum, surahNum, ayahNum) {
   };
   audio.onplay = () => {
     if (state.audio.player !== audio) return;
-    _intentionalPause = false;
+    _intentionalPause = false; /* defined in quran.js */
     state.audio.paused = false;
     const b = document.getElementById(`aud-${globalNum}`);
     if (b) b.textContent = '⏸';
@@ -649,6 +650,15 @@ function playCatAyah(globalNum, surahNum, ayahNum) {
   state.audio = { player: audio, playingId: globalNum, playingSurah: surahNum, playingAyah: ayahNum, paused: false };
   const btn = document.getElementById(btnId);
   if (btn) { btn.textContent = '⏸'; btn.classList.add('cv-playing'); }
+  audio.onpause = () => {
+    if (state.audio.player !== audio) return;
+    state.audio.paused = true;
+    if ('mediaSession' in navigator) navigator.mediaSession.playbackState = 'paused';
+  };
+  audio.onplay = () => {
+    if (state.audio.player !== audio) return;
+    state.audio.paused = false;
+  };
   audio.play().catch(() => {
     if (btn) { btn.textContent = '▶'; btn.classList.remove('cv-playing'); }
     state.audio = { player: null, playingId: null, playingSurah: null, playingAyah: null, paused: false };

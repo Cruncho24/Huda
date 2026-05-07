@@ -419,11 +419,6 @@ function renderPrayerTimes() {
   state.prayer.countdownInterval = setInterval(() => updateCountdown(nextTime), 1000);
   updateCountdown(nextTime);
 
-  // Schedule background notifications if permission already granted
-  if ('Notification' in window && Notification.permission === 'granted') {
-    schedulePrayerNotifications(state.prayer.times);
-  }
-
   // If the compass was open before this re-render, restore it without re-requesting permission
   if (state.prayer.compassOpen) {
     const wrap = document.getElementById('qibla-compass-wrap');
@@ -440,11 +435,12 @@ function renderPrayerTimes() {
 
 function updateCountdown(target) {
   const el = document.getElementById('prayer-countdown');
-  if (!el) { clearInterval(state.prayer.countdownInterval); return; }
+  if (!el) { clearInterval(state.prayer.countdownInterval); state.prayer.countdownInterval = null; return; }
   const diff = new Date(target) - new Date();
   if (diff <= 0) {
     el.textContent = '00:00:00';
     clearInterval(state.prayer.countdownInterval);
+    state.prayer.countdownInterval = null;
 
     // Foreground notification fallback (fires when app is open — covers iOS 16.4+ and non-Triggers browsers)
     if ('Notification' in window && Notification.permission === 'granted' && state.prayer.times) {
@@ -666,10 +662,7 @@ function stopQiblaCompass() {
 
 // ── Prayer Notifications ───────────────────────────────────────
 async function requestNotifPermission() {
-  const permission = await Notification.requestPermission();
-  if (permission === 'granted') {
-    schedulePrayerNotifications(state.prayer.times);
-  }
+  await Notification.requestPermission();
   renderPrayerTimes(); // re-render to hide banner
 }
 
@@ -679,8 +672,4 @@ function dismissNotifBanner() {
   if (el) el.remove();
 }
 
-async function schedulePrayerNotifications(_times) {
-  // Notification Triggers API (showTrigger/TimestampTrigger) was removed from browsers.
-  // Foreground countdown notifications in renderPrayerTimes() cover this use case.
-}
 

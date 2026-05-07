@@ -176,6 +176,7 @@ async function downloadQuranOffline() {
 
   const BATCH = 5;
   let done = 0;
+  let successCount = 0;
 
   for (let i = 1; i <= 114; i += BATCH) {
     if (_offlineCancelled) break;
@@ -189,6 +190,7 @@ async function downloadQuranOffline() {
           .then(([arJson, enJson]) => {
             state.quran.cache[j] = { arData: arJson.data, enData: enJson.data };
             done++;
+            successCount++;
             const countEl = document.getElementById('offline-count');
             const fillEl  = document.getElementById('offline-fill');
             if (countEl) countEl.textContent = done;
@@ -202,8 +204,12 @@ async function downloadQuranOffline() {
 
   _offlineDownloading = false;
   if (!_offlineCancelled) {
-    localStorage.setItem('huda_quran_offline', '1');
-    _persistQuranCache(); // Persist downloaded surahs so they survive page reload
+    _persistQuranCache();
+    if (successCount === 114) {
+      localStorage.setItem('huda_quran_offline', '1');
+    } else {
+      showToast(`Downloaded ${successCount}/114 surahs — retry for full offline access`);
+    }
   }
   _renderOfflineBanner();
 }
@@ -766,6 +772,9 @@ async function fetchSurahTimings(surahNum) {
     for (const vt of (f.verse_timings || [])) {
       t[vt.verse_key] = { from: vt.timestamp_from, to: vt.timestamp_to };
     }
+    // Evict oldest entry if cache exceeds 10 surahs
+    const keys = Object.keys(_surahTimingsCache);
+    if (keys.length >= 10) delete _surahTimingsCache[keys[0]];
     _surahTimingsCache[ck] = t;
     return t;
   } catch(_) { return null; }

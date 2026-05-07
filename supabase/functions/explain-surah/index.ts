@@ -1,7 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js';
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://hudacompanion.com',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 

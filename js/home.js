@@ -117,6 +117,7 @@ function renderHome() {
   }
 
   // Ramadan countdown (to Iftar = Maghrib, or Suhoor = Fajr)
+  if (state.prayer.ramadanInterval) { clearInterval(state.prayer.ramadanInterval); state.prayer.ramadanInterval = null; }
   let ramadanCard = '';
   if (isRamadan && state.prayer.times) {
     const maghrib = new Date(state.prayer.times.maghrib);
@@ -137,7 +138,6 @@ function renderHome() {
         <div class="ramadan-time" id="ramadan-countdown">${hh}h ${String(mm).padStart(2,'0')}m ${String(ss).padStart(2,'0')}s</div>
       </div>`;
     // start live countdown (clear any existing one first)
-    if (state.prayer.ramadanInterval) clearInterval(state.prayer.ramadanInterval);
     state.prayer.ramadanInterval = setInterval(() => {
       const el = document.getElementById('ramadan-countdown');
       if (!el) { clearInterval(state.prayer.ramadanInterval); state.prayer.ramadanInterval = null; return; }
@@ -274,10 +274,10 @@ function renderHome() {
       <div class="section-title">✨ Ayatul Kursi</div>
     </div>
     <div class="ayatul-kursi-card">
-      <div class="ak-arabic">${AYATUL_KURSI.arabic}</div>
-      <div class="ak-translation">${AYATUL_KURSI.translation}</div>
+      <div class="ak-arabic">${esc(AYATUL_KURSI.arabic)}</div>
+      <div class="ak-translation">${esc(AYATUL_KURSI.translation)}</div>
       <div style="margin-top:10px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-        <span class="badge badge-emerald">${AYATUL_KURSI.ref}</span>
+        <span class="badge badge-emerald">${esc(AYATUL_KURSI.ref)}</span>
         <button class="ak-play-btn" id="ak-play" onclick="playAyatulKursi()">▶ Play</button>
         <button class="ak-loop-btn" id="ak-loop" onclick="toggleAyatulKursiLoop()" title="Loop" style="opacity:${_loopAyatulKursi ? '1' : '0.45'}">🔁</button>
         <button class="ak-explain-btn" onclick="showExplanationSheet(262,2,255,AYATUL_KURSI.arabic,AYATUL_KURSI.translation)" title="AI explanation" aria-label="AI explanation">✦ Explain</button>
