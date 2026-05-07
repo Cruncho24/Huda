@@ -762,7 +762,13 @@ async function fetchSurahTimings(surahNum) {
   const rid = r?.qurancdnId;
   if (!rid) return null;
   const ck = `${rid}_${surahNum}`;
-  if (_surahTimingsCache[ck]) return _surahTimingsCache[ck];
+  if (_surahTimingsCache[ck]) {
+    // Refresh insertion order so frequently-accessed entries aren't evicted first
+    const hit = _surahTimingsCache[ck];
+    delete _surahTimingsCache[ck];
+    _surahTimingsCache[ck] = hit;
+    return hit;
+  }
   try {
     const res = await fetch(`https://api.qurancdn.com/api/qdc/audio/reciters/${rid}/audio_files?chapter_number=${surahNum}&segments=true`);
     const data = await res.json();
